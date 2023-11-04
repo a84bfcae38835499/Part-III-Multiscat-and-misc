@@ -7,7 +7,7 @@ a2=[0,const.a];
 a3=[0,0,const.a];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 
-Ncell = 32; Nz = 100; Nslat = 2;
+Ncell = 64; Nz = 100; Nslat = 1;
 zMax = 6; zMin = -2;
 
 V = zeros(Ncell,Ncell,Nz);
