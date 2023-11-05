@@ -31,6 +31,6 @@ ax.set_aspect('equal')
 ax.set_xlabel('$n_1$')
 ax.set_ylabel('$n_2$')
 
-savestr = "test/Figures/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + ".png"
+savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + ".png"
 plt.savefig(fname=savestr)
 # %%
