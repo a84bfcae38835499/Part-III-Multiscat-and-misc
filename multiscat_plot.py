@@ -1,3 +1,4 @@
+#%%
 # -*- coding: utf-8 -*-
 """
 Created on Tue Oct 10 16:42:27 2023
@@ -10,7 +11,8 @@ This is a suggested method for plotting the output results of multiscat.
 import numpy as np
 import pandas as pd
 import seaborn as sns
-
+import datetime
+from matplotlib import pyplot as plt
 # Default theme
 sns.set_theme()
 
@@ -28,3 +30,7 @@ ax = sns.heatmap(d2, cmap='viridis', cbar_kws={'label' : '$P(n_1,n_2)$'})
 ax.set_aspect('equal')
 ax.set_xlabel('$n_1$')
 ax.set_ylabel('$n_2$')
+
+savestr = "test/Figures/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + ".png"
+plt.savefig(fname=savestr)
+# %%
