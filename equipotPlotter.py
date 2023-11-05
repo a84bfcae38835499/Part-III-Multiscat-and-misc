@@ -23,6 +23,6 @@ ax.set(xticklabels=[],
 plt.show()
 
 hm = sns.heatmap(data = values)
-savestr = "Figures/" + datetime.datetime.now().strftime('Potential_%Y-%m-%d_%H-%M') + ".png"
+savestr = "Figures/Potentials/" + datetime.datetime.now().strftime('Potential_%Y-%m-%d_%H-%M') + ".png"
 plt.savefig(fname=savestr)
 plt.show()
