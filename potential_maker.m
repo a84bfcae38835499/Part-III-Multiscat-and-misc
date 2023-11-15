@@ -1,86 +1,116 @@
-%this function is used to create the potential files.
-clear all; close all;
-z=linspace(-2,6,100);
-%z points, note that the points we take should be evenly spaced
-a=2.84;%lattice constant
-a1=[a, 0]; a2=[0, a];%base vectors in real space
-[b1,b2]=Reciprocal(a1,a2);%reciprocal base lattice vectors
-gridp=32;%grid points parallel to the surface in one dimension
-i1=1:gridp; i2=1:gridp;%point grids in a1 and a2 directions
-V=zeros(length(i1),length(i2),length(z));%potential matrix
-D=7.63; alpha=1.1; z0=1.0;%the constants used for generating potential
-V0=zeros(size(z));
-%now assign values to V0
-V0=D*exp(2*alpha*(z0-z))-2*D*exp(alpha*(z0-z));
-V0=repmat(reshape(V0,1,1,[]),size(V,1),size(V,2),1);
-%repeat matrix V0 to prepare to add it to V
-V=V+V0;
-for ia1=1:length(i1)
-for ia2=1:length(i2)
-X(ia1,ia2)=(a1(1)*ia1+a2(1)*ia2)./gridp;%the x grid points
-Y(ia1,ia2)=(a1(2)*ia1+a2(2)*ia2)./gridp;%the y grid points
+clear; close all; clc;
+
+%a = 2.84Å. see const.m for more stuff lololololo
+a1=[const.a,0];
+a2=[0,const.a];
+a3=[0,0,const.a];
+[b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
+
+Ncell = 32; Nz = 100; Nslat = 1;
+zMax = 6; zMin = -2;%units Å
+
+V = zeros(Ncell,Ncell,Nz);
+X = zeros(Ncell,Ncell);
+Y = zeros(Ncell,Ncell);
+Z = linspace(zMin,zMax,Nz);
+for i = 1:Ncell
+    for j = 1:Ncell
+        X(i,j) = (a1(1)*i+a2(1)*j)./Ncell;
+        Y(i,j) = (a1(2)*i+a2(2)*j)./Ncell;
+    end
 end
+
+for z = 1:Nz
+    V(:,:,z) = Vfunc(X,Y,Z(z));
 end
-beta=0.10;%the constant used to create V1
-V1=-2*beta*D*exp(2*alpha*(z0-z));
-Q=zeros(size(X));
-for ia1=1:length(i1)
-for ia2=1:length(i2)
-Q(ia1,ia2)=cos(2*pi*X(ia1,ia2)/a)+cos(2*pi*Y(ia1,ia2)/a);
-for indz=1:length(z)
-V(ia1,ia2,indz)=V(ia1,ia2,indz)+V1(indz)*Q(ia1,ia2);
-%add V1*Q to V
+
+%We strictly ought to be careful with boundary conditions cos MS doesn't
+%actually check them lol
+%===
+%{
+Vsuper = zeros(Nslat*Ncell,Nslat*Ncell,Nz);
+for z = 1:Nz
+    for nx = 1:Ncell:Nslat*Ncell
+        for ny = 1:Ncell:Nslat*Ncell
+            Vsuper(nx:nx+Ncell-1,ny:ny+Ncell-1,z) = V(:,:,z);
+        end
+    end
 end
-end
-end
-%now we have got the matrix V, it's time to create the files used by
-%Multiscat.
-potStructArray.V=V;
-%this creates a struct called “potStructArray with a field V,
-%and this field is defined by the matrix V in your MATLAB’s Workspace.
+%}
+%Vworks = readmatrix("V_works.csv");
+%Vworks = reshape(Vworks,[Ncell,Ncell,Nz]);
+potStructArray.V = V;
+
 Multiscat.PreparePotentialFiles(potStructArray);
-%this function creates the pot10001.in file, when executing this line,
-%make sure that Multiscat.m is in your current folder.
+
 Multiscat.prepareFourierLabels(V);
-%this function creates the FourierLabels.in file, which is also essential
-%for Multiscat to get the information about potential.
+
 potStructArray.a1=a1; potStructArray.a2=a2;
-%make sure you have the base vectors a1 and a2 in your Workspace.
-%The orientation of a1 or a2 does not matter, you just need to get
-%the length and angle between them right. As an example, for
-%LiF (001) surface, a1=[2.84, 0] and a2=[0, 2.84].
-%Note that the length unit is angstrom.
-potStructArray.zmin=z(1);
-potStructArray.zmax=z(end);
-potStructArray.zPoints=length(z);
-%here we have an array called z that stores the values of z being
-%considered. So zmin and zmax are just the first and the last element
-%of z, respectively. The length of z is the number of z points used.
+potStructArray.zmin=Z(1);
+potStructArray.zmax=Z(end);
+potStructArray.zPoints=length(Z);
+
+
 confStruct=Multiscat.createConfigStruct(potStructArray);
 Multiscat.prepareConfigFile(confStruct);
-%the above two lines create Multiscat.conf
-%this function calculates the reciprocal lattice vectors b1 and b2
-%from the real space basis vectors a1 and a2
 
+%We also prepare a .csv which contains an equipotential plot.
 %===
-%V1aaa=-2*beta*D*exp(2*alpha*(z0-1));
-%V0aaa=D*exp(2*alpha*(z0-1))-2*D*exp(alpha*(z0-1));
-%Qaaa=cos(2*pi*1/a)+cos(2*pi*1/a);
-%Vaaa = V0aaa+V1aaa*Qaaa;
+%{
+equipotValue = -10;%Units meV ig
+equipotentialMat = zeros(Ncell*Nslat,Ncell*Nslat);
+writematrix(equipotentialMat,"Test.csv",'Delimiter', ',')
+M = max(Vsuper,[],"all");
+for i = 1:Ncell*Nslat
+    for j = 1:Ncell*Nslat
+        foundVal = false;
+        for k = 1:Nz
+            if(Vsuper(i,j,k) > equipotValue && ~foundVal)
+                disp("i, j, k = " + i + ", " + j + ", " + k +...
+                    ", Value = " + Vsuper(i,j,k) +...
+                    ", Z(k) = " + Z(k));
+                equipotentialMat(i,j) = Z(k);
+                foundVal = true;
+            end
+        end
+        if(~foundVal)
+            %error("unable to find equipotential!")
+        end
+    end
+end
+%disp(equipotentialMat)
+writematrix(equipotentialMat,'Equipotential.csv','Delimiter', ',')
+%}
 disp("#=====#")
 disp("V = ")
 disp(V)
 disp("Sum = ")
 disp(sum(V,"all"))
-writematrix(V,"V_works.csv")
+writematrix(V,"V_dontwork.csv")
 %===
 
-function [b1,b2]=Reciprocal(a1,a2)
-a3=[0 0 1];
-crsprod=a3*(cross([a1 0],[a2 0]))';
-%the volume spanned by a1, a2, and a3
-b1=2*pi*cross([a2 0],a3)/crsprod;
-b1=b1(1:2);
-b2=2*pi*cross(a3,[a1 0])/crsprod;
-b2=b2(1:2);
+function [b1,b2,b3] = Reciprocal(a1,a2,a3)
+    factor = 2*pi/dot(cross(a1,a2),a3);
+    b1 = factor*cross(a2,a3);
+    b2 = factor*cross(a3,a1);
+    b3 = factor*cross(a1,a2);
+end
+
+function [VmatrixElement] = Vfunc(x,y,z)
+    D = 7.63;
+    alpha = 1.1;
+    z0 = 1.0;
+    beta = 0.1;
+    function [V0] = V0func(z)
+        V0 = D * exp(2*alpha*(z0-z))...
+            - 2*D*exp(alpha*(z0-z));
+    end
+    function [V1] = V1func(z)
+        V1 = -2*beta*D*exp(2*alpha*(z0-z));
+    end
+    function [Q] = Qfunc(x,y)
+        Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
+    end
+    VmatrixElement = V0func(z) + V1func(z)...
+        * Qfunc(x,y);
 end
