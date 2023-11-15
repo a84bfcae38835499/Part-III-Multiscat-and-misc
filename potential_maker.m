@@ -1,12 +1,13 @@
 clear; close all; clc;
 
-%a = 2.84Å. see const.m for more stuff lololololo
+%a = 2.84Å. see const.m for more stuff
 a1=[const.a,0];
 a2=[0,const.a];
 a3=[0,0,const.a];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
-
-Ncell = 32; Nz = 100; Nslat = 1;
+%Number of grid points, number of Z points, and number of lattices
+%contained in the overall superlattice (or rather the square root of that)
+Ncell = 32; Nz = 100; Nslat = 3;
 zMax = 6; zMin = -2;%units Å
 
 V = zeros(Ncell,Ncell,Nz);
@@ -27,7 +28,7 @@ end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
 %actually check them lol
 %===
-%{
+
 Vsuper = zeros(Nslat*Ncell,Nslat*Ncell,Nz);
 for z = 1:Nz
     for nx = 1:Ncell:Nslat*Ncell
@@ -36,14 +37,13 @@ for z = 1:Nz
         end
     end
 end
-%}
-%Vworks = readmatrix("V_works.csv");
-%Vworks = reshape(Vworks,[Ncell,Ncell,Nz]);
-potStructArray.V = V;
+writematrix(Vsuper,"V.csv")
+
+potStructArray.V = Vsuper;
 
 Multiscat.PreparePotentialFiles(potStructArray);
 
-Multiscat.prepareFourierLabels(V);
+Multiscat.prepareFourierLabels(Vsuper);
 
 potStructArray.a1=a1; potStructArray.a2=a2;
 potStructArray.zmin=Z(1);
@@ -56,16 +56,14 @@ Multiscat.prepareConfigFile(confStruct);
 
 %We also prepare a .csv which contains an equipotential plot.
 %===
-%{
-equipotValue = -10;%Units meV ig
+equipotValue = 0;%Units meV ig
 equipotentialMat = zeros(Ncell*Nslat,Ncell*Nslat);
-writematrix(equipotentialMat,"Test.csv",'Delimiter', ',')
 M = max(Vsuper,[],"all");
 for i = 1:Ncell*Nslat
     for j = 1:Ncell*Nslat
         foundVal = false;
         for k = 1:Nz
-            if(Vsuper(i,j,k) > equipotValue && ~foundVal)
+            if(Vsuper(i,j,k) < equipotValue && ~foundVal)
                 disp("i, j, k = " + i + ", " + j + ", " + k +...
                     ", Value = " + Vsuper(i,j,k) +...
                     ", Z(k) = " + Z(k));
@@ -80,13 +78,6 @@ for i = 1:Ncell*Nslat
 end
 %disp(equipotentialMat)
 writematrix(equipotentialMat,'Equipotential.csv','Delimiter', ',')
-%}
-disp("#=====#")
-disp("V = ")
-disp(V)
-disp("Sum = ")
-disp(sum(V,"all"))
-writematrix(V,"V_dontwork.csv")
 %===
 
 function [b1,b2,b3] = Reciprocal(a1,a2,a3)
