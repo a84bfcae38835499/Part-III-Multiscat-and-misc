@@ -14,7 +14,7 @@ V = zeros(Ncell,Ncell,Nz);
 X = zeros(Ncell,Ncell);
 Y = zeros(Ncell,Ncell);
 Z = linspace(zMin,zMax,Nz);
-%{
+
 for i = 1:Ncell
     for j = 1:Ncell
         X(i,j) = (a1(1)*i+a2(1)*j)./Ncell;
@@ -39,9 +39,9 @@ for z = 1:Nz
     end
 end
 %writematrix(Vsuper,"V.csv")
-%}
-Vsuper = readmatrix("V_boyao.csv");
-Vsuper = reshape(Vsuper,[Ncell,Ncell,Nz]);
+
+%Vsuper = readmatrix("V_boyao.csv");
+%Vsuper = reshape(Vsuper,[Ncell,Ncell,Nz]);
 
 potStructArray.V = Vsuper;
 
