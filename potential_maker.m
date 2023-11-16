@@ -61,7 +61,7 @@ Multiscat.prepareConfigFile(confStruct);
 %We also prepare a .csv which contains an equipotential plot.
 %===
 equipotValue = 0;%Units meV ig
-
+eqCharArr = [num2str(equipotValue,'%+g') , ' meV'];
 equipotentialMat = zeros(Ncell*Nslat,Ncell*Nslat);
 M = max(Vsuper,[],"all");
 for i = 1:Ncell*Nslat
@@ -83,6 +83,12 @@ for i = 1:Ncell*Nslat
 end
 %disp(equipotentialMat)
 writematrix(equipotentialMat,'Equipotential.csv','Delimiter', ',')
+S = fileread('Equipotential.csv');
+S = ['#Energy surface at ', eqCharArr, newline, S];
+FID = fopen('Equipotential.csv', 'w');
+if FID == -1, error('Cannot open file %s', FileName); end
+fwrite(FID, S, 'char');
+fclose(FID);
 %===
 
 function [b1,b2,b3] = Reciprocal(a1,a2,a3)

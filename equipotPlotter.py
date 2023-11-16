@@ -5,9 +5,21 @@ import seaborn as sns
 from matplotlib import cm
 import datetime
 
-values = np.array(pd.read_csv('Equipotential.csv'))[:,1:]
+f = open("Equipotential.csv", "r")
+lines = f.readlines()
+
+comment = ""
+for line in lines:
+    if(line[0] == '#'):
+           comment += str(line[1:])
+print(comment)
+f.close()
+
+
+values = np.array(pd.read_csv('Equipotential.csv',comment='#'))[:,1:]
 print("Values = ")
 print(values)
+
 
 X = np.linspace(0, 1, np.shape(values)[0])
 Y = np.linspace(0, 1, np.shape(values)[0])
@@ -24,5 +36,6 @@ plt.show()
 
 hm = sns.heatmap(data = values)
 savestr = "Figures/Potentials/" + datetime.datetime.now().strftime('Potential_%Y-%m-%d_%H-%M') + ".png"
+hm.set_title(comment)
 plt.savefig(fname=savestr)
 plt.show()
