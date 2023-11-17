@@ -33,4 +33,3 @@ ax.set_ylabel('$n_2$')
 
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + ".png"
 plt.savefig(fname=savestr)
-# %%
