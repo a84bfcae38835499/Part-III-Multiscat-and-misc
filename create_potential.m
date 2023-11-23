@@ -1,5 +1,5 @@
 % This file is used to create the potential files.
-%clear all; close all;
+clear all; close all;
 
 %% Generate a potential
 
@@ -31,7 +31,7 @@ z0 = 1.0; % z offset
 V0 = D*exp(2*alpha*(z0-z))-2*D*exp(alpha*(z0-z));
 
 % Quick plot of the uncorrugated part of the potential
-if false
+if true
     figure
     plot(z, V0);
     xlabel('z/A')
@@ -41,6 +41,7 @@ if false
     title('Uncorrugated part of the potential')
     V0 = repmat(reshape(V0,1,1,[]),size(V,1),size(V,2),1);
 end
+
 
 % repeat matrix V0 to prepare to add it to V
 V = V + V0;
