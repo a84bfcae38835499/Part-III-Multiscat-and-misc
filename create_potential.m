@@ -1,5 +1,5 @@
 % This file is used to create the potential files.
-clear all; close all;
+%clear all; close all;
 
 %% Generate a potential
 
@@ -58,7 +58,7 @@ beta = 0.10;
 V1 = -2*beta*D*exp(2*alpha*(z0-z));
 
 % Quick plot of the corrugated part of the potential
-if false
+if true
     figure
     plot(z, V1)
     xlabel('z/A')
