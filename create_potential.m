@@ -13,7 +13,7 @@ a2=[0, a];
 % reciprocal base lattice vectors
 [b1, b2] = Reciprocal(a1, a2);
 % grid points parallel to the surface in one dimension
-gridp = 2;
+gridp = 16;
 % point grids in a1 and a2 directions
 how_many_cell = 3; % Sets up a supercell
 i1 = 1:gridp*how_many_cell;
