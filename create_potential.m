@@ -1,5 +1,5 @@
 % This file is used to create the potential files.
-%clear all; close all;
+clear all; close all;
 
 %% Generate a potential
 
@@ -15,7 +15,7 @@ a2=[0, a];
 % grid points parallel to the surface in one dimension
 gridp = 16;
 % point grids in a1 and a2 directions
-how_many_cell = 4; % Sets up a supercell
+how_many_cell = 3; % Sets up a supercell
 i1 = 1:gridp*how_many_cell;
 i2 = 1:gridp*how_many_cell;
 
