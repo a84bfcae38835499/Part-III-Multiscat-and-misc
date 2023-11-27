@@ -54,7 +54,6 @@ end
 
 %===
 %Now add imperfections to the lattice
-%{
 for k = 1:size(V,3) %Should be the z direction
   dropoff = Dropoff(Z(k));
   for i = 1:Ncell*Nsuper
@@ -69,7 +68,7 @@ for k = 1:size(V,3) %Should be the z direction
     end
   end
 end
-%}
+
 %===
 %We supply the lattice to the mulitscat script so it can do its thing
 

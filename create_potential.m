@@ -77,7 +77,21 @@ for ia1=1:length(i1)
         end
     end
 end
-
+%%
+for k = 1:size(V,3) %Should be the z direction
+  dropoff = Dropoff(z(k));
+  for i = 1:gridp*how_many_cell
+    for j = 1:1:gridp*how_many_cell
+      x = X(i,j);
+      y = Y(i,j);
+        val = -1.5*Gaussian2D(x,y, ...
+            [const.a*1,const.a*1],const.a/5,3*const.D*dropoff)/2;
+      V(i,j,k) = V(i,j,k)+val;
+      disp("x, y, z = " + x + ", " + y + ", " + z(k) +...
+          ", Value = " + val);
+    end
+  end
+end
 %% Plot the potential
 % Plot of a slice of the potential in the nth row
 row = 1;
@@ -126,3 +140,10 @@ Multiscat.prepareConfigFile(confStruct);
 %the above two lines create Multiscat.conf
 %this function calculates the reciprocal lattice vectors b1 and b2
 %from the real space basis vectors a1 and a2
+
+%%
+function [DV] = Dropoff(z)
+  %Use this to attenuate the gaussian in z
+    DV = -exp(2*const.alpha*(const.z0-z));
+end
+
