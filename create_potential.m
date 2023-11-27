@@ -85,7 +85,7 @@ for k = 1:size(V,3) %Should be the z direction
       x = X(i,j);
       y = Y(i,j);
       val = Gaussian2D(x,y, ...
-        [const.a*1.3,const.a*1.3],const.a/2,3*const.D*dropoff);
+        [const.a*1.3,const.a*1.35],const.a/2,2*const.D*dropoff);
       V(i,j,k) = V(i,j,k)+val;
       disp("x, y, z = " + x + ", " + y + ", " + z(k) +...
           ", Value = " + val);
