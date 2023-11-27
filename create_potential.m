@@ -84,8 +84,8 @@ for k = 1:size(V,3) %Should be the z direction
     for j = 1:1:gridp*how_many_cell
       x = X(i,j);
       y = Y(i,j);
-        val = -2*Gaussian2D(x,y, ...
-            [const.a*1.15,const.a*1.25],const.a/5,3*const.D*dropoff)/2;
+      val = Gaussian2D(x,y, ...
+        [const.a*1.3,const.a*1.3],const.a/2,3*const.D*dropoff);
       V(i,j,k) = V(i,j,k)+val;
       disp("x, y, z = " + x + ", " + y + ", " + z(k) +...
           ", Value = " + val);
