@@ -1,8 +1,6 @@
 % This file is used to create the potential files.
 clear all; close all;
-
 %% Generate a potential
-
 % z points, note that the points we take should be evenly spaced
 z = linspace(-2,6,100);
 %lattice constant
@@ -15,7 +13,7 @@ a2=[0, a];
 % grid points parallel to the surface in one dimension
 gridp = 16;
 % point grids in a1 and a2 directions
-how_many_cell = 4; % Sets up a supercell
+how_many_cell = 3; % Sets up a supercell
 i1 = 1:gridp*how_many_cell;
 i2 = 1:gridp*how_many_cell;
 
@@ -81,18 +79,20 @@ for ia1=1:length(i1)
 end
 
 %% Plot the potential
-
 % Plot of a slice of the potential in the nth row
 row = 1;
 figure
 contourf(z,  linspace(0, a*how_many_cell, gridp*how_many_cell), ...
     reshape(V(row,:,:), [gridp*how_many_cell,100]), linspace(-20,100,24))
-xlabel('z/A')
-ylabel('x/A')
+xlabel('z/Å')
+ylabel('x/Å')
 colorbar
 xlim([-1,4])
 title('Potential in z, used in simulation')
+hbar = colorbar;
+ylabel(hbar,'Energy / meV');
 
+    fontsize(gcf,scale=2)
 % Linearly interpolated equipotential plot
 equipotential_plot('V', V, 'z', z, 'a', a*how_many_cell)
 

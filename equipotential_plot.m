@@ -1,5 +1,6 @@
 function [xx, yy, pot_height] = equipotential_plot(varargin)
-    for i_=1:2:length(varargin)
+
+   for i_=1:2:length(varargin)
         switch varargin{i_}
             case 'V'
                 V = varargin{i_+1};
@@ -41,8 +42,8 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
 
     figure
     surf(xx, yy, pot_height)
-    xlabel('x/A')
-    ylabel('y/A')
+    xlabel('x/Å')
+    ylabel('y/Å')
     title(['Equipotential V=' num2str(V0) ', used in simulation'])
-
+    fontsize(gcf,scale=2)
 end
