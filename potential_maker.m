@@ -1,13 +1,15 @@
 clear; close all; clc;
 
 %a = 2.84Å. see const.m for more stuff
+%a1=[const.a,0];
+%a2=[0,const.a];
 a1=[const.a,0];
-a2=[0,const.a];
+a2=[const.a/2,const.a * (sqrt(3)/2)];
 a3=[0,0,const.a];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 16; Nz = 500; Nsuper = 4;
+Ncell = 16; Nz = 500; Nsuper = 3;
 zMax = 6; zMin = -2;%units Å
 
 V = zeros(Ncell,Ncell,Nz);
@@ -54,21 +56,22 @@ end
 
 %===
 %Now add imperfections to the lattice
-for k = 1:size(V,3) %Should be the z direction
-  dropoff = Dropoff(Z(k));
-  for i = 1:Ncell*Nsuper
-    for j = 1:Ncell*Nsuper
-      x = Xsuper(i,j);
-      y = Ysuper(i,j);
-      val = Gaussian2D(x,y, ...
-        [const.a*1.3,const.a*1.3],const.a/2,3*const.D*dropoff);
-      Vsuper(i,j,k) = Vsuper(i,j,k)+val;
-      disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
-          ", Value = " + val);
+if false
+  for k = 1:size(V,3) %Should be the z direction
+    dropoff = Dropoff(Z(k));
+    for i = 1:Ncell*Nsuper
+      for j = 1:Ncell*Nsuper
+        x = Xsuper(i,j);
+        y = Ysuper(i,j);
+        val = Gaussian2D(x,y, ...
+          [const.a*1.3,const.a*1.3],const.a/2,3*const.D*dropoff);
+        Vsuper(i,j,k) = Vsuper(i,j,k)+val;
+        disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
+            ", Value = " + val);
+      end
     end
   end
 end
-
 %===
 %We supply the lattice to the mulitscat script so it can do its thing
 
