@@ -1,10 +1,10 @@
 clear; close all; clc;
 
 %a = 2.84Å. see const.m for more stuff
-%a1=[const.a,0];
-%a2=[0,const.a];
 a1=[const.a,0];
-a2=[const.a/2,const.a * (sqrt(3)/2)];
+a2=[0,const.a];
+%a1=[const.a,0];
+%a2=[const.a/2,const.a * (sqrt(3)/2)];
 a3=[0,0,const.a];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
