@@ -1,17 +1,20 @@
 clear; close all; clc;
 
 %a = 2.84Å. see const.m for more stuff
-a1=[const.a,0];
-a2=[0,const.a];
 %a1=[const.a,0];
-%a2=[const.a/2,const.a * (sqrt(3)/2)];
+%a2=[0,const.a];
+a1=[3*const.a,0];
+a2=[0,const.a * sqrt(3)];
 a3=[0,0,const.a];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 16; Nz = 500; Nsuper = 3;
+Ncell = 64; Nz = 250; Nsuper = 1;
 zMax = 6; zMin = -2;%units Å
 
+disp("M * [0,1] = ")
+disp(const.sheerMat*[0;1])
+ 
 V = zeros(Ncell,Ncell,Nz);
 X = zeros(Ncell,Ncell);
 Y = zeros(Ncell,Ncell);
@@ -33,7 +36,11 @@ for i = 1:Ncell*Nsuper
     end
 end
 for k = 1:Nz
-    V(:,:,k) = Vfunc(X,Y,Z(k));
+  for i = 1:Ncell
+    for j = 1:Ncell
+      V(i,j,k) = Vfunc(X(i,j),Y(i,j),Z(k));
+    end
+  end
 end
 
 %We strictly ought to be careful with boundary conditions cos MS doesn't
@@ -86,7 +93,6 @@ potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(end);
 potStructArray.zPoints=length(Z);
 
-
 confStruct=Multiscat.createConfigStruct(potStructArray);
 Multiscat.prepareConfigFile(confStruct);
 
@@ -114,9 +120,7 @@ for i = 1:Ncell*Nsuper
     end
 end
 
-
 %disp(equipotentialMat)
-
 
 %===
 %All this stuff is just to write a comment line lmao
@@ -146,13 +150,68 @@ function [VmatrixElement] = Vfunc(x,y,z)
     function [V1] = V1func(z)
         V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
+    function [V2] = V2func(z)
+        V2 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+    end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
     end
-    VmatrixElement = V0func(z) + V1func(z)...
-        * Qfunc(x,y);
-end
+  function [Q] = Qhexfunc1(x,y)
+        %disp("[][][][][]")
+        %disp(v1)
+        %disp(const.sheerMat)
+        %disp("[][][][][]")
+        %nu = y * 2/sqrt(3);
+        %mu = x - (y/(sqrt(3)));
+        x_n = x / (3*const.a);
+        y_n = y / (sqrt(3)*const.a);
+        Q = 0;
+        
+        mu_n1 = x_n*2;
+        nu_n1 = y_n - x_n;
+        Q = Q + cos(2*pi*nu_n1)^const.phong + cos(2*pi*mu_n1)^const.phong;
 
+        mu_n2 = x_n*2;
+        nu_n2 = -y_n - x_n;
+        Q = Q + cos(2*pi*nu_n2)^const.phong + cos(2*pi*mu_n2)^const.phong;
+
+        nu_n3 = y_n - x_n;
+        mu_n3 = -y_n - x_n;
+        Q = Q + cos(2*pi*nu_n3)^const.phong + cos(2*pi*mu_n3)^const.phong;
+        Q = Q/3;
+        %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
+  end
+  function [Q] = Qhexfunc2(x,y)
+        %disp("[][][][][]")
+        %disp(v1)
+        %disp(const.sheerMat)
+        %disp("[][][][][]")
+        %nu = y * 2/sqrt(3);
+        %mu = x - (y/(sqrt(3)));
+        x1 = x - const.a;
+        y1 = y;
+        x_n = x1 / (3*const.a);
+        y_n = y1 / (sqrt(3)*const.a);
+        Q = 0;
+        
+        mu_n1 = x_n*2;
+        nu_n1 = y_n - x_n;
+        Q = Q + cos(2*pi*nu_n1)^const.phong + cos(2*pi*mu_n1)^const.phong;
+
+        mu_n2 = x_n*2;
+        nu_n2 = -y_n - x_n;
+        Q = Q + cos(2*pi*nu_n2)^const.phong + cos(2*pi*mu_n2)^const.phong;
+
+        nu_n3 = y_n - x_n;
+        mu_n3 = -y_n - x_n;
+        Q = Q + cos(2*pi*nu_n3)^const.phong + cos(2*pi*mu_n3)^const.phong;
+        Q = Q/3;
+        %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
+    end
+    VmatrixElement = V0func(z) ...
+        + V1func(z) * Qhexfunc1(x,y);
+    VmatrixElement = VmatrixElement + Qhexfunc2(x,y) * V2func(z);
+end
 
 function [DV] = Dropoff(z)
   %Use this to attenuate the gaussian in z

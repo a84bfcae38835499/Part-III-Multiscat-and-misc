@@ -6,5 +6,9 @@ classdef const
     alpha = 1.1;
     z0 = 1.0;
     beta = 0.1;
+
+
+    sheerMat = [1 sqrt(3)/2;0 1];
+    phong = 1;
   end
 end
