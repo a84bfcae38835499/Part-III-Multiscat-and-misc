@@ -155,7 +155,7 @@ Multiscat.PreparePotentialFiles(potStructArray);
 
 Multiscat.prepareFourierLabels(Vsuper);
 
-potStructArray.a1=[1,0]; potStructArray.a2=[1/2,sqrt(3)/2];
+potStructArray.a1=const.b*[1,0]; potStructArray.a2=const.b*[1/2,sqrt(3)/2];
 potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(end);
 potStructArray.zPoints=length(Z);
