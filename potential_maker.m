@@ -9,7 +9,7 @@ a3=[0,0,const.b];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 16; Nz = 100; Nsuper = 2;
+Ncell = 16; Nz = 100; Nsuper = 1;
 zMax = 6; zMin = -2;%units Å
 
 disp("M * [0,1] = ")
