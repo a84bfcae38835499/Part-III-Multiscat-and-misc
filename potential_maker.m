@@ -234,8 +234,8 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
     VmatrixElement = V0func(Z) ...
-        + V1func(Z) * Qhexfunc(X,Y)...
-        + Qhexfunc(X - const.b,Y) * V2func(Z);
+        + V1func(Z) * Qhexfunc(X,Y)/2 ...
+        + Qhexfunc(X - const.b,Y) * V2func(Z)/2;
 end
 
 function [DV] = Dropoff(z)
