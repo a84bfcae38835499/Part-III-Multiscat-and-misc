@@ -35,10 +35,9 @@ for i = 1:Ncell*Nsuper
         Ysuper(i,j) = (a1(2)*i+a2(2)*j)./Ncell;
     end
 end
-for k = 1:Nz
-      V(:,:,k) = Vfunc(X,Y,Z(k));
-end
-
+  for k = 1:Nz
+        V(:,:,k) = Vfunc(X,Y,Z(k));
+  end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
 %actually check them lol
 %===
@@ -156,7 +155,7 @@ Multiscat.PreparePotentialFiles(potStructArray);
 
 Multiscat.prepareFourierLabels(Vsuper);
 
-potStructArray.a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
+potStructArray.a1=[1,0]; potStructArray.a2=[1/2,sqrt(3)/2];
 potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(end);
 potStructArray.zPoints=length(Z);

@@ -32,10 +32,16 @@ for i = 1:Ncell*Nsuper
         Ysuper(i,j) = (a1(2)*i+a2(2)*j)./Ncell;
     end
 end
-for k = 1:Nz
-    V(:,:,k) = Vfunc(X,Y,Z(k));
-end
 
+if false
+  for k = 1:Nz
+      V(:,:,k) = Vfunc(X,Y,Z(k));
+  end
+else
+  for k = 1:Nz
+        V(:,:,k) = Vnoise(X,Y,Z(k));
+  end
+end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
 %actually check them lol
 %===
@@ -171,6 +177,20 @@ function [VmatrixElement] = Vfunc(x,y,z)
     end
     VmatrixElement = V0func(z) + V1func(z)...
         * Qfunc(x,y);
+end
+
+function[VmatElem] = Vnoise(X,Y,z)
+      function [V0] = V0func(z)
+        V0 = const.D * exp(2*const.alpha*(const.z0-z))...
+            - 2*const.D*exp(const.alpha*(const.z0-z));
+    end
+    function [V1] = V1func(z)
+        V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+     
+    end
+  disp()
+    VmatElem = V0func(z) + V1func(z)...
+        * wgn(size(X),size(Y),3);
 end
 
 
