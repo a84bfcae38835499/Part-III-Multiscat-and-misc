@@ -75,7 +75,7 @@ c
       include 'multiscat.inc'
       dimension d(nmax), ix(nmax), iy(nmax)
       
-      common /cells/ a1,a2,b2,ei,theta,phi,a0,gax,gay,gbx,gby
+      common /cells/ a1,a2,b2,ei,theta,phi,a0,gax,gay,gbx,gby, foobar
       common /const/ hemass,rmlmda ! = 2m/h^2 !modified by Boyao on 6 Dec 2020
       DATA   Pi /3.141592653589793d0/
            
@@ -99,6 +99,7 @@ c
       pky = sqrt(ered)*sin(thetad)*sin(phid)
       
       n=0
+      foobar = 0
       do i1 = -imax,imax
          do i2 = -imax,imax
             gx = gax*i1 + gbx*i2
@@ -113,12 +114,15 @@ c
                   d(n)=di
                   if ((i1.eq.0) .and. (i2.eq.0)) n00=n
                else
-                  stop 'ERROR: n too big! (basis)'
+               foobar = 1
             end if
             end if
          end do
       end do
-      
+      if(foobar.eq.1) then
+		print *,'Number of diffraction channels, n =',n
+		stop 'ERROR: n too big! (basis) >:('
+      end if
       
       return
       end subroutine basis
