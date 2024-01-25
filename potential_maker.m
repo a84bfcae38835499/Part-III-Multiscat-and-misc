@@ -133,6 +133,9 @@ fwrite(FID, S, 'char');
 fclose(FID);
 
 %===
+
+
+
 %Function definitions
 
 function [b1,b2,b3] = Reciprocal(a1,a2,a3)
@@ -148,10 +151,10 @@ function [VmatrixElement] = Vfunc(x,y,z)
             - 2*const.D*exp(const.alpha*(const.z0-z));
     end
     function [V1] = V1func(z)
-        V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V1 = +2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [V2] = V2func(z)
-        V2 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V2 = +2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
