@@ -129,6 +129,26 @@ fwrite(FID, S, 'char');
 fclose(FID);
 
 %===
+
+%% Plot the potential
+% Plot of a slice of the potential in the nth row
+row = 1;
+figure
+contourf(Z,  linspace(0, const.a*Nsuper, Ncell*Nsuper), ...
+    reshape(Vsuper(row,:,:), [Ncell*Nsuper,Nz]), linspace(-20,100,24))
+xlabel('z/Å')
+ylabel('x/Å')
+colorbar
+xlim([-1,4])
+title('Potential in z, used in simulation')
+hbar = colorbar;
+ylabel(hbar,'Energy / meV');
+
+    fontsize(gcf,scale=2)
+% Linearly interpolated equipotential plot
+equipotential_plot('V', V, 'z', Z, 'a', const.a*Nsuper)
+
+
 %Function definitions
 
 function [b1,b2,b3] = Reciprocal(a1,a2,a3)

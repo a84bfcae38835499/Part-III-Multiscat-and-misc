@@ -9,7 +9,7 @@ a3=[0,0,const.a];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 64; Nz = 500; Nsuper = 1;
+Ncell = 64; Nz = 100; Nsuper = 2;
 zMax = 6; zMin = -2;%units Å
 
 disp("M * [0,1] = ")
@@ -36,17 +36,13 @@ for i = 1:Ncell*Nsuper
     end
 end
 for k = 1:Nz
-  for i = 1:Ncell
-    for j = 1:Ncell
-      V(i,j,k) = Vfunc(X(i,j),Y(i,j),Z(k));
-    end
-  end
+      V(:,:,k) = Vfunc(X,Y,Z(k));
 end
 
 %We strictly ought to be careful with boundary conditions cos MS doesn't
 %actually check them lol
 %===
-%Now we duplicate the lattice to get a superlattice
+%% Now we duplicate the lattice to get a superlattice
 
 Vsuper = zeros(Nsuper*Ncell,Nsuper*Ncell,Nz);
 for z = 1:Nz
@@ -62,7 +58,7 @@ end
 %Vsuper = reshape(Vsuper,[Ncell,Ncell,Nz]);
 
 %===
-%Now add imperfections to the lattice
+%% Now add imperfections to the lattice
 if false
   for k = 1:size(V,3) %Should be the z direction
     dropoff = Dropoff(Z(k));
@@ -80,24 +76,7 @@ if false
   end
 end
 %===
-%We supply the lattice to the mulitscat script so it can do its thing
-
-potStructArray.V = Vsuper;
-
-Multiscat.PreparePotentialFiles(potStructArray);
-
-Multiscat.prepareFourierLabels(Vsuper);
-
-potStructArray.a1=a1; potStructArray.a2=a2;
-potStructArray.zmin=Z(1);
-potStructArray.zmax=Z(end);
-potStructArray.zPoints=length(Z);
-
-confStruct=Multiscat.createConfigStruct(potStructArray);
-Multiscat.prepareConfigFile(confStruct);
-
-%===
-%We also prepare a .csv which contains an equipotential plot.
+%% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
 eqCharArr = [num2str(equipotValue,'%+g') , ' meV'];
 equipotentialMat = zeros(Ncell*Nsuper,Ncell*Nsuper);
@@ -123,7 +102,7 @@ end
 %disp(equipotentialMat)
 
 %===
-%All this stuff is just to write a comment line lmao
+%% All this stuff is just to write a comment line lmao
 writematrix(equipotentialMat,'Equipotential.csv','Delimiter', ',')
 S = fileread('Equipotential.csv');
 S = ['#Energy surface at ', eqCharArr, newline, S];
@@ -133,10 +112,59 @@ fwrite(FID, S, 'char');
 fclose(FID);
 
 %===
+%% Plot the potential
+% Plot of a slice of the potential in the nth row, that is for constant x
+row = floor(Ncell/2);
+figure
+contourf(Z,  linspace(0, const.a*Nsuper, Ncell*Nsuper), ...
+    reshape(Vsuper(row,:,:), [Ncell*Nsuper,Nz]), linspace(-20,100,24))
 
+    fontsize(gcf,scale=1)
+xlabel('z/Å')
+ylabel('y/Å') %is this x or y? I think y but idrk
+colorbar
+xlim([-1,4])
+title('Potential in z, used in simulation')
+hbar = colorbar;
+ylabel(hbar,'Energy / meV');
 
+%% Plot the potential
+% Linearly interpolated equipotential plot
+    fontsize(gcf,scale=1)
+equipotential_plot('V', Vsuper, 'z', Z, 'a', const.a*Nsuper)
 
-%Function definitions
+%% Plot the potential
+zSample = 0.9;
+zRow = floor((zSample - zMin)/(zMax-zMin) * Nz)
+figure
+contourf(Xsuper,Ysuper,Vsuper(:,:,zRow))
+daspect([1 1 1])
+xlabel('x/Å')
+ylabel('y/Å')
+title('Potentials at z = ' + string(zSample) + ' Å');
+hbar = colorbar('southoutside');
+xlabel(hbar,'Energy / meV');
+
+    fontsize(gcf,scale=1)
+%===
+%% We supply the lattice to the mulitscat script so it can do its thing
+
+potStructArray.V = Vsuper;
+
+Multiscat.PreparePotentialFiles(potStructArray);
+
+Multiscat.prepareFourierLabels(Vsuper);
+
+potStructArray.a1=a1; potStructArray.a2=a2;
+potStructArray.zmin=Z(1);
+potStructArray.zmax=Z(end);
+potStructArray.zPoints=length(Z);
+
+confStruct=Multiscat.createConfigStruct(potStructArray);
+Multiscat.prepareConfigFile(confStruct);
+
+%===
+%% Function definitions
 
 function [b1,b2,b3] = Reciprocal(a1,a2,a3)
     factor = 2*pi/dot(cross(a1,a2),a3);
@@ -145,21 +173,21 @@ function [b1,b2,b3] = Reciprocal(a1,a2,a3)
     b3 = factor*cross(a1,a2);
 end
 
-function [VmatrixElement] = Vfunc(x,y,z)
+function [VmatrixElement] = Vfunc(X,Y,Z)
     function [V0] = V0func(z)
         V0 = const.D * exp(2*const.alpha*(const.z0-z))...
-            - 2*const.D*exp(const.alpha*(const.z0-z));
+            -2*const.D*exp(const.alpha*(const.z0-z));
     end
     function [V1] = V1func(z)
-        V1 = +2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [V2] = V2func(z)
-        V2 = +2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V2 = -2.2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
     end
-  function [Q] = Qhexfunc1(x,y)
+  function [Q] = QhexfuncSingle(x,y)
         %disp("[][][][][]")
         %disp(v1)
         %disp(const.sheerMat)
@@ -172,48 +200,41 @@ function [VmatrixElement] = Vfunc(x,y,z)
         
         mu_n1 = x_n*2;
         nu_n1 = y_n - x_n;
-        Q = Q + cos(2*pi*nu_n1)^const.phong + cos(2*pi*mu_n1)^const.phong;
+        Q = Q + cos(2*pi*nu_n1) + cos(2*pi*mu_n1);
 
         mu_n2 = x_n*2;
         nu_n2 = -y_n - x_n;
-        Q = Q + cos(2*pi*nu_n2)^const.phong + cos(2*pi*mu_n2)^const.phong;
+        Q = Q + cos(2*pi*nu_n2) + cos(2*pi*mu_n2);
 
         nu_n3 = y_n - x_n;
         mu_n3 = -y_n - x_n;
-        Q = Q + cos(2*pi*nu_n3)^const.phong + cos(2*pi*mu_n3)^const.phong;
-        Q = Q/3;
-        %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
-  end
-  function [Q] = Qhexfunc2(x,y)
-        %disp("[][][][][]")
-        %disp(v1)
-        %disp(const.sheerMat)
-        %disp("[][][][][]")
-        %nu = y * 2/sqrt(3);
-        %mu = x - (y/(sqrt(3)));
-        x1 = x - const.a;
-        y1 = y;
-        x_n = x1 / (3*const.a);
-        y_n = y1 / (sqrt(3)*const.a);
-        Q = 0;
-        
-        mu_n1 = x_n*2;
-        nu_n1 = y_n - x_n;
-        Q = Q + cos(2*pi*nu_n1)^const.phong + cos(2*pi*mu_n1)^const.phong;
-
-        mu_n2 = x_n*2;
-        nu_n2 = -y_n - x_n;
-        Q = Q + cos(2*pi*nu_n2)^const.phong + cos(2*pi*mu_n2)^const.phong;
-
-        nu_n3 = y_n - x_n;
-        mu_n3 = -y_n - x_n;
-        Q = Q + cos(2*pi*nu_n3)^const.phong + cos(2*pi*mu_n3)^const.phong;
+        Q = Q + cos(2*pi*nu_n3) + cos(2*pi*mu_n3);
         Q = Q/3;
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
-    VmatrixElement = V0func(z) ...
-        + V1func(z) * Qhexfunc1(x,y);
-    VmatrixElement = VmatrixElement + Qhexfunc2(x,y) * V2func(z);
+  function [Q] = Qhexfunc(X,Y)
+        X_n = X ./ (3*const.a);
+        Y_n = Y ./ (sqrt(3)*const.a);
+        Q = zeros(length(X),length(Y));
+        
+        mu = X_n.*2;
+        nu = Y_n - X_n;
+        Q = Q + cos(2*pi*nu) + cos(2*pi*mu);
+
+        %mu = X_n.*2;
+        nu = -Y_n - X_n;
+        Q = Q + cos(2*pi*nu) + cos(2*pi*mu);
+
+        nu = Y_n - X_n;
+        mu = -Y_n - X_n;
+        Q = Q + cos(2*pi*nu) + cos(2*pi*mu);
+        
+        Q = Q./3;
+        %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
+    end
+    VmatrixElement = V0func(Z) ...
+        + V1func(Z) * Qhexfunc(X,Y)...
+        + Qhexfunc(X - const.a,Y) * V2func(Z);
 end
 
 function [DV] = Dropoff(z)
