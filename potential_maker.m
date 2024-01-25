@@ -9,7 +9,7 @@ a3=[0,0,const.b];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 2; Nz = 25; Nsuper = 2;
+Ncell = 64; Nz = 100; Nsuper = 2;
 zMax = 6; zMin = -2;%units Å
 
 disp("M * [0,1] = ")
@@ -234,8 +234,8 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
     VmatrixElement = V0func(Z) ...
-        + V1func(Z) * Qhexfunc(X,Y)/2 ...
-        + Qhexfunc(X - const.b,Y) * V2func(Z)/2;
+        + V1func(Z) * Qhexfunc(X,Y)...
+        + Qhexfunc(X - const.b,Y) * V2func(Z);
 end
 
 function [DV] = Dropoff(z)
