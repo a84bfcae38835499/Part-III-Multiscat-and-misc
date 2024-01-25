@@ -3,13 +3,13 @@ clear; close all; clc;
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
 %a2=[0,const.a];
-a1=[3*const.a,0];
-a2=[0,const.a * sqrt(3)];
-a3=[0,0,const.a];
+a1=[3*const.b,0];
+a2=[0,const.b * sqrt(3)];
+a3=[0,0,const.b];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 4; Nz = 100; Nsuper = 2;
+Ncell = 32; Nz = 100; Nsuper = 2;
 zMax = 6; zMin = -2;%units Å
 
 disp("M * [0,1] = ")
@@ -116,7 +116,7 @@ fclose(FID);
 % Plot of a slice of the potential in the nth row, that is for constant x
 row = floor(Ncell/2);
 figure
-contourf(Z,  linspace(0, const.a*Nsuper, Ncell*Nsuper), ...
+contourf(Z,  linspace(0, sqrt(3)*const.b*Nsuper, Ncell*Nsuper), ...%!!!
     reshape(Vsuper(row,:,:), [Ncell*Nsuper,Nz]), linspace(-20,100,24))
 
     fontsize(gcf,scale=1)
@@ -131,17 +131,18 @@ ylabel(hbar,'Energy / meV');
 %% Plot the potential
 % Linearly interpolated equipotential plot
     fontsize(gcf,scale=1)
-equipotential_plot('V', Vsuper, 'z', Z, 'a', const.a*Nsuper)
+equipotential_plot('V', Vsuper, 'z', Z, 'a', const.b*Nsuper)
 
 %% Plot the potential
-zSample = 0.9;
+zSample = 1.0;
 zRow = floor((zSample - zMin)/(zMax-zMin) * Nz)
 figure
-contourf(Xsuper,Ysuper,Vsuper(:,:,zRow))
+contourf(Xsuper,Ysuper,Vsuper(:,:,zRow),10)
 daspect([1 1 1])
 xlabel('x/Å')
 ylabel('y/Å')
 title('Potentials at z = ' + string(zSample) + ' Å');
+colormap(parula(10))
 hbar = colorbar('southoutside');
 xlabel(hbar,'Energy / meV');
 
@@ -149,7 +150,7 @@ xlabel(hbar,'Energy / meV');
 %===
 %% We supply the lattice to the mulitscat script so it can do its thing
 
-potStructArray.V = Vsuper;
+    potStructArray.V = Vsuper;
 
 Multiscat.PreparePotentialFiles(potStructArray);
 
@@ -182,7 +183,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [V2] = V2func(z)
-        V2 = -2.2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V2 = -2.1*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
@@ -194,8 +195,8 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %disp("[][][][][]")
         %nu = y * 2/sqrt(3);
         %mu = x - (y/(sqrt(3)));
-        x_n = x / (3*const.a);
-        y_n = y / (sqrt(3)*const.a);
+        x_n = x / (3*const.b);
+        y_n = y / (sqrt(3)*const.b);
         Q = 0;
         
         mu_n1 = x_n*2;
@@ -213,8 +214,8 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
   function [Q] = Qhexfunc(X,Y)
-        X_n = X ./ (3*const.a);
-        Y_n = Y ./ (sqrt(3)*const.a);
+        X_n = X ./ (3*const.b);
+        Y_n = Y ./ (sqrt(3)*const.b);
         Q = zeros(length(X),length(Y));
         
         mu = X_n.*2;
@@ -234,7 +235,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     end
     VmatrixElement = V0func(Z) ...
         + V1func(Z) * Qhexfunc(X,Y)...
-        + Qhexfunc(X - const.a,Y) * V2func(Z);
+        + Qhexfunc(X - const.b,Y) * V2func(Z);
 end
 
 function [DV] = Dropoff(z)

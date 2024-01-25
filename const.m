@@ -1,6 +1,7 @@
 classdef const
   properties(Constant)
     a = 2.84;
+    b = 3.16*sqrt(3)
 
     D = 7.63;
     alpha = 1.1;
@@ -9,6 +10,6 @@ classdef const
 
 
     sheerMat = [1 sqrt(3)/2;0 1];
-    phong = 1;
+    phong = 7;
   end
 end
