@@ -9,30 +9,30 @@ a3=[0,0,const.b];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 32; Nz = 150; Nsuper = 1;
+Nxy = 32; Nz = 150; Nsuper = 1;
 zMax = 6; zMin = -2;%units Å
 
 disp("M * [0,1] = ")
 disp(const.sheerMat*[0;1])
 
-V = zeros(Ncell,Ncell,Nz);
-X = zeros(Ncell,Ncell);
-Y = zeros(Ncell,Ncell);
-Xsuper = zeros(Ncell*Nsuper,Ncell*Nsuper);
-Ysuper = zeros(Ncell*Nsuper,Ncell*Nsuper);
+V = zeros(Nxy,Nxy,Nz);
+X = zeros(Nxy,Nxy);
+Y = zeros(Nxy,Nxy);
+Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
+Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Z = linspace(zMin,zMax,Nz);
 
-for i = 1:Ncell
-    for j = 1:Ncell
-        X(i,j) = (a1(1)*i+a2(1)*j)./Ncell;
-        Y(i,j) = (a1(2)*i+a2(2)*j)./Ncell;
+for i = 1:Nxy
+    for j = 1:Nxy
+        X(i,j) = (a1(1)*i+a2(1)*j)./Nxy;
+        Y(i,j) = (a1(2)*i+a2(2)*j)./Nxy;
     end
 end
 
-for i = 1:Ncell*Nsuper
-    for j = 1:Ncell*Nsuper
-        Xsuper(i,j) = (a1(1)*i+a2(1)*j)./Ncell;
-        Ysuper(i,j) = (a1(2)*i+a2(2)*j)./Ncell;
+for i = 1:Nxy*Nsuper
+    for j = 1:Nxy*Nsuper
+        Xsuper(i,j) = (a1(1)*i+a2(1)*j)./Nxy;
+        Ysuper(i,j) = (a1(2)*i+a2(2)*j)./Nxy;
     end
 end
   for k = 1:Nz
@@ -43,11 +43,11 @@ end
 %===
 %% Now we duplicate the lattice to get a superlattice
 
-Vsuper = zeros(Nsuper*Ncell,Nsuper*Ncell,Nz);
+Vsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
 for z = 1:Nz
-    for nx = 1:Ncell:Nsuper*Ncell
-        for ny = 1:Ncell:Nsuper*Ncell
-            Vsuper(nx:nx+Ncell-1,ny:ny+Ncell-1,z) = V(:,:,z);
+    for nx = 1:Nxy:Nsuper*Nxy
+        for ny = 1:Nxy:Nsuper*Nxy
+            Vsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = V(:,:,z);
         end
     end
 end
@@ -61,8 +61,8 @@ end
 if false
   for k = 1:size(V,3) %Should be the z direction
     dropoff = Dropoff(Z(k));
-    for i = 1:Ncell*Nsuper
-      for j = 1:Ncell*Nsuper
+    for i = 1:Nxy*Nsuper
+      for j = 1:Nxy*Nsuper
         x = Xsuper(i,j);
         y = Ysuper(i,j);
         val = Gaussian2D(x,y, ...
@@ -78,10 +78,10 @@ end
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
 eqCharArr = [num2str(equipotValue,'%+g') , ' meV'];
-equipotentialMat = zeros(Ncell*Nsuper,Ncell*Nsuper);
+equipotentialMat = zeros(Nxy*Nsuper,Nxy*Nsuper);
 M = max(Vsuper,[],"all");
-for i = 1:Ncell*Nsuper
-    for j = 1:Ncell*Nsuper
+for i = 1:Nxy*Nsuper
+    for j = 1:Nxy*Nsuper
         foundVal = false;
         for k = 1:Nz
             if(Vsuper(i,j,k) < equipotValue && ~foundVal)
@@ -113,10 +113,10 @@ fclose(FID);
 %===
 %% Plot the potential
 % Plot of a slice of the potential in the nth row, that is for constant x
-row = floor(Ncell/2);
+row = floor(Nxy/2);
 figure
-contourf(Z,  linspace(0, sqrt(3)*const.b*Nsuper, Ncell*Nsuper), ...%!!!
-    reshape(Vsuper(row,:,:), [Ncell*Nsuper,Nz]), linspace(-20,100,24))
+contourf(Z,  linspace(0, sqrt(3)*const.b*Nsuper, Nxy*Nsuper), ...%!!!
+    reshape(Vsuper(row,:,:), [Nxy*Nsuper,Nz]), linspace(-20,100,24))
 
     fontsize(gcf,scale=1)
 xlabel('z/Å')
@@ -155,7 +155,7 @@ Multiscat.PreparePotentialFiles(potStructArray);
 
 Multiscat.prepareFourierLabels(Vsuper);
 
-potStructArray.a1=a1; potStructArray.a2=a2;
+potStructArray.a1=3*a1; potStructArray.a2=3*a2;
 potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(end);
 potStructArray.zPoints=length(Z);
