@@ -9,7 +9,7 @@ a3=[0,0,const.b];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 64; Nz = 100; Nsuper = 1;
+Ncell = 64; Nz = 100; Nsuper = 2;
 zMax = 6; zMin = -2;%units Å
 
 disp("M * [0,1] = ")
@@ -130,7 +130,7 @@ ylabel(hbar,'Energy / meV');
 %% Plot the potential
 % Linearly interpolated equipotential plot
     fontsize(gcf,scale=1)
-equipotential_plot('V', Vsuper, 'z', Z, 'X', X, 'Y', Y)
+equipotential_plot('V', Vsuper, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
 
 %% Plot the potential
 zSample = 1.0;
