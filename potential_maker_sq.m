@@ -9,7 +9,7 @@ a3=[0,0,const.a];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 16; Nz = 500; Nsuper = 3;
+Ncell = 96; Nz = 100; Nsuper = 1;
 zMax = 6; zMin = -2;%units Å
 
 V = zeros(Ncell,Ncell,Nz);
@@ -17,6 +17,7 @@ X = zeros(Ncell,Ncell);
 Y = zeros(Ncell,Ncell);
 Xsuper = zeros(Ncell*Nsuper,Ncell*Nsuper);
 Ysuper = zeros(Ncell*Nsuper,Ncell*Nsuper);
+NoiseField = pinknoise(Ncell*Nsuper,Ncell*Nsuper);
 Z = linspace(zMin,zMax,Nz);
 
 for i = 1:Ncell
@@ -38,8 +39,9 @@ if false
       V(:,:,k) = Vfunc(X,Y,Z(k));
   end
 else
+  WNField = wgn(Ncell*Nsuper,Ncell*Nsuper,3);
   for k = 1:Nz
-        V(:,:,k) = Vnoise(X,Y,Z(k));
+        V(:,:,k) = Vnoise(X,Y,Z(k),WNField);
   end
 end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
@@ -152,7 +154,7 @@ ylabel(hbar,'Energy / meV');
 
     fontsize(gcf,scale=2)
 % Linearly interpolated equipotential plot
-equipotential_plot('V', V, 'z', Z, 'a', const.a*Nsuper)
+equipotential_plot('V', V, 'z', Z, 'X', X, 'Y', Y)
 
 
 %Function definitions
@@ -179,7 +181,7 @@ function [VmatrixElement] = Vfunc(x,y,z)
         * Qfunc(x,y);
 end
 
-function[VmatElem] = Vnoise(X,Y,z)
+function[Vmat] = Vnoise(X,Y,z,noiseArr)
       function [V0] = V0func(z)
         V0 = const.D * exp(2*const.alpha*(const.z0-z))...
             - 2*const.D*exp(const.alpha*(const.z0-z));
@@ -188,10 +190,12 @@ function[VmatElem] = Vnoise(X,Y,z)
         V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
      
     end
-  disp(size(X))
-  disp(size(Y))
-    VmatElem = V0func(z) + V1func(z)...
-        * wgn(size(X),size(Y),3);
+  Vmat = zeros(size(X,1),size(Y,1));
+  for i = 1:size(X,1)
+    for j = 1:size(Y,1)
+      Vmat(i,j) = V0func(z) + V1func(z) * noiseArr(i,j);
+    end
+  end
 end
 
 
