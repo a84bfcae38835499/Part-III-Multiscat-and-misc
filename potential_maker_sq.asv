@@ -17,31 +17,24 @@ X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
 Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
-noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,1);%can be both positive and negative
+noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,4);%can be both positive and negative
 
-maxFreq = pi/(const.a*Nsuper)%I'm so borking this lol
+maxFreq = 2*pi/(const.a*Nsuper)
 
 freqField = ifft2(noiseField);
-
-disp(size(freqField))
-disp("Nxy * Nsuper = " + Nxy*Nsuper)
 midpoint = Nxy*Nsuper/2;
 
-for i = 1:Nxy*Nsuper-1
+for i = 1:Nxy*Nsuper
     for j = 1:Nxy*Nsuper
-        i_n = 2*(i - midpoint)/Nxy*Nsuper;
-        j_n = 2*(j - midpoint)/Nxy*Nsuper;
-        fi = maxFreq*i_n;
-        fj = maxFreq*j_n;
-        %disp("i = " + i + ", j = " + j);
-        freqField(i,j) = freqField(i,j) / sqrt(fi^2+fj^2);
-        freqField(isinf(freqField)|isnan(freqField)) = 0;
+        i_n = (i - midpoint)/Nxy*Nsuper;
+        j_n = ( - midpoint)/Nxy*Nsuper;
+        fi = i_m/Nxt
+
     end
 end
 
-noiseFieldReal = abs(fft2(freqField,Nxy*Nsuper,Nxy*Nsuper));
-imagesc(noiseFieldReal);
-%maxNoise = max(max(noiseField))
+maxNoise = max(max(noiseField))
+noiseField = noiseField./maxNoise;
 Z = linspace(zMin,zMax,Nz);
 
 for i = 1:Nxy
@@ -64,7 +57,7 @@ if false
   end
 else
   for k = 1:Nz
-        V(:,:,k) = Vnoise(X,Y,Z(k),noiseFieldReal);
+        V(:,:,k) = Vnoise(X,Y,Z(k),noiseField);
   end
 end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
