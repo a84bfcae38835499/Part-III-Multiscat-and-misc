@@ -3,13 +3,13 @@ clear; close all; clc;
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
 %a2=[0,const.a];
-a1=[3*const.b,0];
-a2=[0,const.b * sqrt(3)];
+a1=[const.b,0];
+a2=[const.b/2,const.b * sqrt(3)/2];
 a3=[0,0,const.b];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Ncell = 64; Nz = 100; Nsuper = 2;
+Ncell = 64; Nz = 100; Nsuper = 1;
 zMax = 6; zMin = -2;%units Å
 
 disp("M * [0,1] = ")
@@ -130,7 +130,7 @@ ylabel(hbar,'Energy / meV');
 %% Plot the potential
 % Linearly interpolated equipotential plot
     fontsize(gcf,scale=1)
-equipotential_plot('V', Vsuper, 'z', Z, 'a', const.b*Nsuper)
+equipotential_plot('V', Vsuper, 'z', Z, 'X', X, 'Y', Y)
 
 %% Plot the potential
 zSample = 1.0;
@@ -185,7 +185,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         V2 = -2.1*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [Q] = Qfunc(x,y)
-        Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
+        Q = cos(2*pi*x/const.b) + cos(2*pi*y/const.b);
     end
   function [Q] = QhexfuncSingle(x,y)
         %disp("[][][][][]")
@@ -213,8 +213,8 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
   function [Q] = Qhexfunc(X,Y)
-        X_n = X ./ (3*const.b);
-        Y_n = Y ./ (sqrt(3)*const.b);
+        X_n = X ./ (const.b);
+        Y_n = Y ./ (const.b/sqrt(3));
         Q = zeros(length(X),length(Y));
         
         mu = X_n.*2;
@@ -234,7 +234,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     end
     VmatrixElement = V0func(Z) ...
         + V1func(Z) * Qhexfunc(X,Y)...
-        + Qhexfunc(X - const.b,Y) * V2func(Z);
+        + Qhexfunc(X-const.b/3,Y) * V2func(Z);
 end
 
 function [DV] = Dropoff(z)

@@ -8,8 +8,10 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
                 V0 = varargin{i_+1};
             case 'z'
                 z = varargin{i_+1};
-            case 'a'
-                a = varargin{i_+1};
+            case 'X'
+                X = varargin{i_+1};
+            case 'Y'
+                Y = varargin{i_+1};
             otherwise
                 warning(['Unrecognised input ' num2str((i_+1)/2)])
         end
@@ -37,11 +39,10 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
         end
     end
     pot_height = z(1) + inds0*(z(2)-z(1));
-    xx = linspace(0, a, n1);
-    yy = linspace(0, a, n2);
 
     figure
-    surf(xx, yy, pot_height)
+    daspect([1 1 1])
+    surf(X, Y, pot_height)
     xlabel('x/Å')
     ylabel('y/Å')
     title(['Equipotential V=' num2str(V0) ', used in simulation'])
