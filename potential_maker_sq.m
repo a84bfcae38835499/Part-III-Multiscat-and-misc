@@ -19,28 +19,7 @@ Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,1);%can be both positive and negative
 
-maxFreq = pi/(const.a*Nsuper)%I'm so borking this lol
-
-freqField = ifft2(noiseField);
-
-disp(size(freqField))
-disp("Nxy * Nsuper = " + Nxy*Nsuper)
-midpoint = Nxy*Nsuper/2;
-
-for i = 1:Nxy*Nsuper-1
-    for j = 1:Nxy*Nsuper
-        i_n = 2*(i - midpoint)/Nxy*Nsuper;
-        j_n = 2*(j - midpoint)/Nxy*Nsuper;
-        fi = maxFreq*i_n;
-        fj = maxFreq*j_n;
-        %disp("i = " + i + ", j = " + j);
-        freqField(i,j) = freqField(i,j) / sqrt(fi^2+fj^2);
-        freqField(isinf(freqField)|isnan(freqField)) = 0;
-    end
-end
-
-noiseFieldReal = abs(fft2(freqField,Nxy*Nsuper,Nxy*Nsuper));
-imagesc(noiseFieldReal);
+imagesc(noiseField);
 %maxNoise = max(max(noiseField))
 Z = linspace(zMin,zMax,Nz);
 
