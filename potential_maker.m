@@ -155,7 +155,7 @@ Multiscat.PreparePotentialFiles(potStructArray);
 
 Multiscat.prepareFourierLabels(Vsuper);
 
-potStructArray.a1=const.b*[1,0]; potStructArray.a2=const.b*[1/2,sqrt(3)/2];
+potStructArray.a1=a1; potStructArray.a2=a2;
 potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(end);
 potStructArray.zPoints=length(Z);
@@ -182,7 +182,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [V2] = V2func(z)
-        V2 = -2.1*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V2 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.b) + cos(2*pi*y/const.b);
