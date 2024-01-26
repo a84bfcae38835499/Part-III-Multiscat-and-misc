@@ -188,7 +188,8 @@ function[VmatElem] = Vnoise(X,Y,z)
         V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
      
     end
-  disp()
+  disp(size(X))
+  disp(size(Y))
     VmatElem = V0func(z) + V1func(z)...
         * wgn(size(X),size(Y),3);
 end
