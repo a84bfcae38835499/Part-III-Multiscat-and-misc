@@ -40,6 +40,7 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     end
     pot_height = z(1) + inds0*(z(2)-z(1));
 
+    daspect([1 1 1])
     figure
     daspect([1 1 1])
     surf(X, Y, pot_height)
@@ -47,4 +48,5 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     ylabel('y/Å')
     title(['Equipotential V=' num2str(V0) ', used in simulation'])
     fontsize(gcf,scale=2)
+    daspect([1 1 1])
 end
