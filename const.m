@@ -1,7 +1,7 @@
 classdef const
   properties(Constant)
     a = 2.84;
-    b = 1.83366445495;
+    b = 0.1;
 
     D = 7.63;
     alpha = 1.1;
