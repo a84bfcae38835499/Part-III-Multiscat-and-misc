@@ -23,9 +23,29 @@ def import_multiscat(fname):
     d.drop(columns=['#'], inplace=True)
     return(d)
 
+def calculate_entropy(dataf):
+    H = 0
+    vals = dataf.values
+    for p in np.nditer(vals):
+        if(np.isnan(p)):
+            print("NaN found! skipping...")
+        elif(p == 0):
+            print("Zero found! skpping...")
+        else:
+            print("p = " + str(p))
+            H += p * np.log(p)
+    H /= -np.log(dataf.size)
+    return(H)
+
 d = import_multiscat('diffrac10001.out')
 
+
 d2 = d.pivot(index='n1', columns='n2', values='I')
+
+
+H = calculate_entropy(d2)
+print("Entropy = " + str(H))
+
 ax = sns.heatmap(d2, cmap='viridis', cbar_kws={'label' : '$P(n_1,n_2)$'})
 ax.set_aspect('equal')
 ax.set_xlabel('$n_1$')
@@ -33,5 +53,4 @@ ax.set_ylabel('$n_2$')
 
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + ".png"
 plt.savefig(fname=savestr)
-
 # %%

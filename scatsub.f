@@ -119,8 +119,8 @@ c
             end if
          end do
       end do
+      print *,'Number of diffraction channels, n =',n
       if(foobar.eq.1) then
-		print *,'Number of diffraction channels, n =',n
 		stop 'ERROR: n too big! (basis) >:('
       end if
       
