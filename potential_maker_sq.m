@@ -17,30 +17,15 @@ X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
 Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
-noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,1);%can be both positive and negative
+noiseField = zeros(Nxy*Nsuper,Nxy*Nsuper);%can be both positive and negative
 
-maxFreq = pi/(const.a*Nsuper)%I'm so borking this lol
-
-freqField = ifft2(noiseField);
-
-disp(size(freqField))
-disp("Nxy * Nsuper = " + Nxy*Nsuper)
-midpoint = Nxy*Nsuper/2;
-
-for i = 1:Nxy*Nsuper-1
+for i = 1:Nxy*Nsuper
     for j = 1:Nxy*Nsuper
-        i_n = 2*(i - midpoint)/Nxy*Nsuper;
-        j_n = 2*(j - midpoint)/Nxy*Nsuper;
-        fi = maxFreq*i_n;
-        fj = maxFreq*j_n;
-        %disp("i = " + i + ", j = " + j);
-        freqField(i,j) = freqField(i,j) / sqrt(fi^2+fj^2);
-        freqField(isinf(freqField)|isnan(freqField)) = 0;
+      noiseField(i,j) = pinkNoise(i,j,1,Nxy(Nsuper));
     end
 end
 
-noiseFieldReal = abs(fft2(freqField,Nxy*Nsuper,Nxy*Nsuper));
-imagesc(noiseFieldReal);
+imagesc(noiseField);
 %maxNoise = max(max(noiseField))
 Z = linspace(zMin,zMax,Nz);
 
@@ -64,7 +49,7 @@ if false
   end
 else
   for k = 1:Nz
-        V(:,:,k) = Vnoise(X,Y,Z(k),noiseFieldReal);
+        V(:,:,k) = Vnoise(X,Y,Z(k),noiseField);
   end
 end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
@@ -225,4 +210,16 @@ end
 function [DV] = Dropoff(z)
   %Use this to attenuate the gaussian in z
     DV = -exp(2*const.alpha*(const.z0-z));
+end
+
+function [h] = pinkNoise(i,j,sigma,N)
+  uvMax = N/2;
+  h = 0;
+  for u = 1:uvMax
+    for v = 1:uvMax
+      disp("h = "+ h)
+      h = h + sqrt(chi2pdf(u+v,2)/(u^2+v^2))*sin(2*pi*(u*i+v*j)/N + 2*pi*rand);
+    end
+  end
+  h = h * sigma * N/sqrt(2);
 end

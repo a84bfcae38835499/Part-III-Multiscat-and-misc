@@ -17,24 +17,16 @@ X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
 Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
-noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,4);%can be both positive and negative
-
-maxFreq = 2*pi/(const.a*Nsuper)
-
-freqField = ifft2(noiseField);
-midpoint = Nxy*Nsuper/2;
+noiseField = zeros(Nxy*Nsuper,Nxy*Nsuper);%can be both positive and negative
 
 for i = 1:Nxy*Nsuper
     for j = 1:Nxy*Nsuper
-        i_n = (i - midpoint)/Nxy*Nsuper;
-        j_n = ( - midpoint)/Nxy*Nsuper;
-        fi = i_m/Nxt
-
+      noiseField(i,j) = pinkNoise(i,j,1,Nxy(Nsuper));
     end
 end
 
-maxNoise = max(max(noiseField))
-noiseField = noiseField./maxNoise;
+imagesc(noiseField);
+%maxNoise = max(max(noiseField))
 Z = linspace(zMin,zMax,Nz);
 
 for i = 1:Nxy
@@ -218,4 +210,14 @@ end
 function [DV] = Dropoff(z)
   %Use this to attenuate the gaussian in z
     DV = -exp(2*const.alpha*(const.z0-z));
+end
+
+function [h] = pinkNoise(i,j,sigma,N)
+  uvMax = N/2;
+  h = 0;
+  for u = 0:uvMax
+    for v = 0:uvMax
+      h = sqrt(chi2pdf(u+v,2))*sin(2*pi*(u*i+v*j)/N + 2*pi*rand())
+    end
+  end
 end
