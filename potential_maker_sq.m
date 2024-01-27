@@ -1,5 +1,5 @@
 clear; close all; clc;
-rng(1337);
+rng(2);
 
 %a = 2.84Å. see const.m for more stuff
 a1=[const.a,0];
@@ -10,7 +10,7 @@ a3=[0,0,const.a];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 100; Nsuper = 1;
+Nxy = 32; Nz = 100; Nsuper = 1;
 zMax = 6; zMin = -2;%units Å
 
 V = zeros(Nxy,Nxy,Nz);
@@ -18,13 +18,17 @@ X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
 Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
-pinkNoiseX = dsp.ColoredNoise(1,NumChannels=Nxy*Nsuper,Seed=69420,SamplesPerFrame=Nxy*Nsuper);
-pinkNoiseY = dsp.ColoredNoise(1,NumChannels=Nxy*Nsuper,Seed=42069,SamplesPerFrame=Nxy*Nsuper);
+pinkNoiseX = dsp.ColoredNoise(1,NumChannels=Nxy*Nsuper,SamplesPerFrame=Nxy*Nsuper);
+pinkNoiseY = dsp.ColoredNoise(1,NumChannels=Nxy*Nsuper,SamplesPerFrame=Nxy*Nsuper);
 %noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,1,1,69420);%can be both positive and negative
 noiseField = pinkNoiseX() + transpose(pinkNoiseY());
 
+noiseField = smoothdata2(noiseField);
+
 noiseMax = max(max(abs(noiseField)));
 noiseField = 2*noiseField/noiseMax;
+
+
 
 imagesc(noiseField);
 %maxNoise = max(max(noiseField))
