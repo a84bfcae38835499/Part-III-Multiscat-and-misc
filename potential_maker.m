@@ -3,9 +3,13 @@ clear; close all; clc;
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
 %a2=[0,const.a];
-a1=[const.b,0];
+a1=[const.b,0]; %These lattice parameters correspond to the projected hexagon tiling of MoS2, which is neither the bond length (because that's in 3D)
+                %nor the unit cell vectors, which are three times these
+                %lengths
 a2=[const.b/2,const.b * sqrt(3)/2];
 a3=[0,0,const.b];
+A1 = a1 * 3;
+A2 = a2 * 3;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
@@ -155,7 +159,7 @@ Multiscat.PreparePotentialFiles(potStructArray);
 
 Multiscat.prepareFourierLabels(Vsuper);
 
-potStructArray.a1=3*a1; potStructArray.a2=3*a2;
+potStructArray.a1=a1; potStructArray.a2=a2;
 potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(end);
 potStructArray.zPoints=length(Z);
