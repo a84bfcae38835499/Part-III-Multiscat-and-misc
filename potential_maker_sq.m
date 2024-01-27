@@ -10,7 +10,7 @@ a3=[0,0,const.a];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 1;
+Nxy = 64; Nz = 100; Nsuper = 1;
 zMax = 6; zMin = -2;%units Å
 
 V = zeros(Nxy,Nxy,Nz);
@@ -26,7 +26,7 @@ noiseField = noiseX() + transpose(noiseY());
 noiseFieldSuper = [noiseField noiseField noiseField; noiseField noiseField noiseField; noiseField noiseField noiseField];
 
 
-noiseFieldSuper = smoothdata2(noiseFieldSuper,SmoothingFactor=0.25);
+%noiseFieldSuper = smoothdata2(noiseFieldSuper,SmoothingFactor=0.25);
 
 
 noiseField = noiseFieldSuper(Nxy*Nsuper:2*Nxy*Nsuper,Nxy*Nsuper:2*Nxy*Nsuper);
