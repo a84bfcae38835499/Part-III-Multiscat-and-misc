@@ -18,8 +18,8 @@ X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
 Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
-noiseX = dsp.ColoredNoise(1,NumChannels=Nxy*Nsuper,SamplesPerFrame=Nxy*Nsuper);
-noiseY = dsp.ColoredNoise(1,NumChannels=Nxy*Nsuper,SamplesPerFrame=Nxy*Nsuper);
+noiseX = dsp.ColoredNoise(0,NumChannels=Nxy*Nsuper,SamplesPerFrame=Nxy*Nsuper);
+noiseY = dsp.ColoredNoise(0,NumChannels=Nxy*Nsuper,SamplesPerFrame=Nxy*Nsuper);
 %noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,1,1,69420);%can be both positive and negative
 noiseField = noiseX() + transpose(noiseY());
 
