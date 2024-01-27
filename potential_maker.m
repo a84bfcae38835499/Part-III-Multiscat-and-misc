@@ -139,7 +139,7 @@ equipotential_plot('V', Vsuper, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
 
 %% Plot the potential
 zSample = 1.0;
-zRow = floor((zSample - zMin)/(zMax-zMin) * Nz)
+zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
 figure
 contourf(Xsuper,Ysuper,Vsuper(:,:,zRow),10)
 daspect([1 1 1])
@@ -187,7 +187,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [V2] = V2func(z)
-        V2 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V2 = -2.1*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.b) + cos(2*pi*y/const.b);
@@ -218,8 +218,8 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
   function [Q] = Qhexfunc(X,Y)
-        X_n = X ./ (const.b);
-        Y_n = Y ./ (const.b/sqrt(3));
+        X_n = X ./ (const.b*3);
+        Y_n = Y ./ (const.b*3/sqrt(3));
         Q = zeros(length(X),length(Y));
         
         mu = X_n.*2;
@@ -239,7 +239,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     end
     VmatrixElement = V0func(Z) ...
         + V1func(Z) * Qhexfunc(X,Y)...
-        + Qhexfunc(X-const.b/3,Y) * V2func(Z);
+        + Qhexfunc(X-const.b,Y) * V2func(Z);
 end
 
 function [DV] = Dropoff(z)

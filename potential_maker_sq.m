@@ -1,5 +1,5 @@
 clear; close all; clc;
-rng default;
+rng(1337);
 
 %a = 2.84Å. see const.m for more stuff
 a1=[const.a,0];

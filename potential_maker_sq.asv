@@ -1,4 +1,5 @@
 clear; close all; clc;
+rng;
 
 %a = 2.84Å. see const.m for more stuff
 a1=[const.a,0];
@@ -17,8 +18,10 @@ X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
 Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
-pinkNoise = dsp.ColoredNoise(2,)
-noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,1,1,69420);%can be both positive and negative
+pinkNoiseX = dsp.ColoredNoise(1,NumChannels=Nxy*Nsuper,Seed=69420,SamplesPerFrame=Nxy*Nsuper);
+pinkNoiseY = dsp.ColoredNoise(1,NumChannels=Nxy*Nsuper,Seed=42069,SamplesPerFrame=Nxy*Nsuper);
+%noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,1,1,69420);%can be both positive and negative
+noiseField = pinkNoiseX() + transpose(pinkNoiseY());
 
 noiseMax = max(max(abs(noiseField)));
 noiseField = 2*noiseField/noiseMax;
