@@ -26,7 +26,7 @@ noiseField = noiseX() + transpose(noiseY());
 noiseFieldSuper = [noiseField noiseField noiseField; noiseField noiseField noiseField; noiseField noiseField noiseField];
 
 
-noiseFieldSuper = smoothdata2(noiseFieldSuper,SmoothingFactor=0.5);
+noiseFieldSuper = smoothdata2(noiseFieldSuper,SmoothingFactor=0.25);
 
 
 noiseField = noiseFieldSuper(Nxy*Nsuper:2*Nxy*Nsuper,Nxy*Nsuper:2*Nxy*Nsuper);
