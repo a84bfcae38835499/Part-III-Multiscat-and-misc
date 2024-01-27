@@ -17,24 +17,14 @@ X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
 Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
-noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,4);%can be both positive and negative
+pinkNoise = dsp.ColoredNoise(2,)
+noiseField = wgn(Nxy*Nsuper,Nxy*Nsuper,1,1,69420);%can be both positive and negative
 
-maxFreq = 2*pi/(const.a*Nsuper)
+noiseMax = max(max(abs(noiseField)));
+noiseField = 2*noiseField/noiseMax;
 
-freqField = ifft2(noiseField);
-midpoint = Nxy*Nsuper/2;
-
-for i = 1:Nxy*Nsuper
-    for j = 1:Nxy*Nsuper
-        i_n = (i - midpoint)/Nxy*Nsuper;
-        j_n = ( - midpoint)/Nxy*Nsuper;
-        fi = i_m/Nxt
-
-    end
-end
-
-maxNoise = max(max(noiseField))
-noiseField = noiseField./maxNoise;
+imagesc(noiseField);
+%maxNoise = max(max(noiseField))
 Z = linspace(zMin,zMax,Nz);
 
 for i = 1:Nxy

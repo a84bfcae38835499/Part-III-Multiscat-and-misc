@@ -1,4 +1,5 @@
 clear; close all; clc;
+rng default;
 
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
@@ -28,15 +29,15 @@ Z = linspace(zMin,zMax,Nz);
 
 for i = 1:Nxy
     for j = 1:Nxy
-        X(i,j) = (a1(1)*i+a2(1)*j)./Nxy;
-        Y(i,j) = (a1(2)*i+a2(2)*j)./Nxy;
+        X(i,j) = (A1(1)*i+A2(1)*j)./Nxy;
+        Y(i,j) = (A1(2)*i+A2(2)*j)./Nxy;
     end
 end
 
 for i = 1:Nxy*Nsuper
     for j = 1:Nxy*Nsuper
-        Xsuper(i,j) = (a1(1)*i+a2(1)*j)./Nxy;
-        Ysuper(i,j) = (a1(2)*i+a2(2)*j)./Nxy;
+        Xsuper(i,j) = (A1(1)*i+A2(1)*j)./Nxy;
+        Ysuper(i,j) = (A1(2)*i+A2(2)*j)./Nxy;
     end
 end
   for k = 1:Nz
@@ -61,7 +62,7 @@ end
 %Vsuper = reshape(Vsuper,[Ncell,Ncell,Nz]);
 
 %===
-%% Now add imperfections to the lattice
+%% Now add imperfections to the lattice TODO update this for MoS2
 if false
   for k = 1:size(V,3) %Should be the z direction
     dropoff = Dropoff(Z(k));
@@ -159,7 +160,7 @@ Multiscat.PreparePotentialFiles(potStructArray);
 
 Multiscat.prepareFourierLabels(Vsuper);
 
-potStructArray.a1=a1; potStructArray.a2=a2;
+potStructArray.a1=A1; potStructArray.a2=A2;
 potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(end);
 potStructArray.zPoints=length(Z);
