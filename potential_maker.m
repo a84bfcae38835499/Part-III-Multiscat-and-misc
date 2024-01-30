@@ -117,11 +117,14 @@ fclose(FID);
 
 %==
 
-[Xcoords, Ycoords] = GetLatticePoints(Nsuper);
+[S_X, S_Y, Mo_X, Mo_Y] = GetLatticePoints(Nsuper);
 
+scatter(S_X,S_Y,'filled','o',SizeData=400)
+hold on
 daspect([1 1 1])
-plot(Xcoords,Ycoords,'o')
+scatter(Mo_X,Mo_Y,'filled','pentagram',SizeData=400)
 daspect([1 1 1])
+hold off
 %===
 %% Plot the potential
 % Plot of a slice of the potential in the nth row, that is for constant x
@@ -254,29 +257,31 @@ function [DV] = Dropoff(z)
     DV = -exp(2*const.alpha*(const.z0-z));
 end
 
-function [Xcoords,Ycoords] = GetLatticePoints(Nsuper)
+function [X1coords,Y1coords,X2coords,Y2coords] = GetLatticePoints(Nsuper)
 %Assumes 6 unit cells per lattice
   a1 = [const.b, 0];
   a2 = [const.b/2,const.b * sqrt(3)/2];
   X = zeros(2,3);
   Y = zeros(2,3);
-  Xcoords = zeros(2*Nsuper,3*Nsuper);
-  Ycoords = zeros(2*Nsuper,3*Nsuper);
+  X1coords = zeros(Nsuper,3*Nsuper);
+  Y1coords = zeros(Nsuper,3*Nsuper);
+  X2coords = zeros(Nsuper,3*Nsuper);
+  Y2coords = zeros(Nsuper,3*Nsuper);
       X(1,1) = 0;Y(1,1) = 0;
       X(2,1) = a1(1);Y(2,1) = 0;
       X(1,2) = a1(1)+a2(1);Y(1,2) = a1(2)+a2(2);
       X(2,2) = a1(1)*2+a2(1);Y(2,2) = a1(2)*2+a2(2);
-      X(1,3) = a2(1)*2;Y(1,3) =a2(2)*2;
-      X(2,3) = a1(1)*2+a2(1)*2;Y(2,3)=a1(2)*2+a2(2)*2;
+      X(1,3) = a1(1)*2+a2(1)*2;Y(1,3)=a1(2)*2+a2(2)*2;
+      X(2,3) = a2(1)*2;Y(2,3)=a2(2)*2;
     for i = 1:Nsuper
     for j = 1:Nsuper
       disp("(i-1)*Nsuper = " + (i-1)*Nsuper + ", (j-1)*Nsuper = " + (j-1)*Nsuper)
-      bottomLeft = ((i-1)*a1+(j-1)*a2)*3
-      for k = 1:2
+      bottomLeft = ((i-1)*a1+(j-1)*a2)*3;
       for l = 1:3
-        Xcoords((i-1)*2+k,(j-1)*3+l) = X(k,l) + bottomLeft(1);
-        Ycoords((i-1)*2+k,(j-1)*3+l) = Y(k,l) + bottomLeft(2);
-      end
+        X1coords((i-1)+1,(j-1)*3+l) = X(1,l) + bottomLeft(1);
+        Y1coords((i-1)+1,(j-1)*3+l) = Y(1,l) + bottomLeft(2);
+        X2coords((i-1)+1,(j-1)*3+l) = X(2,l) + bottomLeft(1);
+        Y2coords((i-1)+1,(j-1)*3+l) = Y(2,l) + bottomLeft(2);
       end
     end
     end
