@@ -3,7 +3,7 @@ rng default;
 
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
-%a2=[0,const.a];
+%a2=[0,const.a]; 
 a1=[const.b,0]; %These lattice parameters correspond to the projected hexagon tiling of MoS2, which is neither the bond length (because that's in 3D)
                 %nor the unit cell vectors, which are three times these
                 %lengths
@@ -115,10 +115,17 @@ if FID == -1, error('Cannot open file %s', FileName); end
 fwrite(FID, S, 'char');
 fclose(FID);
 
+%==
+
+[Xcoords, Ycoords] = GetLatticePoints(Nsuper);
+
+daspect([1 1 1])
+plot(Xcoords,Ycoords,'o')
+daspect([1 1 1])
 %===
 %% Plot the potential
 % Plot of a slice of the potential in the nth row, that is for constant x
-row = floor(Nxy/2);
+  row = floor(Nxy/2);
 figure
 contourf(Z,  linspace(0, sqrt(3)*const.b*Nsuper, Nxy*Nsuper), ...%!!!
     reshape(Vsuper(row,:,:), [Nxy*Nsuper,Nz]), linspace(-20,100,24))
@@ -187,7 +194,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [V2] = V2func(z)
-        V2 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V2 = -2.15*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.b) + cos(2*pi*y/const.b);
@@ -245,4 +252,32 @@ end
 function [DV] = Dropoff(z)
   %Use this to attenuate the gaussian in z
     DV = -exp(2*const.alpha*(const.z0-z));
+end
+
+function [Xcoords,Ycoords] = GetLatticePoints(Nsuper)
+%Assumes 6 unit cells per lattice
+  a1 = [const.b, 0];
+  a2 = [const.b/2,const.b * sqrt(3)/2];
+  X = zeros(2,3);
+  Y = zeros(2,3);
+  Xcoords = zeros(2*Nsuper,3*Nsuper);
+  Ycoords = zeros(2*Nsuper,3*Nsuper);
+      X(1,1) = 0;Y(1,1) = 0;
+      X(2,1) = a1(1);Y(2,1) = 0;
+      X(1,2) = a1(1)+a2(1);Y(1,2) = a1(2)+a2(2);
+      X(2,2) = a1(1)*2+a2(1);Y(2,2) = a1(2)*2+a2(2);
+      X(1,3) = a2(1)*2;Y(1,3) =a2(2)*2;
+      X(2,3) = a1(1)*2+a2(1)*2;Y(2,3)=a1(2)*2+a2(2)*2;
+    for i = 1:Nsuper
+    for j = 1:Nsuper
+      disp("(i-1)*Nsuper = " + (i-1)*Nsuper + ", (j-1)*Nsuper = " + (j-1)*Nsuper)
+      bottomLeft = ((i-1)*a1+(j-1)*a2)*3
+      for k = 1:2
+      for l = 1:3
+        Xcoords((i-1)*2+k,(j-1)*3+l) = X(k,l) + bottomLeft(1);
+        Ycoords((i-1)*2+k,(j-1)*3+l) = Y(k,l) + bottomLeft(2);
+      end
+      end
+    end
+    end
 end
