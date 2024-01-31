@@ -272,7 +272,7 @@ function [X1coords,Y1coords,X2coords,Y2coords] = GetLatticePoints(Nsuper)
     end
 end
 
-function [Vout] = AddDefect(Vin,Nsuper)
+function [Vout] = AddDefect(Vin)
   Vout = Vin;
   Nxy = size(Vout,1);
   Nz = size(Vout,3);

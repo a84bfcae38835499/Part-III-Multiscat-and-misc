@@ -15,9 +15,14 @@ maxChY = (max(diffracChannels(:,2),[],"all"));
 nChX = maxChX - minChX;
 nChY = maxChY - minChY;
 
-plotValues = NaN(size(diffracValues,1),1);
-plotCoordsX = NaN(size(diffracValues,1),1);
-plotCoordsY = NaN(size(diffracValues,1),1);
+plotChannels = NaN(nChX*nChY,2);
+plotValues = NaN(nChX*nChY,1);
+
+for k = 1:size(diffracChannels,1)
+  chX = diffracChannels(k,1);
+  chY = diffracChannels(k,2);
+  plotChannels(chX,chY);
+end
 
 %we want something like
 %[channelX,channelY,val] -> [x,y,val] -> plot!
@@ -52,7 +57,6 @@ for chx = minChX:maxChX
     end
 end
 
-indx = 1;
 
 for chx = minChX:maxChX
     for chy = minChY:maxChY
@@ -63,20 +67,12 @@ for chx = minChX:maxChX
       %disp("X = " + string(B1(1)*double(chx) + B2(1)*double(chy)))
       %disp("Y = " + string(B1(2)*double(chx) + B2(2)*double(chy)))
       for k = 1:size(diffracChannels,1)
-        %disp("diff= " + diffracChannels(k,1) + ", " + diffracChannels(k,2))
-        %disp("chan= " + chx + ", " + chy)
-        result = diffracChannels(k,:) == [chx,chy];
-        if(result)
-          disp("Found channel!!! chan= " + chx + ", " + chy)
-          plotValues(indx) = diffracValues(k);
-          plotCoordsX(indx) = X(i,j);
-          plotCoordsY(indx) = Y(i,j);
-          indx = indx + 1;
+        if(diffracChannels(k,:) == [i,j])
+          plotValues(k) = diffracValues
         else
-          continue
+          break
         end
       end
     end
 end
-scatter(plotCoordsX,plotCoordsY,'filled','o',SizeData=plotValues*5000)
-daspect([1,1,1])
+scatter(X,Y,'filled','o',SizeData=400)
