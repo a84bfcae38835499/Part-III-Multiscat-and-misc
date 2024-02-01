@@ -77,27 +77,27 @@ for k in range(0,nOccCh):
     n1 = getattr(row,'n1')
     n2 = getattr(row,'n2')
     I = getattr(row,'I')
-    print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
+    #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
     plotValues[k] = I
-    plotCoordsY[k] = -B1[0] * n1 - B2[0] * n2 #for some reason everything gets inverted??
+    plotCoordsY[k] = -B1[0] * n1 - B2[0] * n2 #for some reason everything gets inverted?? and x and y are swapped from what I'd expect?????
     plotCoordsX[k] = -B1[1] * n1 - B2[1] * n2
 
 print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
 print("Entropy = " + str(H))
 
-scalefact = 6
+scalefact = 5
 fig, ax = plt.subplots(figsize=(4, 4))
 #h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
-print("x coords = ")
-print(plotCoordsX)
-print("y coords = ")
-print(plotCoordsY)
-h = ax.hexbin(plotCoordsX/np.sqrt(B1[0]**2+B1[1]**2),plotCoordsY/np.sqrt(B1[0]**2+B1[1]**2),C=plotValues,gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)),cmap='magma',vmax=0.1)
+#print("x coords = ")
+#print(plotCoordsX)
+#print("y coords = ")
+#print(plotCoordsY)
+magnitude = np.sqrt(B1[0]**2+B1[1]**2)
+h = ax.hexbin(plotCoordsX/magnitude,plotCoordsY/magnitude,C=plotValues,gridsize=(int(np.sqrt(3)*scalefact)+1, int(scalefact)),cmap='magma')
 
-fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(0.1, 1), cmap='magma'),
+fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(0, 1), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
-ax.set_aspect(1)
 
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
 plt.savefig(fname=savestr)
