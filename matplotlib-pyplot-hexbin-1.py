@@ -94,7 +94,7 @@ fig, ax = plt.subplots(figsize=(4, 4))
 #print("y coords = ")
 #print(plotCoordsY)
 magnitude = np.sqrt(B1[0]**2+B1[1]**2)
-h = ax.hexbin(plotCoordsX/magnitude,plotCoordsY/magnitude,C=plotValues,gridsize=(int(np.sqrt(3)*scalefact)+1, int(scalefact)),cmap='magma',bins='log',norm=mpl.colors.LogNorm(vmin=1e-5,vmax=1))
+h = ax.hexbin(plotCoordsX/magnitude,plotCoordsY/magnitude,C=plotValues,gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)),cmap='magma',bins='log',norm=mpl.colors.LogNorm(vmin=1e-5,vmax=1))
  
 fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=1e-5,vmax=1), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
