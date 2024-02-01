@@ -86,7 +86,7 @@ print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
 print("Entropy = " + str(H))
 
-scalefact = 5
+scalefact = 16
 fig, ax = plt.subplots(figsize=(4, 4))
 #h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
 #print("x coords = ")
