@@ -22,7 +22,7 @@ def calculate_entropy(intensities):
         elif(p == 0):
             print("Zero found! skpping...")
         else:
-            print("p = " + str(p))
+        #    print("p = " + str(p))
             H += p * np.log(p)
     H /= -np.log(intensities.size)
     return(H)
@@ -86,7 +86,7 @@ print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
 print("Entropy = " + str(H))
 
-scalefact = 16
+scalefact = 4
 fig, ax = plt.subplots(figsize=(4, 4))
 #h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
 #print("x coords = ")
