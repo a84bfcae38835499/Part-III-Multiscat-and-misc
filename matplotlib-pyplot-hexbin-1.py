@@ -68,7 +68,7 @@ for k in range(0,nOccCh):
 
 print("Number of occupied channels = " + str(nOccCh))
 
-scalefact = 5
+scalefact = 6
 fig, ax = plt.subplots(figsize=(4, 4))
 #h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
 print("x coords = ")
@@ -77,4 +77,6 @@ print("y coords = ")
 print(plotCoordsY)
 h = ax.hexbin(plotCoordsX/np.sqrt(B1[0]**2+B1[1]**2),plotCoordsY/np.sqrt(B1[0]**2+B1[1]**2),C=plotValues,gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
 hx, hy = h.get_offsets().T
+savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
+plt.savefig(fname=savestr)
 plt.show()
