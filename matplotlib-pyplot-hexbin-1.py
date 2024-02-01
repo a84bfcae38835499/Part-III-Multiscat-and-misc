@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import matplotlib as mpl
 import numpy as np
 import pandas as pd
 import datetime
@@ -12,6 +12,21 @@ def import_multiscat(fname):
                     header=None, names=['#','n1','n2','I'])
     d.drop(columns=['#'], inplace=True)
     return(d)
+
+
+def calculate_entropy(intensities):
+    H = 0
+    for p in np.nditer(intensities):
+        if(np.isnan(p)):
+            print("NaN found! skipping...")
+        elif(p == 0):
+            print("Zero found! skpping...")
+        else:
+            print("p = " + str(p))
+            H += p * np.log(p)
+    H /= -np.log(intensities.size)
+    return(H)
+
 
 latticeFile = open('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'r')
 count = 0
@@ -49,6 +64,7 @@ latticeFile.close()
 
 d = import_multiscat('diffrac10001.out')
 print(d)
+
 #print(d2)
 #print(d2.values)
 nOccCh = len(d.index)
@@ -67,6 +83,8 @@ for k in range(0,nOccCh):
     plotCoordsX[k] = -B1[1] * n1 - B2[1] * n2
 
 print("Number of occupied channels = " + str(nOccCh))
+H = calculate_entropy(plotValues)
+print("Entropy = " + str(H))
 
 scalefact = 6
 fig, ax = plt.subplots(figsize=(4, 4))
@@ -75,8 +93,12 @@ print("x coords = ")
 print(plotCoordsX)
 print("y coords = ")
 print(plotCoordsY)
-h = ax.hexbin(plotCoordsX/np.sqrt(B1[0]**2+B1[1]**2),plotCoordsY/np.sqrt(B1[0]**2+B1[1]**2),C=plotValues,gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
-hx, hy = h.get_offsets().T
+h = ax.hexbin(plotCoordsX/np.sqrt(B1[0]**2+B1[1]**2),plotCoordsY/np.sqrt(B1[0]**2+B1[1]**2),C=plotValues,gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)),cmap='magma',vmax=0.1)
+
+fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(0.1, 1), cmap='magma'),
+             ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
+ax.set_aspect(1)
+
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
 plt.savefig(fname=savestr)
 plt.show()

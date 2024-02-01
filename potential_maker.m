@@ -35,7 +35,7 @@ fclose(FID);
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 128; Nz = 150; Nsuper = 1;
+Nxy = 64; Nz = 150; Nsuper = 1;
 zMax = 6; zMin = -2;%units Å
 
 disp("M * [0,1] = ")
@@ -203,7 +203,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [V2] = V2func(z)
-        V2 = -2.15*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V2 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
