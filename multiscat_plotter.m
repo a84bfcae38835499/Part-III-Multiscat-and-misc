@@ -78,5 +78,5 @@ for chx = minChX:maxChX
       end
     end
 end
-scatter(plotCoordsX,plotCoordsY,'filled','o',SizeData=plotValues*5000)
+scatter(plotCoordsX,plotCoordsY,'filled','o',SizeData=max(plotValues,1.e-15)*5000)
 daspect([1,1,1])
