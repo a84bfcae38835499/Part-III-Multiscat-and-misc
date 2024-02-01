@@ -84,7 +84,7 @@ end
 
 %===
 %% Now add imperfections to the lattice TODO update this for MoS2
-
+Vsuper = AddSulphurDefect(Vsuper,1,3,Xsuper,Ysuper,Z,Nsuper)
 %===
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
@@ -274,13 +274,13 @@ function [X1coords,Y1coords,X2coords,Y2coords] = GetLatticePoints(Nsuper)
   Y1coords = zeros(Nsuper,3*Nsuper);
   X2coords = zeros(Nsuper,3*Nsuper);
   Y2coords = zeros(Nsuper,3*Nsuper);
-      X(1,1) = 0;Y(1,1) = 0;
-      X(2,1) = a1(1);Y(2,1) = 0;
-      X(1,2) = a1(1)+a2(1);Y(1,2) = a1(2)+a2(2);
-      X(2,2) = a1(1)*2+a2(1);Y(2,2) = a1(2)*2+a2(2);
-      X(1,3) = a1(1)*2+a2(1)*2;Y(1,3)=a1(2)*2+a2(2)*2;
-      X(2,3) = a2(1)*2;Y(2,3)=a2(2)*2;
-    for i = 1:Nsuper
+  X(1,1) = 0;Y(1,1) = 0;
+  X(2,1) = a1(1);Y(2,1) = 0;
+  X(1,2) = a1(1)+a2(1);Y(1,2) = a1(2)+a2(2);
+  X(2,2) = a1(1)*2+a2(1);Y(2,2) = a1(2)*2+a2(2);
+  X(1,3) = a1(1)*2+a2(1)*2;Y(1,3)=a1(2)*2+a2(2)*2;
+  X(2,3) = a2(1)*2;Y(2,3)=a2(2)*2;
+  for i = 1:Nsuper
     for j = 1:Nsuper
       disp("(i-1)*Nsuper = " + (i-1)*Nsuper + ", (j-1)*Nsuper = " + (j-1)*Nsuper)
       bottomLeft = ((i-1)*a1+(j-1)*a2)*3;
@@ -291,21 +291,27 @@ function [X1coords,Y1coords,X2coords,Y2coords] = GetLatticePoints(Nsuper)
         Y2coords((i-1)+1,(j-1)*3+l) = Y(2,l) + bottomLeft(2);
       end
     end
-    end
+  end
 end
 
-function [Vout] = AddDefect(Vin,Nsuper)
+function [Vout] = AddSulphurDefect(Vin,m1,m2,Xsuper,Ysuper,Z,Nsuper)
+%Adds a defect at sulphur site (m1,m2)
   Vout = Vin;
-  Nxy = size(Vout,1);
+  NxySuper = size(Vout,1);
   Nz = size(Vout,3);
+  [X1,Y1,X2,Y2] = GetLatticePoints(Nsuper);
+  centre = [X1(m1,m2),Y1(m1,m2)];
+  disp("Centre:")
+  disp(centre)
   for k = 1:Nz
     dropoff = Dropoff(Z(k));
-    for i = 1:Nxy*Nsuper
-      for j = 1:Nxy*Nsuper
+    for i = 1:NxySuper
+      for j = 1:NxySuper
         x = Xsuper(i,j);
         y = Ysuper(i,j);
         val = Gaussian2D(x,y, ...
-          [const.a*1.3,const.a*1.3],const.a/2,3*const.D*dropoff);
+          centre,const.b/2,-const.D*dropoff);
+        %I made these values the fuck up
         Vout(i,j,k) = Vout(i,j,k)+val;
         disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
             ", Value = " + val);
