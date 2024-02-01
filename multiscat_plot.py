@@ -16,7 +16,7 @@ from matplotlib import pyplot as plt
 # Default theme
 sns.set_theme()
 
-def import_multiscat(fname):    
+def import_multiscat(fname):
     """Impot standrad multiscat output into a pandas data frame."""
     d = pd.read_csv(fname, skiprows=7, delim_whitespace=True, 
                     header=None, names=['#','n1','n2','I'])
@@ -54,3 +54,4 @@ ax.set_ylabel('$n_2$')
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + ".png"
 plt.savefig(fname=savestr)
 # %%
+

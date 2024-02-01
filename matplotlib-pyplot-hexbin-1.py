@@ -63,8 +63,8 @@ for k in range(0,nOccCh):
     I = getattr(row,'I')
     print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
     plotValues[k] = I
-    plotCoordsX[k] = B1[0] * n1 + B2[0] * n2
-    plotCoordsY[k] = B1[1] * n1 + B2[1] * n2
+    plotCoordsY[k] = -B1[0] * n1 - B2[0] * n2 #for some reason everything gets inverted??
+    plotCoordsX[k] = -B1[1] * n1 - B2[1] * n2
 
 print("Number of occupied channels = " + str(nOccCh))
 
