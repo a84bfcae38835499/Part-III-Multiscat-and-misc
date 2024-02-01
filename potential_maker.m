@@ -14,6 +14,25 @@ A2 = a2;
 %A1 = a1 * 3;
 %A2 = a2 * 3;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
+[B1,B2,B3] = Reciprocal([A1,0],[A2,0],a3);
+%% data for python hex plotter WIP
+writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
+A1str = [char(num2str(A1))];
+A2str = [char(num2str(A2))];
+B1str = [char(num2str(B1(1:2)))];
+B2str = [char(num2str(B2(1:2)))];
+S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
+realStr = ['Real space vectors:',newline,'A1 = ',A1str, newline, 'A2 = ',A2str];
+recpStr = ['Reciprocal vectors:',newline,'B1 = ',B1str, newline, 'B2 = ', B2str];
+
+S = [realStr,newline,recpStr,S];
+FID = fopen('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'w');
+if FID == -1, error('Cannot open file %s', FileName); end
+fwrite(FID, S, 'char');
+fclose(FID);
+%%
+
+
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 128; Nz = 150; Nsuper = 1;
