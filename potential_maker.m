@@ -2,17 +2,17 @@ clear; close all; clc;
 rng default;
 
 %a = 2.84Å. see const.m for more stuff
-a1=[const.a,0];
-a2=[0,const.a]; 
-%a1=[const.b,0]; %These lattice parameters correspond to the projected hexagon tiling of MoS2, which is neither the bond length (because that's in 3D)
+%a1=[const.a,0];
+%a2=[0,const.a]; 
+a1=[const.b,0]; %These lattice parameters correspond to the projected hexagon tiling of MoS2, which is neither the bond length (because that's in 3D)
                 %nor the unit cell vectors, which are three times these
                 %lengths
-%a2=[const.b/2,const.b * sqrt(3)/2];
+a2=[const.b/2,const.b * sqrt(3)/2];
 a3=[0,0,const.b];
-A1 = a1;
-A2 = a2;
-%A1 = a1 * 3;
-%A2 = a2 * 3;
+%A1 = a1;
+%A2 = a2;
+A1 = a1 * 3;
+A2 = a2 * 3;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 [B1,B2,B3] = Reciprocal([A1,0],[A2,0],a3);
 %% data for python hex plotter WIP
@@ -253,10 +253,10 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         Q = Q./3;
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
+        %+ V1func(Z) * Qfunc(X,Y)...
     VmatrixElement = V0func(Z) ...
-        + V1func(Z) * Qfunc(X,Y)...
-        %+ V1func(Z) * Qhexfunc(X,Y)...
-        %+ Qhexfunc(X-const.b,Y) * V2func(Z);
+        + V1func(Z) * Qhexfunc(X,Y)...
+        + Qhexfunc(X-const.b,Y) * V2func(Z);
 end
 
 function [DV] = Dropoff(z)
