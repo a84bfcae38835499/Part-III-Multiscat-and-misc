@@ -84,7 +84,7 @@ end
 
 %===
 %% Now add imperfections to the lattice TODO update this for MoS2
-Vsuper = AddSulphurDefect(Vsuper,1,3,Xsuper,Ysuper,Z,Nsuper)
+%Vsuper = AddSulphurDefect(Vsuper,1,3,Xsuper,Ysuper,Z,Nsuper)
 %===
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
