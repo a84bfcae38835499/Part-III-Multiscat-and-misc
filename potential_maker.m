@@ -200,10 +200,10 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
             -2*const.D*exp(const.alpha*(const.z0-z));
     end
     function [V1] = V1func(z)
-        V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V1 = +2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [V2] = V2func(z)
-        V2 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+        V2 = +2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
@@ -310,7 +310,7 @@ function [Vout] = AddSulphurDefect(Vin,m1,m2,Xsuper,Ysuper,Z,Nsuper)
         x = Xsuper(i,j);
         y = Ysuper(i,j);
         val = Gaussian2D(x,y, ...
-          centre,const.b/2,-const.D*dropoff);
+          centre,const.b/2,-const.D*dropoff*1.1);
         %I made these values the fuck up
         Vout(i,j,k) = Vout(i,j,k)+val;
         disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
