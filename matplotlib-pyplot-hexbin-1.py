@@ -71,10 +71,15 @@ nOccCh = len(d.index)
 plotValues = np.zeros((nOccCh))
 plotCoordsX = np.zeros((nOccCh))
 plotCoordsY = np.zeros((nOccCh))
-
+nmin = 0
+nmax = 0
 for k in range(0,nOccCh):
     row = d.iloc[k]
     n1 = getattr(row,'n1')
+    if(n1 < nmin):
+        nmin = n1
+    if(n1 > nmax):
+        nmax = n1
     n2 = getattr(row,'n2')
     I = getattr(row,'I')
     #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
@@ -86,15 +91,18 @@ print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
 print("Entropy = " + str(H))
 
-scalefact = 4
 fig, ax = plt.subplots(figsize=(4, 4))
 #h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
 #print("x coords = ")
 #print(plotCoordsX)
 #print("y coords = ")
 #print(plotCoordsY)
-magnitude = np.sqrt(B1[0]**2+B1[1]**2)
-h = ax.hexbin(plotCoordsX/magnitude,plotCoordsY/magnitude,C=plotValues,gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)),cmap='magma',bins='log',norm=mpl.colors.LogNorm(vmin=1e-5,vmax=1))
+
+xSpan = nmax-nmin
+xSpan = xSpan
+print(xSpan)
+
+h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(int(np.sqrt(3)*(xSpan)), int(xSpan)),cmap='magma',bins='log',norm=mpl.colors.Normalize(0,1))
  
 fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=1e-5,vmax=1), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
