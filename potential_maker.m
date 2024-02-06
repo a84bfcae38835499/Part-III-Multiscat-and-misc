@@ -84,7 +84,7 @@ end
 
 %===
 %% Now add imperfections to the lattice TODO update this for MoS2
-Vsuper = AddSulphurDefect(Vsuper,1,3,Xsuper,Ysuper,Z,Nsuper)
+Vsuper = AddSulphurDefect(Vsuper,2,4,Xsuper,Ysuper,Z,Nsuper);
 %===
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
@@ -96,9 +96,9 @@ for i = 1:Nxy*Nsuper
         foundVal = false;
         for k = 1:Nz
             if(Vsuper(i,j,k) < equipotValue && ~foundVal)
-                disp("i, j, k = " + i + ", " + j + ", " + k +...
-                    ", Value = " + Vsuper(i,j,k) +...
-                    ", Z(k) = " + Z(k));
+                %disp("i, j, k = " + i + ", " + j + ", " + k +...
+                %    ", Value = " + Vsuper(i,j,k) +...
+                %    ", Z(k) = " + Z(k));
                 equipotentialMat(i,j) = Z(k);
                 foundVal = true;
             end
@@ -199,11 +199,8 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         V0 = const.D * exp(2*const.alpha*(const.z0-z))...
             -2*const.D*exp(const.alpha*(const.z0-z));
     end
-    function [V1] = V1func(z)
-        V1 = +2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
-    end
-    function [V2] = V2func(z)
-        V2 = +2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+    function [V1] = V1func(z,z0)
+        V1 = 2*const.beta*const.D*exp(2*const.alpha*(z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
@@ -255,13 +252,13 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     end
         %+ V1func(Z) * Qfunc(X,Y)...
     VmatrixElement = V0func(Z) ...
-        + V1func(Z) * Qhexfunc(X,Y)...
-        + Qhexfunc(X-const.b,Y) * V2func(Z);
+        + V1func(Z,1) * Qhexfunc(X,Y)...
+        + Qhexfunc(X-const.b,Y) * V1func(Z,1.5);
 end
 
 function [DV] = Dropoff(z)
   %Use this to attenuate the gaussian in z
-    DV = -exp(2*const.alpha*(const.z0-z));
+    DV = exp(2*const.alpha*(const.z0-z));
 end
 
 function [X1coords,Y1coords,X2coords,Y2coords] = GetLatticePoints(Nsuper)
@@ -310,11 +307,11 @@ function [Vout] = AddSulphurDefect(Vin,m1,m2,Xsuper,Ysuper,Z,Nsuper)
         x = Xsuper(i,j);
         y = Ysuper(i,j);
         val = Gaussian2D(x,y, ...
-          centre,const.b/2,-const.D*dropoff*1.1);
+          centre,const.b/2,const.D*dropoff*1.1);
         %I made these values the fuck up
         Vout(i,j,k) = Vout(i,j,k)+val;
-        disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
-            ", Value = " + val);
+        %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
+        %    ", Value = " + val);
       end
     end
   end
