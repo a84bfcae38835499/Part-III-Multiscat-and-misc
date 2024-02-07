@@ -1,29 +1,29 @@
 clear; close all; clc;
 rng default;
 
+%Number of grid points, number of Z points, and number of lattices
+%contained in the overall superlattice (or rather the square root of that)
+Nxy = 64; Nz = 150; Nsuper = 1;
+zMax = 6; zMin = -2;%units Å
+
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
 %a2=[0,const.a]; 
-a1=[const.b,0]; %These lattice parameters correspond to the projected hexagon tiling of MoS2, which is neither the bond length (because that's in 3D)
-                %nor the unit cell vectors, which are three times these
-                %lengths
-a2=[const.b/2,const.b * sqrt(3)/2];
-a3=[0,0,const.b];
+a1=[const.c,0];
+a2=[const.c/2,const.c * sqrt(3)/2];
+a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
-A1 = a1 * 3;
-A2 = a2 * 3;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
-[B1,B2,B3] = Reciprocal([A1,0],[A2,0],a3);
 %% data for python hex plotter WIP
 writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
-A1str = [char(num2str(A1))];
-A2str = [char(num2str(A2))];
-B1str = [char(num2str(B1(1:2)))];
-B2str = [char(num2str(B2(1:2)))];
+a1str = [char(num2str(a1))];
+a2str = [char(num2str(a2))];
+b1str = [char(num2str(b1(1:2)))];
+b2str = [char(num2str(b2(1:2)))];
 S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
-realStr = ['Real space vectors:',newline,'A1 = ',A1str, newline, 'A2 = ',A2str];
-recpStr = ['Reciprocal vectors:',newline,'B1 = ',B1str, newline, 'B2 = ', B2str];
+realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str];
+recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
 
 S = [realStr,newline,recpStr,S];
 FID = fopen('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'w');
@@ -33,13 +33,6 @@ fclose(FID);
 %%
 
 
-%Number of grid points, number of Z points, and number of lattices
-%contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 150; Nsuper = 2;
-zMax = 6; zMin = -2;%units Å
-
-disp("M * [0,1] = ")
-disp(const.sheerMat*[0;1])
 
 V = zeros(Nxy,Nxy,Nz);
 X = zeros(Nxy,Nxy);
@@ -50,15 +43,15 @@ Z = linspace(zMin,zMax,Nz);
 
 for i = 1:Nxy
     for j = 1:Nxy
-        X(i,j) = (A1(1)*i+A2(1)*j)./Nxy;
-        Y(i,j) = (A1(2)*i+A2(2)*j)./Nxy;
+        X(i,j) = (a1(1)*i+a2(1)*j)./Nxy;
+        Y(i,j) = (a1(2)*i+a2(2)*j)./Nxy;
     end
 end
 
 for i = 1:Nxy*Nsuper
     for j = 1:Nxy*Nsuper
-        Xsuper(i,j) = (A1(1)*i+A2(1)*j)./Nxy;
-        Ysuper(i,j) = (A1(2)*i+A2(2)*j)./Nxy;
+        Xsuper(i,j) = (a1(1)*i+a2(1)*j)./Nxy;
+        Ysuper(i,j) = (a1(2)*i+a2(2)*j)./Nxy;
     end
 end
   for k = 1:Nz
@@ -83,8 +76,8 @@ end
 %Vsuper = reshape(Vsuper,[Ncell,Ncell,Nz]);
 
 %===
-%% Now add imperfections to the lattice TODO update this for MoS2
-Vsuper = AddSulphurDefect(Vsuper,2,4,Xsuper,Ysuper,Z,Nsuper);
+%% Now add imperfections to the lattice
+%Vsuper = AddSulphurDefect(Vsuper,2,4,Xsuper,Ysuper,Z,Nsuper);
 %===
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
@@ -136,7 +129,7 @@ hold off
 % Plot of a slice of the potential in the nth row, that is for constant x
   row = floor(Nxy/2);
 figure
-contourf(Z,  linspace(0, sqrt(3)*const.b*Nsuper, Nxy*Nsuper), ...%!!!
+contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
     reshape(Vsuper(row,:,:), [Nxy*Nsuper,Nz]), linspace(-20,100,24))
 
     fontsize(gcf,scale=1)
@@ -176,7 +169,7 @@ Multiscat.PreparePotentialFiles(potStructArray);
 
 Multiscat.prepareFourierLabels(Vsuper);
 
-potStructArray.a1=A1; potStructArray.a2=A2;
+potStructArray.a1=a1; potStructArray.a2=a2;
 potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(end);
 potStructArray.zPoints=length(Z);
@@ -195,12 +188,12 @@ function [b1,b2,b3] = Reciprocal(a1,a2,a3)
 end
 
 function [VmatrixElement] = Vfunc(X,Y,Z)
-    function [V0] = V0func(z)
-        V0 = const.D * exp(2*const.alpha*(const.z0-z))...
-            -2*const.D*exp(const.alpha*(const.z0-z));
+    function [V0] = V0func(z,z0)
+        V0 = const.D * exp(2*const.alpha*(z0-z))...
+            -2*const.D*exp(const.alpha*(z0-z));
     end
-    function [V1] = V1func(z,z0)
-        V1 = 2*const.beta*const.D*exp(2*const.alpha*(z0-z));
+    function [V1] = V1func(z,z0,wellDepth)
+        V1 = 2*const.beta*wellDepth*exp(2*const.alpha*(z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
@@ -212,8 +205,8 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %disp("[][][][][]")
         %nu = y * 2/sqrt(3);
         %mu = x - (y/(sqrt(3)));
-        x_n = x / (3*const.b);
-        y_n = y / (sqrt(3)*const.b);
+        x_n = x / (const.c);
+        y_n = y / (const.c/sqrt(3));
         Q = 0;
         
         mu_n1 = x_n*2;
@@ -230,16 +223,17 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         Q = Q/3;
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
+
   function [Q] = Qhexfunc(X,Y)
-        X_n = X ./ (const.b*3);
-        Y_n = Y ./ (const.b*3/sqrt(3));
+        X_n = X ./ (const.c);
+        Y_n = Y ./ (const.c*sqrt(3));
         Q = zeros(length(X),length(Y));
         
-        mu = X_n.*2;
-        nu = Y_n - X_n;
+        mu = X_n - Y_n;
+        nu = Y_n*2;
         Q = Q + cos(2*pi*nu) + cos(2*pi*mu);
 
-        %mu = X_n.*2;
+        mu = Y_n.*2;
         nu = -Y_n - X_n;
         Q = Q + cos(2*pi*nu) + cos(2*pi*mu);
 
@@ -251,9 +245,10 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V0func(Z) ...
-        + V1func(Z,1) * Qhexfunc(X,Y)...
-        + Qhexfunc(X-const.b,Y) * V1func(Z,1.5);
+    VmatrixElement = V0func(Z,1) ...
+        + V1func(Z,1.5,7.63) * Qhexfunc(X,Y)...
+        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1,7.63);
+      %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
 function [DV] = Dropoff(z)
@@ -263,8 +258,8 @@ end
 
 function [X1coords,Y1coords,X2coords,Y2coords] = GetLatticePoints(Nsuper)
 %Assumes 6 unit cells per lattice
-  a1 = [const.b, 0];
-  a2 = [const.b/2,const.b * sqrt(3)/2];
+  a1 = [const.c, 0];
+  a2 = [const.c/2,const.c * sqrt(3)/2];
   X = zeros(2,3);
   Y = zeros(2,3);
   X1coords = zeros(Nsuper,3*Nsuper);
@@ -307,7 +302,7 @@ function [Vout] = AddSulphurDefect(Vin,m1,m2,Xsuper,Ysuper,Z,Nsuper)
         x = Xsuper(i,j);
         y = Ysuper(i,j);
         val = Gaussian2D(x,y, ...
-          centre,const.b/2,const.D*dropoff*1.1);
+          centre,const.c/2,const.D*dropoff*1.1);
         %I made these values the fuck up
         Vout(i,j,k) = Vout(i,j,k)+val;
         %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
