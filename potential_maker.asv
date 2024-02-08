@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 50; Nsuper = 3;
+Nxy = 64; Nz = 150; Nsuper = 2;
 zMax = 8; zMin = -1;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -140,7 +140,7 @@ equipotential_plot('V', Vsuper, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
     shading interp
 
 %% Plot the potential
-zSample = 1.0;
+zSample = 2.0;
 zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
 figure
 contourf(Xsuper,Ysuper,Vsuper(:,:,zRow),10)
@@ -225,7 +225,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %+ V1func(Z) * Qfunc(X,Y)...
     VmatrixElement = V0func(Z,2.4,const.MoS2Depth/3) ...
         + V1func(Z,3,const.MoS2Depth/3) * Qhexfunc(X,Y)...
-        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1.5,const.MoS2Depth/3);
+        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1.7,const.MoS2Depth/3);
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
@@ -239,18 +239,23 @@ function [Vout] = AddSulphurDefect(Vin,m1,m2,a1,a2,Xsuper,Ysuper,Z)
   Vout = Vin;
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
+  centres = zeros(2,9);
   centre = m1*a1+m2*a2;
   disp("Centre:")
   disp(centre)
+  for m = -1:1
+    for n = -1:1
+      centres()
+    end
+  end
   for k = 1:Nz
-    dropoff = Dropoff(Z(k));
     for i = 1:NxySuper
       for j = 1:NxySuper
         x = Xsuper(i,j);
         y = Ysuper(i,j);
         val = Gaussian2D(x,y, ...
-          centre,const.c,2*const.beta*const.MoS2Depth*exp(2*const.alpha*(z0-z)));
-        %I made these values the fuck up
+          centre,const.c*0.2,-3*const.beta*const.MoS2Depth*exp(2*const.alpha*(3-Z(k))));
+        %These parameters have been fined tuned to match the requirements
         Vout(i,j,k) = Vout(i,j,k)+val;
         %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
         %    ", Value = " + val);

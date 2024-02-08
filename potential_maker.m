@@ -79,7 +79,7 @@ end
 
 %===
 %% Now add imperfections to the lattice
-%Vsuper = AddSulphurDefect(Vsuper,2,1,a1,a2,Xsuper,Ysuper,Z);
+Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 %===
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
@@ -234,25 +234,57 @@ function [DV] = Dropoff(z,z0)
     DV = exp(2*const.alpha*(z0-z));
 end
 
-function [Vout] = AddSulphurDefect(Vin,m1,m2,a1,a2,Xsuper,Ysuper,Z)
+function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m1,m2,a1,a2,Nsuper,Xsuper,Ysuper,Z)
 %Adds a defect at sulphur site (m1,m2)
   Vout = Vin;
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
+  centresX = zeros(3);
+  centresY = zeros(3);
   centre = m1*a1+m2*a2;
   disp("Centre:")
   disp(centre)
-  for k = 1:Nz
-    for i = 1:NxySuper
-      for j = 1:NxySuper
-        x = Xsuper(i,j);
-        y = Ysuper(i,j);
-        val = Gaussian2D(x,y, ...
-          centre,const.c*0.2,-3*const.beta*const.MoS2Depth*exp(2*const.alpha*(3-Z(k))));
-        %These parameters have been fined tuned to match the requirements
-        Vout(i,j,k) = Vout(i,j,k)+val;
-        %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
-        %    ", Value = " + val);
+  if doWeRepeat
+    for m = -1:1
+      for n = -1:1
+        centresX(m+2,n+2) = centre(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper;
+        centresY(m+2,n+2) = centre(2)+m*a1(2)*Nsuper+n*a2(2)*Nsuper;
+      end
+    end
+  end
+  if doWeRepeat
+    for m = -1:1
+      for n = -1:1
+        for k = 1:Nz
+          for i = 1:NxySuper
+            for j = 1:NxySuper
+              x = Xsuper(i,j);
+              y = Ysuper(i,j);
+              centre1 = [centresX(m+2,n+2) centresY(m+2,n+2)];
+              val = Gaussian2D(x,y, ...
+                centre,const.c*0.2,-3*const.beta*const.MoS2Depth*exp(2*const.alpha*(3-Z(k))));
+              %These parameters have been fined tuned to match the requirements
+              Vout(i,j,k) = Vout(i,j,k)+val;
+              %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
+              %    ", Value = " + val);
+            end
+          end
+        end
+      end
+    end
+  else
+    for k = 1:Nz
+      for i = 1:NxySuper
+        for j = 1:NxySuper
+          x = Xsuper(i,j);
+          y = Ysuper(i,j);
+          val = Gaussian2D(x,y, ...
+            centre,const.c*0.2,-3*const.beta*const.MoS2Depth*exp(2*const.alpha*(3-Z(k))));
+          %These parameters have been fined tuned to match the requirements
+          Vout(i,j,k) = Vout(i,j,k)+val;
+          %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
+          %    ", Value = " + val);
+        end
       end
     end
   end
