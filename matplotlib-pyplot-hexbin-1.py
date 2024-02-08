@@ -28,7 +28,7 @@ def calculate_entropy(intensities):
     return(H)
 
 latticeFile = open('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'r')
-count = 0
+count = 0 
 
 B1 = [0,0]
 B2 = [0,0]
@@ -108,7 +108,9 @@ xSpan = xSpan*0.5
 print(xSpan)
 
 h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(int(1+np.sqrt(3)*(xSpan)), int(xSpan)),cmap='magma',bins='log',norm=mpl.colors.Normalize(valmin,valmax))
- 
+
+plt.gca().set_aspect('equal')
+
 fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=valmin,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
 
