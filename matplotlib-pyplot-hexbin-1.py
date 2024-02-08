@@ -107,11 +107,11 @@ xSpan = nmax-nmin
 xSpan = xSpan*0.5
 print(xSpan)
 
-h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(int(1+np.sqrt(3)*(xSpan)), int(xSpan)),cmap='magma',bins='log',norm=mpl.colors.Normalize(valmin/2,valmax))
+h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(int(1+np.sqrt(3)*(xSpan)), int(xSpan)),cmap='magma',bins='log',norm=mpl.colors.Normalize(1e-5,valmax))
 
 plt.gca().set_aspect('equal')
 
-fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=valmin/2,vmax=valmax), cmap='magma'),
+fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=1e-5,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
 
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
