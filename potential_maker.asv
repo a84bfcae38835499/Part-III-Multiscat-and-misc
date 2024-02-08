@@ -3,14 +3,14 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 128; Nz = 150; Nsuper = 1;
-zMax = 6; zMin = -2;%units Å
+Nxy = 64; Nz = 150; Nsuper = 1;
+zMax = 8; zMin = -1;%units Å
 
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
 %a2=[0,const.a]; 
-a1=[const.c,0];
-a2=[const.c/2,const.c * sqrt(3)/2];
+a1=2*[-const.c,0];
+a2=2*[const.c*sqrt(3)/2,const.c/2];
 a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
@@ -145,6 +145,7 @@ ylabel(hbar,'Energy / meV');
 % Linearly interpolated equipotential plot
     fontsize(gcf,scale=1)
 equipotential_plot('V', Vsuper, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+    shading interp
 
 %% Plot the potential
 zSample = 1.0;
@@ -188,9 +189,9 @@ function [b1,b2,b3] = Reciprocal(a1,a2,a3)
 end
 
 function [VmatrixElement] = Vfunc(X,Y,Z)
-    function [V0] = V0func(z,z0)
-        V0 = const.D * exp(2*const.alpha*(z0-z))...
-            -2*const.D*exp(const.alpha*(z0-z));
+  function [V0] = V0func(z,z0,backgroundDepth)
+        V0 = backgroundDepth * exp(2*const.alpha*(z0-z))...
+            -2*backgroundDepth*exp(const.alpha*(z0-z));
     end
     function [V1] = V1func(z,z0,wellDepth)
         V1 = 2*const.beta*wellDepth*exp(2*const.alpha*(z0-z));
@@ -223,25 +224,16 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         Q = Q/3;
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
   end
-
-    function [c] cosPositive(x)
-      if(cos(x > 0))
-        c = x;
-      else
-        c = 0;
-      end
-    end
-
   function [Q] = Qhexfunc(X,Y)
         X_n = X ./ (const.c);
         Y_n = Y ./ (const.c*sqrt(3));
-        Q = 2/3 * (cosPositive(2*pi*(X_n-Y_ncosPositivecos(4*pi*Y_n)+cosPositive(2*pi*(X_n+Y_n)));
+        Q = 2/3 * (cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n)));
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V0func(Z,1) ...
-        + V1func(Z,1+0.5,7.63) * Qhexfunc(X,Y)...
-        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1,7.63);
+    VmatrixElement = V0func(Z,2.4,const.MoS2Depth/3) ...
+        + V1func(Z,3,const.MoS2Depth/3) * Qhexfunc(X,Y)...
+        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1.5,const.MoS2Depth/3);
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
