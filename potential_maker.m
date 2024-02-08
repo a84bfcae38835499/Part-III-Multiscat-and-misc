@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 128; Nz = 150; Nsuper = 1;
+Nxy = 64; Nz = 150; Nsuper = 2;
 zMax = 6; zMin = -2;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -145,6 +145,7 @@ ylabel(hbar,'Energy / meV');
 % Linearly interpolated equipotential plot
     fontsize(gcf,scale=1)
 equipotential_plot('V', Vsuper, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+    shading interp
 
 %% Plot the potential
 zSample = 1.0;

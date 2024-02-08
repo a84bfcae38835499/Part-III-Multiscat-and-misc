@@ -47,4 +47,5 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     title(['Equipotential V=' num2str(V0) ', used in simulation'])
     fontsize(gcf,scale=2)
     daspect([1 1 0.5])
+    colormap(plasma)
 end
