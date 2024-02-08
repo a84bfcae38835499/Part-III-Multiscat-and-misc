@@ -106,8 +106,11 @@ fig, ax = plt.subplots(figsize=(4, 4))
 xSpan = nmax-nmin
 xSpan = xSpan*0.5
 print(xSpan)
-
-h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(int(1+np.sqrt(3)*(xSpan)), int(xSpan)),cmap='magma',bins='log',norm=mpl.colors.Normalize(1e-5,valmax))
+ySpan = int(1+np.sqrt(3)*(xSpan))
+if(ySpan%2==0):
+    ySpan = ySpan - 1
+    
+h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',bins='log',norm=mpl.colors.Normalize(1e-5,valmax))
 
 plt.gca().set_aspect('equal')
 
