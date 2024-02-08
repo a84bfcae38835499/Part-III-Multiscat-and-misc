@@ -188,9 +188,9 @@ function [b1,b2,b3] = Reciprocal(a1,a2,a3)
 end
 
 function [VmatrixElement] = Vfunc(X,Y,Z)
-    function [V0] = V0func(z,z0)
-        V0 = const.D * exp(2*const.alpha*(z0-z))...
-            -2*const.D*exp(const.alpha*(z0-z));
+  function [V0] = V0func(z,z0,backgroundDepth)
+        V0 = backgroundDepth * exp(2*const.alpha*(z0-z))...
+            -2*backgroundDepth*exp(const.alpha*(z0-z));
     end
     function [V1] = V1func(z,z0,wellDepth)
         V1 = 2*const.beta*wellDepth*exp(2*const.alpha*(z0-z));
@@ -222,8 +222,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         Q = Q + cos(2*pi*nu_n3) + cos(2*pi*mu_n3);
         Q = Q/3;
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
-    end
-
+  end
   function [Q] = Qhexfunc(X,Y)
         X_n = X ./ (const.c);
         Y_n = Y ./ (const.c*sqrt(3));
@@ -231,9 +230,9 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V0func(Z,1) ...
-        + V1func(Z,1,7.63) * Qhexfunc(X,Y)...
-        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1,7.63);
+    VmatrixElement = V0func(Z,2.4,const.MoS2Depth/3) ...
+        + V1func(Z,3,const.MoS2Depth/3) * Qhexfunc(X,Y)...
+        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1.5,const.MoS2Depth/3);
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
