@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 50; Nsuper = 3;
+Nxy = 64; Nz = 50; Nsuper = 2;
 zMax = 8; zMin = -1;%units Å
 
 %a = 2.84Å. see const.m for more stuff
