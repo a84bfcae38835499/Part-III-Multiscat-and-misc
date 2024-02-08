@@ -227,27 +227,13 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
   function [Q] = Qhexfunc(X,Y)
         X_n = X ./ (const.c);
         Y_n = Y ./ (const.c*sqrt(3));
-        Q = zeros(length(X),length(Y));
-        
-        mu = X_n - Y_n;
-        nu = Y_n*2;
-        Q = Q + cos(2*pi*nu) + cos(2*pi*mu);
-
-        mu = Y_n.*2;
-        nu = -Y_n - X_n;
-        Q = Q + cos(2*pi*nu) + cos(2*pi*mu);
-
-        nu = Y_n - X_n;
-        mu = -Y_n - X_n;
-        Q = Q + cos(2*pi*nu) + cos(2*pi*mu);
-        
-        Q = Q./3;
+        Q = 2/3 * (cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n)));
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
     VmatrixElement = V0func(Z,1) ...
         + V1func(Z,1,7.63) * Qhexfunc(X,Y)...
-        %+ Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1,7.63);
+        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1,7.63);
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
