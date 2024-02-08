@@ -3,14 +3,16 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 150; Nsuper = 1;
+Nxy = 64; Nz = 50; Nsuper = 3;
 zMax = 8; zMin = -1;%units Å
 
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
 %a2=[0,const.a]; 
-a1=2*[-const.c,0];
-a2=2*[const.c*sqrt(3)/2,const.c/2];
+%a1=[const.c,0];
+%a2=[const.c/2,const.c * sqrt(3)/2];
+a1=[-const.c,0];
+a2=[const.c/2,const.c*sqrt(3)/2];
 a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
@@ -77,7 +79,7 @@ end
 
 %===
 %% Now add imperfections to the lattice
-%Vsuper = AddSulphurDefect(Vsuper,2,4,Xsuper,Ysuper,Z,Nsuper);
+Vsuper = AddSulphurDefect(Vsuper,2,1,a1,a2,Xsuper,Ysuper,Z);
 %===
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
@@ -115,16 +117,6 @@ fwrite(FID, S, 'char');
 fclose(FID);
 
 %==
-
-[S_X, S_Y, Mo_X, Mo_Y] = GetLatticePoints(Nsuper);
-
-scatter(S_X,S_Y,'filled','o',SizeData=400)
-hold on
-daspect([1 1 1])
-scatter(Mo_X,Mo_Y,'filled','pentagram',SizeData=400)
-daspect([1 1 1])
-hold off
-%===
 %% Plot the potential
 % Plot of a slice of the potential in the nth row, that is for constant x
   row = floor(Nxy/2);
@@ -170,7 +162,7 @@ Multiscat.PreparePotentialFiles(potStructArray);
 
 Multiscat.prepareFourierLabels(Vsuper);
 
-potStructArray.a1=a1; potStructArray.a2=a2;
+potStructArray.a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
 potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(end);
 potStructArray.zPoints=length(Z);
@@ -237,48 +229,17 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
-function [DV] = Dropoff(z)
+function [DV] = Dropoff(z,z0)
   %Use this to attenuate the gaussian in z
-    DV = exp(2*const.alpha*(const.z0-z));
+    DV = exp(2*const.alpha*(z0-z));
 end
 
-function [X1coords,Y1coords,X2coords,Y2coords] = GetLatticePoints(Nsuper)
-%Assumes 6 unit cells per lattice
-  a1 = [const.c, 0];
-  a2 = [const.c/2,const.c * sqrt(3)/2];
-  X = zeros(2,3);
-  Y = zeros(2,3);
-  X1coords = zeros(Nsuper,3*Nsuper);
-  Y1coords = zeros(Nsuper,3*Nsuper);
-  X2coords = zeros(Nsuper,3*Nsuper);
-  Y2coords = zeros(Nsuper,3*Nsuper);
-  X(1,1) = 0;Y(1,1) = 0;
-  X(2,1) = a1(1);Y(2,1) = 0;
-  X(1,2) = a1(1)+a2(1);Y(1,2) = a1(2)+a2(2);
-  X(2,2) = a1(1)*2+a2(1);Y(2,2) = a1(2)*2+a2(2);
-  X(1,3) = a1(1)*2+a2(1)*2;Y(1,3)=a1(2)*2+a2(2)*2;
-  X(2,3) = a2(1)*2;Y(2,3)=a2(2)*2;
-  for i = 1:Nsuper
-    for j = 1:Nsuper
-      disp("(i-1)*Nsuper = " + (i-1)*Nsuper + ", (j-1)*Nsuper = " + (j-1)*Nsuper)
-      bottomLeft = ((i-1)*a1+(j-1)*a2)*3;
-      for l = 1:3
-        X1coords((i-1)+1,(j-1)*3+l) = X(1,l) + bottomLeft(1);
-        Y1coords((i-1)+1,(j-1)*3+l) = Y(1,l) + bottomLeft(2);
-        X2coords((i-1)+1,(j-1)*3+l) = X(2,l) + bottomLeft(1);
-        Y2coords((i-1)+1,(j-1)*3+l) = Y(2,l) + bottomLeft(2);
-      end
-    end
-  end
-end
-
-function [Vout] = AddSulphurDefect(Vin,m1,m2,Xsuper,Ysuper,Z,Nsuper)
+function [Vout] = AddSulphurDefect(Vin,m1,m2,a1,a2,Xsuper,Ysuper,Z)
 %Adds a defect at sulphur site (m1,m2)
   Vout = Vin;
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
-  [X1,Y1,X2,Y2] = GetLatticePoints(Nsuper);
-  centre = [X1(m1,m2),Y1(m1,m2)];
+  centre = m1*a1+m2*a2;
   disp("Centre:")
   disp(centre)
   for k = 1:Nz
@@ -288,7 +249,7 @@ function [Vout] = AddSulphurDefect(Vin,m1,m2,Xsuper,Ysuper,Z,Nsuper)
         x = Xsuper(i,j);
         y = Ysuper(i,j);
         val = Gaussian2D(x,y, ...
-          centre,const.c/2,const.D*dropoff*1.1);
+          centre,const.c,2*const.beta*const.MoS2Depth*exp(2*const.alpha*(z0-z)));
         %I made these values the fuck up
         Vout(i,j,k) = Vout(i,j,k)+val;
         %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
