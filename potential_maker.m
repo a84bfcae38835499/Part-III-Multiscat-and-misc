@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 150; Nsuper = 2;
+Nxy = 64; Nz = 100; Nsuper = 2;
 zMax = 8; zMin = -1;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -79,7 +79,7 @@ end
 
 %===
 %% Now add imperfections to the lattice
-Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+Vsuper = AddSulphurDefect(true,Vsuper,1,0,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 %===
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
@@ -260,7 +260,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m1,m2,a1,a2,Nsuper,Xsuper,Ysup
             for j = 1:NxySuper
               x = Xsuper(i,j);
               y = Ysuper(i,j);
-              centre1 = [centresX(m+2,n+2) centresY(m+2,n+2)];
+              centre = [centresX(m+2,n+2) centresY(m+2,n+2)];
               val = Gaussian2D(x,y, ...
                 centre,const.c*0.2,-3*const.beta*const.MoS2Depth*exp(2*const.alpha*(3-Z(k))));
               %These parameters have been fined tuned to match the requirements
@@ -289,3 +289,5 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m1,m2,a1,a2,Nsuper,Xsuper,Ysup
     end
   end
 end
+
+function Plot
