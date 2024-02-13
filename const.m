@@ -10,7 +10,7 @@ classdef const
     beta = 0.1;
 
     MoS2Depth = 13.6%from https://pubs.acs.org/doi/epdf/10.1021/acs.jpcc.8b12029
-
+    zOffset = 2;
 
     rotatMat = [sqrt(3)/2 -1/2;1/2 sqrt(3)/2];
     phong = 7;

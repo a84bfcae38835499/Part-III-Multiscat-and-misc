@@ -79,7 +79,7 @@ end
 
 %===
 %% Now add imperfections to the lattice
-Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+%Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 %===
 %% Plot the potential
 %nPlot = 2/3;mPlot = 1/2;
@@ -139,17 +139,20 @@ contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
 xlabel('z/Å')
 ylabel('y/Å') %is this x or y? I think y but idrk
 colorbar
-xlim([-1,4])
+xlim([2,6])
 title('Potential in z, used in simulation')
 hbar = colorbar;
 ylabel(hbar,'Energy / meV');
 
 %% Plot the potential
 % Linearly interpolated equipotential plot
-    fontsize(gcf,scale=1)
+fontsize(gcf,scale=1)
 equipotential_plot('V', Vsuper, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
-    shading interp
-
+shading interp
+hold on
+importfile("DFT_Pure.mat")
+equipotential_plot('V',Pot_M,'z',Z(1:19),'X',Xsuper(1:12,1:12),'Y',Ysuper(1:12,1:12))
+hold off
 %% Plot the potential
 zSample = 2.0;
 zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
@@ -250,9 +253,9 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V0func(Z,2.4,const.MoS2Depth/3) ...
-        + V1func(Z,3,const.MoS2Depth/3) * Qhexfunc(X,Y)...
-        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1.7,const.MoS2Depth/3);
+    VmatrixElement = V0func(Z,const.zOffset+2.4,const.MoS2Depth/3) ...
+        + V1func(Z,const.zOffset+3,const.MoS2Depth/3) * Qhexfunc(X,Y)...
+        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,const.zOffset+1.7,const.MoS2Depth/3);
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
@@ -271,7 +274,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper
   centre = m*a1+n*a2;
   disp("Centre:")
   disp(centre)
-  if doWeRepeat
+  if doWeRepeat %This is awful optimisation lolololo
     for m = -1:1
       for n = -1:1
         centresX(m+2,n+2) = centre(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper;
@@ -289,7 +292,8 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper
               y = Ysuper(i,j);
               centre = [centresX(m+2,n+2) centresY(m+2,n+2)];
               val = Gaussian2D(x,y, ...
-                centre,const.c*0.2,-3*const.beta*const.MoS2Depth*exp(2*const.alpha*(3-Z(k))));
+                centre,const.c*0.2,-3*const.beta*const.MoS2Depth* ...
+                exp(2*const.alpha*(const.zOffset+3-Z(k))));
               %These parameters have been fined tuned to match the requirements
               Vout(i,j,k) = Vout(i,j,k)+val;
               %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
@@ -306,7 +310,8 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper
           x = Xsuper(i,j);
           y = Ysuper(i,j);
           val = Gaussian2D(x,y, ...
-            centre,const.c*0.2,-3*const.beta*const.MoS2Depth*exp(2*const.alpha*(3-Z(k))));
+            centre,const.c*0.2,-3*const.beta*const.MoS2Depth* ...
+            exp(2*const.alpha*(3+const.zOffset-Z(k))));
           %These parameters have been fined tuned to match the requirements
           Vout(i,j,k) = Vout(i,j,k)+val;
           %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
@@ -342,5 +347,6 @@ function PlotPotentialAlongZ(V,a1,a2,m,n,Z,zMin,dftPot,plotColor)
   d.LineStyle = "-";
   d.Color = [0 0.4470 0.7410];
   d.Marker = ".";
+  ylim([1.1*min(dftPot) 1.1*max(dftPot)])
   hold off
 end
