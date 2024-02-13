@@ -79,8 +79,19 @@ end
 
 %===
 %% Now add imperfections to the lattice
-Vsuper = AddSulphurDefect(true,Vsuper,1,0,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 %===
+%% Plot the potential
+%nPlot = 2/3;mPlot = 1/2;
+nPlotDef = 1;mPlotDef = 1;
+aboveCol = [0.8 0.3 1];
+PlotPotentialAlongZ(Vsuper,a1,a2,mPlotDef,nPlotDef,Z,0,dft.aboveDefect,aboveCol)
+nPlotHol = 2/3;mPlotHol = 1/3;
+holCol = [0.0 1 0.6];
+PlotPotentialAlongZ(Vsuper,a1,a2,mPlotHol,nPlotHol,Z,0,dft.aboveHollow,holCol)
+nPlotMo = 1/3;mPlotMo = 2/3;
+moCol = [1 0.4 0];
+PlotPotentialAlongZ(Vsuper,a1,a2,mPlotMo,nPlotMo,Z,0,dft.aboveMo,moCol)
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
 eqCharArr = [num2str(equipotValue,'%+g') , ' meV'];
@@ -148,11 +159,27 @@ daspect([1 1 1])
 xlabel('x/Å')
 ylabel('y/Å')
 title('Potentials at z = ' + string(zSample) + ' Å');
-colormap(parula(10))
+colormap(parula(15))
 hbar = colorbar('southoutside');
 xlabel(hbar,'Energy / meV');
 
     fontsize(gcf,scale=1)
+hold on
+    xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
+    yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
+    plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
+    plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
+
+    xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
+    yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
+    plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
+    plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
+
+    xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
+    yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
+    plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
+    plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
+ hold off
 %===
 %% We supply the lattice to the mulitscat script so it can do its thing
 
@@ -234,14 +261,14 @@ function [DV] = Dropoff(z,z0)
     DV = exp(2*const.alpha*(z0-z));
 end
 
-function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m1,m2,a1,a2,Nsuper,Xsuper,Ysuper,Z)
+function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z)
 %Adds a defect at sulphur site (m1,m2)
   Vout = Vin;
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
   centresX = zeros(3);
   centresY = zeros(3);
-  centre = m1*a1+m2*a2;
+  centre = m*a1+n*a2;
   disp("Centre:")
   disp(centre)
   if doWeRepeat
@@ -290,4 +317,30 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m1,m2,a1,a2,Nsuper,Xsuper,Ysup
   end
 end
 
-function Plot
+function PlotPotentialAlongZ(V,a1,a2,m,n,Z,zMin,dftPot,plotColor)
+  NxyNsuper = size(V,1);
+  SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper;
+  k = int8(interp1(Z,1:numel(Z),zMin));
+
+  centre = m*a1+n*a2;
+  result = SpaghettiBolognaise\(centre');
+  i = int8(result(1));
+  j = int8(result(2));
+  Vpiece = squeeze(V(i,j,:));
+  figure
+  p = plot(Z(k:end),Vpiece(k:end),'DisplayName','Estimated analytical potential');
+  p.LineStyle = ":";
+  p.Color = plotColor;
+  p.Marker = ".";
+  tit = 'Plot of potential at x, y = ' + string(centre(1)) + ', ' + string(centre(2));
+  title(tit)
+  xlabel('z/Å')
+  ylabel('Energy/meV')
+  hold on
+  legend()
+  d = plot(dft.zAxis,dftPot,'DisplayName','DFT result');
+  d.LineStyle = "-";
+  d.Color = [0 0.4470 0.7410];
+  d.Marker = ".";
+  hold off
+end
