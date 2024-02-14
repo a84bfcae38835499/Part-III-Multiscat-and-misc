@@ -4,7 +4,7 @@ rng default;
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 64; Nz = 100; Nsuper = 2;
-zMax = 8; zMin = -1;%units Å
+zMax = 6; zMin = -1;%units Å
 
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
@@ -43,17 +43,17 @@ Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Z = linspace(zMin,zMax,Nz);
 
-for i = 1:Nxy
-    for j = 1:Nxy
-        X(i,j) = (a1(1)*i+a2(1)*j)./Nxy;
-        Y(i,j) = (a1(2)*i+a2(2)*j)./Nxy;
+for i = 0:Nxy-1
+    for j = 0:Nxy-1
+        X(i+1,j+1) = (a1(1)*i+a2(1)*j)./Nxy;
+        Y(i+1,j+1) = (a1(2)*i+a2(2)*j)./Nxy;
     end
 end
 
-for i = 1:Nxy*Nsuper
-    for j = 1:Nxy*Nsuper
-        Xsuper(i,j) = (a1(1)*i+a2(1)*j)./Nxy;
-        Ysuper(i,j) = (a1(2)*i+a2(2)*j)./Nxy;
+for i = 0:Nxy*Nsuper-1
+    for j = 0:Nxy*Nsuper-1
+        Xsuper(i+1,j+1) = (a1(1)*i+a2(1)*j)./Nxy;
+        Ysuper(i+1,j+1) = (a1(2)*i+a2(2)*j)./Nxy;
     end
 end
   for k = 1:Nz
@@ -147,12 +147,36 @@ ylabel(hbar,'Energy / meV');
 %% Plot the potential
 % Linearly interpolated equipotential plot
 fontsize(gcf,scale=1)
-equipotential_plot('V', Vsuper, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+%equipotential_plot('V', Vsuper, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
 shading interp
-hold on
+%hold on
+
 importfile("DFT_Pure.mat")
-equipotential_plot('V',Pot_M,'z',Z(1:19),'X',Xsuper(1:12,1:12),'Y',Ysuper(1:12,1:12))
-hold off
+x1=[const.d,0];
+x2=[const.d/2,const.d * sqrt(3)/2];
+DFTSuper = 1;
+XDFTSuper = zeros(12*DFTSuper);
+YDFTSuper = zeros(12*DFTSuper);
+
+for i = 0:12*DFTSuper-1
+    for j = 0:12*DFTSuper-1
+        XDFTSuper(i+1,j+1) = (x1(1)*i+x2(1)*j)./12;
+        YDFTSuper(i+1,j+1) = (x1(2)*i+x2(2)*j)./12;
+    end
+end
+
+
+VDFTsuper = zeros(DFTSuper*12,DFTSuper*12,19);
+for z = 1:19
+    for nx = 1:12:DFTSuper*12
+        for ny = 1:12:DFTSuper*12
+            VDFTsuper(nx:nx+12-1,ny:ny+12-1,z) = pagetranspose(Pot_M(:,:,z));
+        end
+    end
+end
+
+equipotential_plot('V',VDFTsuper,'z',Z(1:19),'X',XDFTSuper,'Y',YDFTSuper)
+%hold off
 %% Plot the potential
 zSample = 2.0;
 zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
