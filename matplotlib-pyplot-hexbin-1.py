@@ -105,15 +105,16 @@ fig, ax = plt.subplots(figsize=(4, 4))
 
 xSpan = nmax-nmin
 xSpan = xSpan*0.5
+xSpan = xSpan
 print(xSpan)
 ySpan = int(1+np.sqrt(3)*(xSpan))
 if(ySpan%2==0):
     ySpan = ySpan - 1
-h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',bins='log',norm=mpl.colors.Normalize(1e-5,valmax))
+h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',bins='log',norm=mpl.colors.LogNorm(valmin,valmax))
 
 plt.gca().set_aspect('equal')
 
-fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=1e-5,vmax=valmax), cmap='magma'),
+fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=valmin,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
 
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
