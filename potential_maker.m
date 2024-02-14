@@ -210,16 +210,16 @@ hold on
 %===
 %% We supply the lattice to the mulitscat script so it can do its thing
 
-    potStructArray.V = Vsuper;
+    potStructArray.V = VDFTsuper;
 
 Multiscat.PreparePotentialFiles(potStructArray);
 
-Multiscat.prepareFourierLabels(Vsuper);
+Multiscat.prepareFourierLabels(VDFTsuper);
 
-potStructArray.a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
+potStructArray.a1=DFTSuper*x1; potStructArray.a2=DFTSuper*a2;
 potStructArray.zmin=Z(1);
-potStructArray.zmax=Z(end);
-potStructArray.zPoints=length(Z);
+potStructArray.zmax=Z(19);
+potStructArray.zPoints=length(19);
 
 confStruct=Multiscat.createConfigStruct(potStructArray);
 Multiscat.prepareConfigFile(confStruct);
