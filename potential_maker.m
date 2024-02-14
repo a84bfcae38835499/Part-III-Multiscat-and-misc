@@ -219,7 +219,7 @@ Multiscat.PreparePotentialFiles(potStructArray);
 
 Multiscat.prepareFourierLabels(VDFTsuper);
 
-potStructArray.a1=DFTSuper*x1; potStructArray.a2=DFTSuper*a2;
+potStructArray.a1=DFTSuper*x1; potStructArray.a2=DFTSuper*x2;
 potStructArray.zmin=Z(1);
 potStructArray.zmax=Z(19);
 potStructArray.zPoints=length(19);
