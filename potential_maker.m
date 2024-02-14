@@ -16,13 +16,16 @@ a2=[const.c/2,const.c*sqrt(3)/2];
 a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
+x1=[const.d,0];
+x2=[const.d/2,const.d * sqrt(3)/2];
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
+[y1,y2,y3] = Reciprocal([x1,0],[x2,0],a3);
 %% data for python hex plotter WIP
 writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
-a1str = [char(num2str(a1))];
-a2str = [char(num2str(a2))];
-b1str = [char(num2str(b1(1:2)))];
-b2str = [char(num2str(b2(1:2)))];
+a1str = [char(num2str(x1))];
+a2str = [char(num2str(x2))];
+b1str = [char(num2str(y1(1:2)))];
+b2str = [char(num2str(y2(1:2)))];
 S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
 realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str];
 recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
