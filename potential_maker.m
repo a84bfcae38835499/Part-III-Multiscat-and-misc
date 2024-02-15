@@ -3,8 +3,8 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 12; Nz = 19; Nsuper = 1;
-zMax = 6; zMin = -1;%units Å
+Nxy = 19; Nz = 12; Nsuper = 1;
+zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
@@ -25,7 +25,7 @@ x2=[const.d/2,const.d * sqrt(3)/2];
 DFTsuper = 1;
 XDFTsuper = zeros(12*DFTsuper);
 YDFTsuper = zeros(12*DFTsuper);
-ZDFT = linspace(2,6,19);
+ZDFT = linspace(1.5,6,19);
 
 for i = 0:12*DFTsuper-1
     for j = 0:12*DFTsuper-1
@@ -53,7 +53,7 @@ VDFTsuper = zeros(DFTsuper*12,DFTsuper*12,19);
 for z = 1:19
     for nx = 1:12:DFTsuper*12
         for ny = 1:12:DFTsuper*12
-            VDFTsuper(nx:nx+12-1,ny:ny+12-1,z) = pagetranspose(Pot_M(:,:,z))*4000;
+            VDFTsuper(nx:nx+12-1,ny:ny+12-1,z) = pagetranspose(Pot_M(:,:,z))*1000;
         end
     end
 end
@@ -161,7 +161,7 @@ AnalyticMin = min(Vsuper,[],"all")
 AnalyticMax = max(Vsuper,[],"all")
 
 %% Now change all the crap to be Min's DFT
-doDFT = true;
+doDFT = false;
 if doDFT
   Nsuper = DFTsuper;
   Nxy = 12;
@@ -200,7 +200,7 @@ contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
 xlabel('z/Å')
 ylabel('y/Å') %is this x or y? I think y but idrk
 colorbar
-xlim([2,6])
+xlim([1.5,6])
 title('Potential in z, used in simulation')
 hbar = colorbar;
 ylabel(hbar,'Energy / meV');
