@@ -53,7 +53,7 @@ VDFTsuper = zeros(DFTsuper*12,DFTsuper*12,19);
 for z = 1:19
     for nx = 1:12:DFTsuper*12
         for ny = 1:12:DFTsuper*12
-            VDFTsuper(nx:nx+12-1,ny:ny+12-1,z) = pagetranspose(Pot_M(:,:,z))*1000;
+            VDFTsuper(nx:nx+12-1,ny:ny+12-1,z) = pagetranspose(Pot_M(:,:,z))*4000;
         end
     end
 end
