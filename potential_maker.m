@@ -161,7 +161,7 @@ AnalyticMin = min(Vsuper,[],"all")
 AnalyticMax = max(Vsuper,[],"all")
 
 %% Now change all the crap to be Min's DFT
-doDFT = true;
+doDFT = false;
 if doDFT
   Nsuper = DFTsuper;
   Nxy = 12;
@@ -209,11 +209,11 @@ figure
 for i = -0
   Vsoup = i;
   equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
-  shading interp
+  %shading interp
   hold on
   view([40 15])
   equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
-  shading interp
+  %shading interp
   hold off
   savestr = 'Figures/Frames/Equipot_' +string(Vsoup)+'.jpg'
   saveas(gcf,savestr,'jpg')
