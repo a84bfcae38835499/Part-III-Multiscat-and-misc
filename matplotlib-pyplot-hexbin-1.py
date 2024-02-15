@@ -74,6 +74,7 @@ nmin = 0
 nmax = 0
 valmin = 1
 valmax = 0
+smolVal = 1e-5
 for k in range(0,nOccCh):
     row = d.iloc[k]
     n1 = getattr(row,'n1')
@@ -83,6 +84,9 @@ for k in range(0,nOccCh):
         nmax = n1
     n2 = getattr(row,'n2')
     I = getattr(row,'I')
+    if(I == 0):
+        print(f"Zero found, setting to {smolVal}")
+        I = smolVal
     if(I < valmin):
         valmin = I
     if(I > valmax):
@@ -91,6 +95,8 @@ for k in range(0,nOccCh):
     plotValues[k] = I
     plotCoordsY[k] = -B1[0] * n1 - B2[0] * n2 #for some reason everything gets inverted?? and x and y are swapped from what I'd expect?????
     plotCoordsX[k] = -B1[1] * n1 - B2[1] * n2
+print(f"Valmin = {valmin}, valmax = {valmax}")
+    
 
 print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
