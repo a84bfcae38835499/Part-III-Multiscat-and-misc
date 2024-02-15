@@ -161,7 +161,7 @@ AnalyticMin = min(Vsuper,[],"all")
 AnalyticMax = max(Vsuper,[],"all")
 
 %% Now change all the crap to be Min's DFT
-doDFT = false;
+doDFT = true;
 if doDFT
   Nsuper = DFTsuper;
   Nxy = 12;
