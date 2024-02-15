@@ -74,7 +74,7 @@ nmin = 0
 nmax = 0
 valmin = 1
 valmax = 0
-smolVal = 1e-5
+smolVal = 1e-10
 for k in range(0,nOccCh):
     row = d.iloc[k]
     n1 = getattr(row,'n1')
@@ -116,12 +116,21 @@ print(xSpan)
 ySpan = int(1+np.sqrt(3)*(xSpan))
 if(ySpan%2==0):
     ySpan = ySpan - 1
-h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',bins='log',norm=mpl.colors.LogNorm(valmin,valmax))
 
-plt.gca().set_aspect('equal')
-
-fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=valmin,vmax=valmax), cmap='magma'),
+useLog = False
+if(useLog):
+    h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.LogNorm(valmin,valmax))
+    plt.gca().set_aspect('equal')
+    fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=valmin,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
+else:
+    h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.Normalize(valmin,valmax))
+    plt.gca().set_aspect('equal')
+    fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=valmin,vmax=valmax), cmap='magma'),
+             ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
+
+
+
 
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
 plt.savefig(fname=savestr)
