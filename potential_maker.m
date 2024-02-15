@@ -161,7 +161,7 @@ AnalyticMin = min(Vsuper,[],"all")
 AnalyticMax = max(Vsuper,[],"all")
 
 %% Now change all the crap to be Min's DFT
-doDFT = true;
+doDFT = false;
 if doDFT
   Nsuper = DFTsuper;
   Nxy = 12;
@@ -323,8 +323,8 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     end
         %+ V1func(Z) * Qfunc(X,Y)...
     VmatrixElement = V0func(Z,const.zOffset+2.4,const.MoS2Depth/3) ...
-        + V1func(Z,const.zOffset+3,const.MoS2Depth/3) * Qhexfunc(X,Y)...
-        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,const.zOffset+1.7,const.MoS2Depth/3);
+        + V1func(Z,const.zOffset+3,const.MoS2Depth/3) * Qhexfunc(X,Y)/10 ...
+        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,const.zOffset+1.7,const.MoS2Depth/3)/10;
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
