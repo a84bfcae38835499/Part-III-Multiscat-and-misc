@@ -1,4 +1,3 @@
 # Multiscat
-Vivian Perez Part III multiscat junk github for purposes VERY MESSY
-
-![alt text](https://ih1.redbubble.net/image.3277373716.3377/bg,f8f8f8-flat,750x,075,f-pad,750x1000,f8f8f8.jpg)
+Vivian Perez Part III multiscat github for random stuff VERY MESSY AND WORK IN PROGRESS
+![alt text](https://i.pinimg.com/736x/9b/b3/28/9bb328016fd249641c9d00446e2aee7a.jpg)
