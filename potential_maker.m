@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 2;
+Nxy = 12; Nz = 19; Nsuper = 1;
 zMax = 6; zMin = -1;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -36,18 +36,18 @@ end
 
 XDFTsuper = XDFTsuper - const.c/(2-0.3); %makes the 0,0 point be a sulphur
 
-%theta = 30;
-%rotMat = [cosd(theta) -sind(theta);
-%          sind(theta)  cosd(theta)];
+theta = 30;
+rotMat = [cosd(theta) -sind(theta);
+          sind(theta)  cosd(theta)];
 
-%for i = 1:size(XDFTSuper,1)
-%  for j = 1:size(YDFTSuper,1)
-%    vIn = [XDFTSuper(i,j); YDFTSuper(i,j)];
-%    vOut = rotMat * vIn;
-%    XDFTSuper(i,j) = vOut(1);
-%    YDFTSuper(i,j) = vOut(2);
-%  end
-%end
+for i = 1:size(XDFTsuper,1)
+  for j = 1:size(YDFTsuper,1)
+    vIn = [XDFTsuper(i,j); YDFTsuper(i,j)];
+    vOut = rotMat * vIn;
+    XDFTsuper(i,j) = vOut(1);
+    YDFTsuper(i,j) = vOut(2);
+  end
+end
 
 VDFTsuper = zeros(DFTsuper*12,DFTsuper*12,19);
 for z = 1:19
@@ -61,9 +61,6 @@ end
 [y1,y2,y3] = Reciprocal([x1,0],[x2,0],a3);
 
 %%
-
-
-
 V = zeros(Nxy,Nxy,Nz);
 X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
@@ -162,38 +159,6 @@ DFTmin = min(VDFTsuper,[],"all")
 DFTmax = max(VDFTsuper,[],"all")
 AnalyticMin = min(Vsuper,[],"all")
 AnalyticMax = max(Vsuper,[],"all")
-%% Plot the potential
-fontsize(gcf,scale=1)
-zSample = 2.0;
-zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
-figure
-contourf(Xsuper,Ysuper,Vsuper(:,:,zRow),10)
-daspect([1 1 1])
-xlabel('x/Å')
-ylabel('y/Å')
-title('Potentials at z = ' + string(zSample) + ' Å');
-colormap(parula(15))
-hbar = colorbar('southoutside');
-xlabel(hbar,'Energy / meV');
-
-    fontsize(gcf,scale=1)
-hold on
-    xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
-    yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
-    plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
-    plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
-
-    xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
-    yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
-    plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
-    plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
-
-    xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
-    yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
-    plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
-    plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
- hold off
-%===
 
 %% Now change all the crap to be Min's DFT
 doDFT = false;
@@ -255,6 +220,39 @@ for i = -0
   figure
   %clf
 end
+%% Plot the potential
+fontsize(gcf,scale=1)
+zSample = 5;
+zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
+figure
+contourf(Xsuper,Ysuper,Vsuper(:,:,zRow),10)
+daspect([1 1 1])
+xlabel('x/Å')
+ylabel('y/Å')
+title('Potentials at z = ' + string(zSample) + ' Å');
+colormap(parula(15))
+hbar = colorbar('southoutside');
+xlabel(hbar,'Energy / meV');
+    %add indicators for where we're sampling the potential z
+    fontsize(gcf,scale=1)
+hold on
+    xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
+    yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
+    plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
+    plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
+
+    xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
+    yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
+    plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
+    plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
+
+    xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
+    yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
+    plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
+    plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
+ hold off
+%===
+
 %% We supply the lattice to the mulitscat script so it can do its thing
 
     potStructArray.V = Vsuper;
