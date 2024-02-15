@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 12; Nz = 19; Nsuper = 1;
+Nxy = 120; Nz = 190; Nsuper = 1;
 zMax = 6; zMin = -1;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -110,13 +110,13 @@ end
 %nPlot = 2/3;mPlot = 1/2;
 nPlotDef = 1;mPlotDef = 1;
 aboveCol = [0.8 0.3 1];
-PlotPotentialAlongZ(Vsuper,a1,a2,mPlotDef,nPlotDef,Z,0,dft.aboveDefect,aboveCol)
+%PlotPotentialAlongZ(Vsuper,a1,a2,mPlotDef,nPlotDef,Z,0,dft.aboveDefect,aboveCol)
 nPlotHol = 2/3;mPlotHol = 1/3;
 holCol = [0.0 1 0.6];
-PlotPotentialAlongZ(Vsuper,a1,a2,mPlotHol,nPlotHol,Z,0,dft.aboveHollow,holCol)
+%PlotPotentialAlongZ(Vsuper,a1,a2,mPlotHol,nPlotHol,Z,0,dft.aboveHollow,holCol)
 nPlotMo = 1/3;mPlotMo = 2/3;
 moCol = [1 0.4 0];
-PlotPotentialAlongZ(Vsuper,a1,a2,mPlotMo,nPlotMo,Z,0,dft.aboveMo,moCol)
+%PlotPotentialAlongZ(Vsuper,a1,a2,mPlotMo,nPlotMo,Z,0,dft.aboveMo,moCol)
 %% We also prepare a .csv which contains an equipotential plot.
 equipotValue = 0;%Units meV ig
 eqCharArr = [num2str(equipotValue,'%+g') , ' meV'];
