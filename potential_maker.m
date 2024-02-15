@@ -156,32 +156,14 @@ fwrite(FID, S, 'char');
 fclose(FID);
 
 %==
-%% Plot the potential
-% Plot of a slice of the potential in the nth row, that is for constant x
-  row = floor(Nxy/2);
-figure
-contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
-    reshape(Vsuper(row,:,:), [Nxy*Nsuper,Nz]), linspace(-20,100,24))
 
-    fontsize(gcf,scale=1)
-xlabel('z/Å')
-ylabel('y/Å') %is this x or y? I think y but idrk
-colorbar
-xlim([2,6])
-title('Potential in z, used in simulation')
-hbar = colorbar;
-ylabel(hbar,'Energy / meV');
-
-%% Plot the potential
-% Linearly interpolated equipotential plot
+%% Get min and max bounds of the potentials
 DFTmin = min(VDFTsuper,[],"all")
 DFTmax = max(VDFTsuper,[],"all")
 AnalyticMin = min(Vsuper,[],"all")
 AnalyticMax = max(Vsuper,[],"all")
-fontsize(gcf,scale=1)
-clf
-%for i = -25.:0.1:25.
 %% Plot the potential
+fontsize(gcf,scale=1)
 zSample = 2.0;
 zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
 figure
@@ -240,13 +222,33 @@ if FID == -1, error('Cannot open file %s', FileName); end
 fwrite(FID, S, 'char');
 fclose(FID);
 
-for i = 0
+%% Plot the potential
+% Plot of a slice of the potential in the nth row, that is for constant x
+  row = floor(Nxy/2);
+figure
+contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
+    reshape(Vsuper(row,:,:), [Nxy*Nsuper,Nz]), linspace(-30,100,24))
+
+    fontsize(gcf,scale=1)
+xlabel('z/Å')
+ylabel('y/Å') %is this x or y? I think y but idrk
+colorbar
+xlim([2,6])
+title('Potential in z, used in simulation')
+hbar = colorbar;
+ylabel(hbar,'Energy / meV');
+
+for i = -20:1:20
   Vsoup = i;
   equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
   shading interp
+  hold on
+  view([40 15])
+  equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
+  hold off
   savestr = 'Figures/Frames/Equipot_' +string(Vsoup)+'.jpg'
   saveas(gcf,savestr,'jpg')
-  figure
+  %figure
   %clf
 end
 %% We supply the lattice to the mulitscat script so it can do its thing
