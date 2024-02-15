@@ -196,16 +196,18 @@ hold on
 %===
 
 %% Now change all the crap to be Min's DFT
-Nsuper = DFTsuper;
-Nxy = 12;
-Nz = 19;
-Xsuper = XDFTsuper;
-Ysuper = YDFTsuper;
-Z = ZDFT;
-Vsuper = VDFTsuper;
-a1 = x1;a2=x2;
-b1 = y1; b2 = y2;
-
+doDFT = false;
+if doDFT
+  Nsuper = DFTsuper;
+  Nxy = 12;
+  Nz = 19;
+  Xsuper = XDFTsuper;
+  Ysuper = YDFTsuper;
+  Z = ZDFT;
+  Vsuper = VDFTsuper;
+  a1 = x1;a2=x2;
+  b1 = y1; b2 = y2;
+end
 %% data for python hex plotter
 writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
 a1str = [char(num2str(a1))];
@@ -237,18 +239,20 @@ xlim([2,6])
 title('Potential in z, used in simulation')
 hbar = colorbar;
 ylabel(hbar,'Energy / meV');
+figure
 
-for i = -20:1:20
+for i = -0
   Vsoup = i;
   equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
   shading interp
   hold on
   view([40 15])
   equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
+  shading interp
   hold off
   savestr = 'Figures/Frames/Equipot_' +string(Vsoup)+'.jpg'
   saveas(gcf,savestr,'jpg')
-  %figure
+  figure
   %clf
 end
 %% We supply the lattice to the mulitscat script so it can do its thing
