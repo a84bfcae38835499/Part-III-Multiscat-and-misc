@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 100; Nsuper = 2;
+Nxy = 32; Nz = 100; Nsuper = 2;
 zMax = 6; zMin = -1;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -22,37 +22,37 @@ a3=[0,0,const.c];
 importfile("DFT_Pure.mat")
 x1=[const.d,0];
 x2=[const.d/2,const.d * sqrt(3)/2];
-DFTSuper = 1;
-XDFTSuper = zeros(12*DFTSuper);
-YDFTSuper = zeros(12*DFTSuper);
+DFTsuper = 1;
+XDFTsuper = zeros(12*DFTsuper);
+YDFTsuper = zeros(12*DFTsuper);
 ZDFT = linspace(2,6,19);
 
-for i = 0:12*DFTSuper-1
-    for j = 0:12*DFTSuper-1
-        XDFTSuper(i+1,j+1) = (x1(1)*i+x2(1)*j)./12;
-        YDFTSuper(i+1,j+1) = (x1(2)*i+x2(2)*j)./12;
+for i = 0:12*DFTsuper-1
+    for j = 0:12*DFTsuper-1
+        XDFTsuper(i+1,j+1) = (x1(1)*i+x2(1)*j)./12;
+        YDFTsuper(i+1,j+1) = (x1(2)*i+x2(2)*j)./12;
     end
 end
 
-XDFTSuper = XDFTSuper - const.c/(2-0.3); %makes the 0,0 point be a sulphur
+XDFTsuper = XDFTsuper - const.c/(2-0.3); %makes the 0,0 point be a sulphur
 
-theta = 30;
-rotMat = [cosd(theta) -sind(theta);
-          sind(theta)  cosd(theta)];
+%theta = 30;
+%rotMat = [cosd(theta) -sind(theta);
+%          sind(theta)  cosd(theta)];
 
-for i = 1:size(XDFTSuper,1)
-  for j = 1:size(YDFTSuper,1)
-    vIn = [XDFTSuper(i,j); YDFTSuper(i,j)];
-    vOut = rotMat * vIn;
-    XDFTSuper(i,j) = vOut(1);
-    YDFTSuper(i,j) = vOut(2);
-  end
-end
+%for i = 1:size(XDFTSuper,1)
+%  for j = 1:size(YDFTSuper,1)
+%    vIn = [XDFTSuper(i,j); YDFTSuper(i,j)];
+%    vOut = rotMat * vIn;
+%    XDFTSuper(i,j) = vOut(1);
+%    YDFTSuper(i,j) = vOut(2);
+%  end
+%end
 
-VDFTsuper = zeros(DFTSuper*12,DFTSuper*12,19);
+VDFTsuper = zeros(DFTsuper*12,DFTsuper*12,19);
 for z = 1:19
-    for nx = 1:12:DFTSuper*12
-        for ny = 1:12:DFTSuper*12
+    for nx = 1:12:DFTsuper*12
+        for ny = 1:12:DFTsuper*12
             VDFTsuper(nx:nx+12-1,ny:ny+12-1,z) = pagetranspose(Pot_M(:,:,z))*1000;
         end
     end
@@ -181,18 +181,6 @@ AnalyticMax = max(Vsuper,[],"all")
 fontsize(gcf,scale=1)
 clf
 %for i = -25.:0.1:25.
-for i = 0
-  Vsoup = i;
-  equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
-  shading interp
-  hold on
-  view([40 15])
-  equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTSuper,'Y',YDFTSuper)
-  hold off
-  savestr = 'Figures/Frames/Equipot_' +string(Vsoup)+'.jpg'
-  saveas(gcf,savestr,'jpg')
-  clf
-end
 %% Plot the potential
 zSample = 2.0;
 zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
@@ -226,11 +214,11 @@ hold on
 %===
 
 %% Now change all the crap to be Min's DFT
-Nsuper = DFTSuper;
+Nsuper = DFTsuper;
 Nxy = 12;
 Nz = 19;
-XSuper = XDFTSuper;
-YSuper = YDFTSuper;
+Xsuper = XDFTsuper;
+Ysuper = YDFTsuper;
 Z = ZDFT;
 Vsuper = VDFTsuper;
 a1 = x1;a2=x2;
@@ -252,6 +240,15 @@ if FID == -1, error('Cannot open file %s', FileName); end
 fwrite(FID, S, 'char');
 fclose(FID);
 
+for i = 0
+  Vsoup = i;
+  equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+  shading interp
+  savestr = 'Figures/Frames/Equipot_' +string(Vsoup)+'.jpg'
+  saveas(gcf,savestr,'jpg')
+  figure
+  %clf
+end
 %% We supply the lattice to the mulitscat script so it can do its thing
 
     potStructArray.V = Vsuper;
