@@ -16,25 +16,50 @@ a2=[const.c/2,const.c*sqrt(3)/2];
 a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
+[b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
+%% Import Min's DFT
+
+importfile("DFT_Pure.mat")
 x1=[const.d,0];
 x2=[const.d/2,const.d * sqrt(3)/2];
-[b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
-[y1,y2,y3] = Reciprocal([x1,0],[x2,0],a3);
-%% data for python hex plotter WIP
-writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
-a1str = [char(num2str(x1))];
-a2str = [char(num2str(x2))];
-b1str = [char(num2str(y1(1:2)))];
-b2str = [char(num2str(y2(1:2)))];
-S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
-realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str];
-recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
+DFTSuper = 1;
+XDFTSuper = zeros(12*DFTSuper);
+YDFTSuper = zeros(12*DFTSuper);
+ZDFT = linspace(2,6,19);
 
-S = [realStr,newline,recpStr,S];
-FID = fopen('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'w');
-if FID == -1, error('Cannot open file %s', FileName); end
-fwrite(FID, S, 'char');
-fclose(FID);
+for i = 0:12*DFTSuper-1
+    for j = 0:12*DFTSuper-1
+        XDFTSuper(i+1,j+1) = (x1(1)*i+x2(1)*j)./12;
+        YDFTSuper(i+1,j+1) = (x1(2)*i+x2(2)*j)./12;
+    end
+end
+
+XDFTSuper = XDFTSuper - const.c/(2-0.3); %makes the 0,0 point be a sulphur
+
+theta = 30;
+rotMat = [cosd(theta) -sind(theta);
+          sind(theta)  cosd(theta)];
+
+for i = 1:size(XDFTSuper,1)
+  for j = 1:size(YDFTSuper,1)
+    vIn = [XDFTSuper(i,j); YDFTSuper(i,j)];
+    vOut = rotMat * vIn;
+    XDFTSuper(i,j) = vOut(1);
+    YDFTSuper(i,j) = vOut(2);
+  end
+end
+
+VDFTsuper = zeros(DFTSuper*12,DFTSuper*12,19);
+for z = 1:19
+    for nx = 1:12:DFTSuper*12
+        for ny = 1:12:DFTSuper*12
+            VDFTsuper(nx:nx+12-1,ny:ny+12-1,z) = pagetranspose(Pot_M(:,:,z))*1000;
+        end
+    end
+end
+
+[y1,y2,y3] = Reciprocal([x1,0],[x2,0],a3);
+
 %%
 
 
@@ -149,37 +174,25 @@ ylabel(hbar,'Energy / meV');
 
 %% Plot the potential
 % Linearly interpolated equipotential plot
+DFTmin = min(VDFTsuper,[],"all")
+DFTmax = max(VDFTsuper,[],"all")
+AnalyticMin = min(Vsuper,[],"all")
+AnalyticMax = max(Vsuper,[],"all")
 fontsize(gcf,scale=1)
-%equipotential_plot('V', Vsuper, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
-shading interp
-%hold on
-
-importfile("DFT_Pure.mat")
-x1=[const.d,0];
-x2=[const.d/2,const.d * sqrt(3)/2];
-DFTSuper = 1;
-XDFTSuper = zeros(12*DFTSuper);
-YDFTSuper = zeros(12*DFTSuper);
-
-for i = 0:12*DFTSuper-1
-    for j = 0:12*DFTSuper-1
-        XDFTSuper(i+1,j+1) = (x1(1)*i+x2(1)*j)./12;
-        YDFTSuper(i+1,j+1) = (x1(2)*i+x2(2)*j)./12;
-    end
+clf
+%for i = -25.:0.1:25.
+for i = 0
+  Vsoup = i;
+  equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+  shading interp
+  hold on
+  view([40 15])
+  equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTSuper,'Y',YDFTSuper)
+  hold off
+  savestr = 'Figures/Frames/Equipot_' +string(Vsoup)+'.jpg'
+  saveas(gcf,savestr,'jpg')
+  clf
 end
-
-
-VDFTsuper = zeros(DFTSuper*12,DFTSuper*12,19);
-for z = 1:19
-    for nx = 1:12:DFTSuper*12
-        for ny = 1:12:DFTSuper*12
-            VDFTsuper(nx:nx+12-1,ny:ny+12-1,z) = pagetranspose(Pot_M(:,:,z));
-        end
-    end
-end
-
-equipotential_plot('V',VDFTsuper,'z',Z(1:19),'X',XDFTSuper,'Y',YDFTSuper)
-%hold off
 %% Plot the potential
 zSample = 2.0;
 zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
@@ -211,18 +224,46 @@ hold on
     plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
  hold off
 %===
+
+%% Now change all the crap to be Min's DFT
+Nsuper = DFTSuper;
+Nxy = 12;
+Nz = 19;
+XSuper = XDFTSuper;
+YSuper = YDFTSuper;
+Z = ZDFT;
+Vsuper = VDFTsuper;
+a1 = x1;a2=x2;
+b1 = y1; b2 = y2;
+
+%% data for python hex plotter
+writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
+a1str = [char(num2str(a1))];
+a2str = [char(num2str(a2))];
+b1str = [char(num2str(b1(1:2)))];
+b2str = [char(num2str(b2(1:2)))];
+S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
+realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str];
+recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
+
+S = [realStr,newline,recpStr,S];
+FID = fopen('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'w');
+if FID == -1, error('Cannot open file %s', FileName); end
+fwrite(FID, S, 'char');
+fclose(FID);
+
 %% We supply the lattice to the mulitscat script so it can do its thing
 
-    potStructArray.V = VDFTsuper;
+    potStructArray.V = Vsuper;
 
 Multiscat.PreparePotentialFiles(potStructArray);
 
-Multiscat.prepareFourierLabels(VDFTsuper);
+Multiscat.prepareFourierLabels(Vsuper);
 
-potStructArray.a1=DFTSuper*x1; potStructArray.a2=DFTSuper*x2;
+potStructArray.a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
 potStructArray.zmin=Z(1);
-potStructArray.zmax=Z(19);
-potStructArray.zPoints=length(19);
+potStructArray.zmax=Z(end);
+potStructArray.zPoints=length(Z);
 
 confStruct=Multiscat.createConfigStruct(potStructArray);
 Multiscat.prepareConfigFile(confStruct);

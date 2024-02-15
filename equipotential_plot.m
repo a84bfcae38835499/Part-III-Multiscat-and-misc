@@ -20,6 +20,7 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     if ~exist('V0', 'var')
         V0 = 0;
     end
+    disp("V0 = " + num2str(V0,'%.2f'))
 
     n1 = size(V, 1);
     n2 = size(V, 2);
@@ -30,10 +31,12 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     for ia1=1:n1
         for ia2=1:n2
             for indz=1:length(z)-1
-                if V(ia1,ia2,indz) > 0 && V(ia1,ia2,indz+1) < V0
+                %if V(ia1,ia2,indz) > 0 && V(ia1,ia2,indz+1) < V0
+                if V(ia1,ia2,indz+1) < V0
                     m = (V(ia1,ia2,indz) - V(ia1, ia2, indz+1))/(indz - (indz+1));
                     c = V(ia1, ia2,indz) - m*indz;
                     inds0(ia1,ia2) = -c/m;
+                    inds0(ia1,ia2) = indz;
                 end
             end
         end
@@ -41,10 +44,17 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     pot_height = z(1) + inds0*(z(2)-z(1));
 
     %figure
+    f = figure('visible','off');
+    potMin = min(pot_height,[],"all");
+    potMax = max(pot_height,[],"all");
+    disp("Min = " + num2str(potMin) + ", max = " + num2str(potMax));
     surf(X, Y, pot_height)
+    zMin = min(z,[],"all");
+    zMax = max(z,[],"all");
+    zlim([zMin-2,zMax+2])
     xlabel('x/Å')
     ylabel('y/Å')
-    title(['Equipotential V=' num2str(V0) ', used in simulation'])
+    title(['Equipotential V=' num2str(V0,'%.2f') '/meV, used in simulation'])
     %fontsize(gcf,scale=2)
     daspect([1 1 0.5])
     colormap(plasma)
