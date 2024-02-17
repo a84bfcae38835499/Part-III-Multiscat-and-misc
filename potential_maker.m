@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 12; Nz = 19; Nsuper = 1;
+Nxy = 64; Nz = 100; Nsuper = 1;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -22,7 +22,7 @@ a3=[0,0,const.c];
 importfile("DFT_Pure.mat")
 x1=[const.d,0];
 x2=[const.d/2,const.d * sqrt(3)/2];
-DFTsuper = 1;
+DFTsuper = 3;
 XDFTsuper = zeros(12*DFTsuper);
 YDFTsuper = zeros(12*DFTsuper);
 ZDFT = linspace(1.5,6,19);
@@ -35,6 +35,9 @@ for i = 0:12*DFTsuper-1
 end
 
 XDFTsuper = XDFTsuper - const.c/(2-0.3); %makes the 0,0 point be a sulphur
+XDFTsuper = XDFTsuper - x1(1) - x2(1);%shifts potential to overlap with the smaller unit cell, for interpolation purposes
+YDFTsuper = YDFTsuper - x1(2) - x2(2);
+
 
 theta = 30;
 rotMat = [cosd(theta) -sind(theta);
@@ -81,12 +84,68 @@ for i = 0:Nxy*Nsuper-1
         Ysuper(i+1,j+1) = (a1(2)*i+a2(2)*j)./Nxy;
     end
 end
-  for k = 1:Nz
-        V(:,:,k) = Vfunc(X,Y,Z(k));
-  end
+for k = 1:Nz
+      V(:,:,k) = Vfunc(X,Y,Z(k));
+end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
 %actually check them lol
 %===
+%% Now interpolate the DFT data into a useful basis
+interpolateDFTdata = true;
+Vvect = zeros(Nz*Nxy*Nxy,1);
+if interpolateDFTdata == true
+  VDFTvect = zeros(DFTsuper*DFTsuper*12*12*19,1);
+  XDFTvect = VDFTvect;
+  YDFTvect = VDFTvect;
+  ZDFTvect = VDFTvect;
+  index = 0;
+  for k = 1:19
+    z = ZDFT(k);
+     for j = 1:12*DFTsuper
+      for i = 1:12*DFTsuper
+        if(index + 1 ~= 144*DFTsuper*DFTsuper*(k-1)+12*DFTsuper*(j-1)+i)
+          error("F")
+        end
+        index = 144*DFTsuper*DFTsuper*(k-1)+12*DFTsuper*(j-1)+i;
+        disp("index = " + num2str(index))
+        XDFTvect(index) = XDFTsuper(i,j);
+        YDFTvect(index) = YDFTsuper(i,j);
+        ZDFTvect(index) = z;
+        VDFTvect(index) = VDFTsuper(i,j,k);
+      end
+    end
+  end
+  InterpolatedFn = scatteredInterpolant(XDFTvect,YDFTvect,ZDFTvect,VDFTvect,'natural','none');
+
+  Xvect = squeeze(zeros(Nxy*Nxy*Nz,1));
+  Yvect = Xvect;
+  Zvect = Xvect;
+  for k = 1:Nz
+    z = Z(k);
+     for j = 1:Nxy
+      for i = 1:Nxy
+        index2 = Nxy*Nxy*(k-1)+Nxy*(j-1)+i;
+        disp("index2 = " + num2str(index2))
+        Xvect(index2) = X(i,j);
+        Yvect(index2) = Y(i,j);
+        Zvect(index2) = z;
+      end
+    end
+  end
+
+  Vvect = InterpolatedFn(Xvect,Yvect,Zvect);
+  if(anynan(Vvect))
+    error("Nan found!")
+  end
+
+  for k = 1:Nz
+    for j = 1:Nxy
+      for i = 1:Nxy
+        V(i,j,k) = Vvect(Nxy*Nxy*(k-1)+Nxy*(j-1)+i);
+      end   
+    end
+  end
+end
 %% Now we duplicate the lattice to get a superlattice
 
 Vsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
@@ -106,7 +165,7 @@ end
 %% Now add imperfections to the lattice
 %Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 %===
-%% Plot the potential
+%% Plot the potential. Disabled for now, as if the grid res is too high it complains
 %nPlot = 2/3;mPlot = 1/2;
 nPlotDef = 1;mPlotDef = 1;
 aboveCol = [0.8 0.3 1];
@@ -151,7 +210,6 @@ FID = fopen('Equipotential.csv', 'w');
 if FID == -1, error('Cannot open file %s', FileName); end
 fwrite(FID, S, 'char');
 fclose(FID);
-
 %==
 
 %% Get min and max bounds of the potentials
@@ -205,24 +263,28 @@ title('Potential in z, used in simulation')
 hbar = colorbar;
 ylabel(hbar,'Energy / meV');
 figure
-
-for i = -0
-  Vsoup = i;
+fileindx = 1;
+for i = -10:1:0
+  Vsoup = single(i);
   equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
-  %shading interp
+  shading interp
+  xlim([-3.5 2]);
+  ylim([-0.5 3]);
+  daspect([1 1 1])
   hold on
-  view([40 15])
+  view([15 45])
   equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
-  %shading interp
+  shading interp
   hold off
-  savestr = 'Figures/Frames/Equipot_' +string(Vsoup)+'.jpg'
+  savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg"
+  fileindx = fileindx + 1;
   saveas(gcf,savestr,'jpg')
   figure
   %clf
 end
 %% Plot the potential
 fontsize(gcf,scale=1)
-zSample = 5;
+zSample = 3;
 zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
 figure
 contourf(Xsuper,Ysuper,Vsuper(:,:,zRow),10)
@@ -233,24 +295,27 @@ title('Potentials at z = ' + string(zSample) + ' Å');
 colormap(parula(15))
 hbar = colorbar('southoutside');
 xlabel(hbar,'Energy / meV');
-    %add indicators for where we're sampling the potential z
-    fontsize(gcf,scale=1)
-hold on
-    xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
-    yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
-    plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
-    plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
+%add indicators for where we're sampling the potential z
+fontsize(gcf,scale=1)
+plotPoints = false;
+if(plotPoints)
+  hold on
+  xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
+  yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
+  plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
+  plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
 
-    xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
-    yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
-    plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
-    plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
+  xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
+  yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
+  plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
+  plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
 
-    xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
-    yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
-    plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
-    plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
- hold off
+  xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
+  yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
+  plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
+  plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
+   hold off
+end
 %===
 
 %% We supply the lattice to the mulitscat script so it can do its thing
