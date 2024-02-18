@@ -58,5 +58,5 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     %fontsize(gcf,scale=2)
     %daspect([1 1 1])
     colormap(plasma)
-    clim([-2 4])
+    clim([potMin potMax])
 end

@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 100; Nsuper = 1;
+Nxy = 128; Nz = 100; Nsuper = 1;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -22,7 +22,7 @@ a3=[0,0,const.c];
 importfile("DFT_Pure.mat")
 x1=[const.d,0];
 x2=[const.d/2,const.d * sqrt(3)/2];
-DFTsuper = 3;
+DFTsuper = 2;
 XDFTsuper = zeros(12*DFTsuper);
 YDFTsuper = zeros(12*DFTsuper);
 ZDFT = linspace(1.5,6,19);
@@ -91,7 +91,7 @@ end
 %actually check them lol
 %===
 %% Now interpolate the DFT data into a useful basis
-interpolateDFTdata = true;
+interpolateDFTdata = false;
 Vvect = zeros(Nz*Nxy*Nxy,1);
 if interpolateDFTdata == true
   VDFTvect = zeros(DFTsuper*DFTsuper*12*12*19,1);
@@ -107,7 +107,7 @@ if interpolateDFTdata == true
           error("F")
         end
         index = 144*DFTsuper*DFTsuper*(k-1)+12*DFTsuper*(j-1)+i;
-        disp("index = " + num2str(index))
+        %disp("index = " + num2str(index))
         XDFTvect(index) = XDFTsuper(i,j);
         YDFTvect(index) = YDFTsuper(i,j);
         ZDFTvect(index) = z;
@@ -125,7 +125,7 @@ if interpolateDFTdata == true
      for j = 1:Nxy
       for i = 1:Nxy
         index2 = Nxy*Nxy*(k-1)+Nxy*(j-1)+i;
-        disp("index2 = " + num2str(index2))
+        %disp("index2 = " + num2str(index2))
         Xvect(index2) = X(i,j);
         Yvect(index2) = Y(i,j);
         Zvect(index2) = z;
@@ -176,41 +176,6 @@ holCol = [0.0 1 0.6];
 nPlotMo = 1/3;mPlotMo = 2/3;
 moCol = [1 0.4 0];
 %PlotPotentialAlongZ(Vsuper,a1,a2,mPlotMo,nPlotMo,Z,0,dft.aboveMo,moCol)
-%% We also prepare a .csv which contains an equipotential plot.
-equipotValue = 0;%Units meV ig
-eqCharArr = [num2str(equipotValue,'%+g') , ' meV'];
-equipotentialMat = zeros(Nxy*Nsuper,Nxy*Nsuper);
-M = max(Vsuper,[],"all");
-for i = 1:Nxy*Nsuper
-    for j = 1:Nxy*Nsuper
-        foundVal = false;
-        for k = 1:Nz
-            if(Vsuper(i,j,k) < equipotValue && ~foundVal)
-                %disp("i, j, k = " + i + ", " + j + ", " + k +...
-                %    ", Value = " + Vsuper(i,j,k) +...
-                %    ", Z(k) = " + Z(k));
-                equipotentialMat(i,j) = Z(k);
-                foundVal = true;
-            end
-        end
-        if(~foundVal)
-            %error("unable to find equipotential!")
-        end
-    end
-end
-
-%disp(equipotentialMat)
-
-%===
-%% All this stuff is just to write a comment line lmao
-writematrix(equipotentialMat,'Equipotential.csv','Delimiter', ',')
-S = fileread('Equipotential.csv');
-S = ['#Energy surface at ', eqCharArr, newline, S];
-FID = fopen('Equipotential.csv', 'w');
-if FID == -1, error('Cannot open file %s', FileName); end
-fwrite(FID, S, 'char');
-fclose(FID);
-%==
 
 %% Get min and max bounds of the potentials
 DFTmin = min(VDFTsuper,[],"all")
@@ -219,8 +184,8 @@ AnalyticMin = min(Vsuper,[],"all")
 AnalyticMax = max(Vsuper,[],"all")
 
 %% Now change all the crap to be Min's DFT
-doDFT = false;
-if doDFT
+copyDFT = false;
+if copyDFT
   Nsuper = DFTsuper;
   Nxy = 12;
   Nz = 19;
@@ -264,17 +229,17 @@ hbar = colorbar;
 ylabel(hbar,'Energy / meV');
 figure
 fileindx = 1;
-for i = -10:1:0
+for i = 0
   Vsoup = single(i);
   equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+  shading interp
+  hold on
+  view([15 45])
+  %equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
   shading interp
   xlim([-3.5 2]);
   ylim([-0.5 3]);
   daspect([1 1 1])
-  hold on
-  view([15 45])
-  equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
-  shading interp
   hold off
   savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg"
   fileindx = fileindx + 1;
