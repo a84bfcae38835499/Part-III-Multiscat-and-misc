@@ -115,7 +115,7 @@ if interpolateDFTdata == true
       end
     end
   end
-  InterpolatedFn = scatteredInterpolant(XDFTvect,YDFTvect,ZDFTvect,VDFTvect,'nearest','none');
+  InterpolatedFn = scatteredInterpolant(XDFTvect,YDFTvect,ZDFTvect,VDFTvect,'linear','none');
 
   Xvect = squeeze(zeros(Nxy*Nxy*Nz,1));
   Yvect = Xvect;
@@ -284,21 +284,21 @@ end
 %===
 
 %% We supply the lattice to the mulitscat script so it can do its thing
-
+doingMSshit = true;
+if(doingMSshit)
     potStructArray.V = Vsuper;
-
-Multiscat.PreparePotentialFiles(potStructArray);
-
-Multiscat.prepareFourierLabels(Vsuper);
-
-potStructArray.a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
-potStructArray.zmin=Z(1);
-potStructArray.zmax=Z(end);
-potStructArray.zPoints=length(Z);
-
-confStruct=Multiscat.createConfigStruct(potStructArray);
-Multiscat.prepareConfigFile(confStruct);
-
+    Multiscat.PreparePotentialFiles(potStructArray);
+    
+    Multiscat.prepareFourierLabels(Vsuper);
+    
+    potStructArray.a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
+    potStructArray.zmin=Z(1);
+    potStructArray.zmax=Z(end);
+    potStructArray.zPoints=length(Z);
+    
+    confStruct=Multiscat.createConfigStruct(potStructArray);
+    Multiscat.prepareConfigFile(confStruct);
+end
 %===
 %% Function definitions
 
@@ -352,9 +352,9 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V0func(Z,const.zOffset+2.4,const.MoS2Depth/3) ...
-        + V1func(Z,const.zOffset+3,const.MoS2Depth/3) * Qhexfunc(X,Y)/10 ...
-        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,const.zOffset+1.7,const.MoS2Depth/3)/10;
+    VmatrixElement = V0func(Z,const.zOffset+1,const.MoS2Depth/2) ...
+        + V1func(Z,const.zOffset+3,const.MoS2Depth/10) * Qhexfunc(X,Y)/10 ...
+        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,const.zOffset+1.7,const.MoS2Depth/10)/10;
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
