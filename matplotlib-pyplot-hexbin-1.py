@@ -191,7 +191,7 @@ scatFile.close()
 
 ax.set_title(titelstr)
 
-captiontxt="Entropy = " + "{:.4f}".format(H)
+captiontxt="Entropy = " + "{:.6f}".format(H)
 plt.figtext(0.5, 0.06, captiontxt, wrap=True, horizontalalignment='center', fontsize=12)
 
 import unicodedata
@@ -214,7 +214,7 @@ def slugify(value, allow_unicode=False):
     return re.sub(r'[-\s]+', '-', value).strip('-_')
 
 filenametxt=""
-filenametxt="Nearest"
+filenametxt="Natural"
 plt.figtext(0.5, 0.01, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic')
 
 if(filenametxt == ""):
