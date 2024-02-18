@@ -145,7 +145,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111,axes_class=AA.Axes, grid_helper=grid_helper,zorder=6)
 
 # Add the grid
-ax.grid(which='major', axis='both', linestyle='--')
+ax.grid(which='major', axis='both', linestyle='-',color=[0.8, 0.8, 0.8])
 
 useLog = False
 if(useLog):
@@ -162,6 +162,28 @@ else:
 
 
 ax.set_aspect(1)
+
+
+
+scatFile = open('scatCond.in', 'r')
+E = -69
+theta = -69
+phi = -69
+line = scatFile.readline()
+line = scatFile.readline()
+vals = line.split(",")
+E = float(vals[0])
+theta = float(vals[1])
+phi = float(vals[2])
+titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, $\\phi$ =" + str(phi) + "$\\degree$"
+print(titelstr)
+scatFile.close()
+
+ax.set_title(titelstr)
+
+captiontxt="Entropy = " + "{:.4f}".format(H)
+plt.figtext(0.5, 0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12)
+
 
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
 plt.savefig(fname=savestr)
