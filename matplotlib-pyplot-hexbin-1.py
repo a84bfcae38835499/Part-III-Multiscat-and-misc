@@ -75,19 +75,25 @@ nOccCh = len(d.index)
 plotValues = np.zeros((nOccCh))
 plotCoordsX = np.zeros((nOccCh))
 plotCoordsY = np.zeros((nOccCh))
-nmin = 0
-nmax = 0
+n1min = 0
+n1max = 0
+n2min = 0
+n2max = 0
 valmin = 1
 valmax = 0
 smolVal = 1e-10
 for k in range(0,nOccCh):
     row = d.iloc[k]
     n1 = getattr(row,'n1')
-    if(n1 < nmin):
-        nmin = n1
-    if(n1 > nmax):
-        nmax = n1
+    if(n1 < n1min):
+        n1min = n1
+    if(n1 > n1max):
+        n1max = n1
     n2 = getattr(row,'n2')
+    if(n2 < n2min):
+        n2min = n2
+    if(n2 > n2max):
+        n2max = n2
     I = getattr(row,'I')
     if(I == 0):
         print(f"Zero found, setting to {smolVal}")
@@ -107,16 +113,24 @@ print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
 print("Entropy = " + str(H))
 
-xSpan = nmax-nmin
-xSpan = xSpan*0.5
-xSpan = xSpan
+n1Span = n1max-n1min
+xSpan = n1Span*0.5
+n2Span = n2max-n2min
 print(xSpan)
 ySpan = int(1+np.sqrt(3)*(xSpan))
 if(ySpan%2==0):
     ySpan = ySpan - 1
 
-fudge = np.sqrt(3)/2 #I have absolutely no idea why this is needed
+fig = plt.figure()
+#h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
+#print("x coords = ")
+#print(plotCoordsX)
+#print("y coords = ")
+#print(plotCoordsY)
+ax = fig.add_subplot(111)
+ax.set_aspect(1)
 
+fudge = np.sqrt(3)/2 #I have absolutely no idea why this is needed
 # from curved coordinate to rectlinear coordinate.
 def tr(x, y):
     x, y = np.asarray(x), np.asarray(y)
@@ -134,34 +148,30 @@ grid_helper = AA.GridHelperCurveLinear((tr, inv_tr),
                                        grid_locator1=gf.MaxNLocator(nbins=1),
                                        grid_locator2=gf.MaxNLocator(nbins=1))
 
-fig = plt.figure()
-#h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
-#print("x coords = ")
-#print(plotCoordsX)
-#print("y coords = ")
-#print(plotCoordsY)
 
-
-ax = fig.add_subplot(111,axes_class=AA.Axes, grid_helper=grid_helper,zorder=6)
 
 # Add the grid
-ax.grid(which='major', axis='both', linestyle='-',color=[0.8, 0.8, 0.8])
-
+ax.grid(visible=False)
+plt.tick_params(
+    axis='x',          # changes apply to the x-axis
+    which='both',      # both major and minor ticks are affected
+    bottom=False,      # ticks along the bottom edge are off
+    top=False,         # ticks along the top edge are off
+    labelbottom=False) # labels along the bottom edge are off
 useLog = False
 if(useLog):
     h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.LogNorm(valmin,valmax))
-    plt.gca().set_aspect('equal')
+    #plt.gca().set_aspect('equal')
     fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=valmin,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
 else:
     h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.Normalize(valmin,valmax))
-    plt.gca().set_aspect('equal')
+    #plt.gca().set_aspect('equal')
     fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=valmin,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
 
 
 
-ax.set_aspect(1)
 
 
 
@@ -182,9 +192,35 @@ scatFile.close()
 ax.set_title(titelstr)
 
 captiontxt="Entropy = " + "{:.4f}".format(H)
-plt.figtext(0.5, 0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12)
+plt.figtext(0.5, 0.06, captiontxt, wrap=True, horizontalalignment='center', fontsize=12)
 
+import unicodedata
+import re
 
-savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
+def slugify(value, allow_unicode=False):
+    """
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value.lower())
+    return re.sub(r'[-\s]+', '-', value).strip('-_')
+
+filenametxt=""
+filenametxt="Nearest"
+plt.figtext(0.5, 0.01, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic')
+
+if(filenametxt == ""):
+    savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
+else:
+    savestr = "Figures/Diffraction/" +slugify(filenametxt) +datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + ".png"
+print(savestr)
 plt.savefig(fname=savestr)
 plt.show()
