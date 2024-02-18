@@ -115,7 +115,7 @@ if interpolateDFTdata == true
       end
     end
   end
-  InterpolatedFn = scatteredInterpolant(XDFTvect,YDFTvect,ZDFTvect,VDFTvect,'linear','none');
+  InterpolatedFn = scatteredInterpolant(XDFTvect,YDFTvect,ZDFTvect,VDFTvect,'nearest','none');
 
   Xvect = squeeze(zeros(Nxy*Nxy*Nz,1));
   Yvect = Xvect;
