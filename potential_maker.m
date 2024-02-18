@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 50; Nsuper = 2;
+Nxy = 16; Nz = 50; Nsuper = 4;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -163,7 +163,7 @@ end
 
 %===
 %% Now add imperfections to the lattice
-Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+%Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 %===
 %% Plot the potential. Disabled for now, as if the grid res is too high it complains
 %nPlot = 2/3;mPlot = 1/2;
@@ -232,13 +232,13 @@ fileindx = 1;
 for i = 0
   Vsoup = single(i);
   equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
-  %shading interp
+  shading interp
   hold on
   view([15 45])
   %equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
-  %shading interp
-  xlim([-3.5 2]);
-  ylim([-0.5 3]);
+  shading interp
+  xlim([-3.5 2]*Nsuper);
+  ylim([-0.5 3]*Nsuper);
   daspect([1 1 1])
   hold off
   savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg"
