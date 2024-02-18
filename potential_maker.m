@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 4; Nsuper = 1;
+Nxy = 32; Nz = 50; Nsuper = 2;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -91,7 +91,7 @@ end
 %actually check them lol
 %===
 %% Now interpolate the DFT data into a useful basis
-interpolateDFTdata = false;
+interpolateDFTdata = true;
 Vvect = zeros(Nz*Nxy*Nxy,1);
 if interpolateDFTdata == true
   VDFTvect = zeros(DFTsuper*DFTsuper*12*12*19,1);
@@ -232,11 +232,11 @@ fileindx = 1;
 for i = 0
   Vsoup = single(i);
   equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
-  shading interp
+  %shading interp
   hold on
   view([15 45])
   %equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
-  shading interp
+  %shading interp
   xlim([-3.5 2]);
   ylim([-0.5 3]);
   daspect([1 1 1])
@@ -364,6 +364,7 @@ function [DV] = Dropoff(z,z0)
 end
 
 function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z)
+factor = -1*const.beta*const.MoS2Depth;
 %Adds a defect at sulphur site (m1,m2)
   Vout = Vin;
   NxySuper = size(Vout,1);
@@ -391,8 +392,8 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper
               y = Ysuper(i,j);
               centre = [centresX(m+2,n+2) centresY(m+2,n+2)];
               val = Gaussian2D(x,y, ...
-                centre,const.c*0.2,-3*const.beta*const.MoS2Depth* ...
-                exp(2*const.alpha*(const.zOffset+3-Z(k))));
+                centre,const.c*0.2, ...
+                factor * exp(2*const.alpha*(const.zOffset+3-Z(k))));
               %These parameters have been fined tuned to match the requirements
               Vout(i,j,k) = Vout(i,j,k)+val;
               %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
@@ -409,8 +410,8 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper
           x = Xsuper(i,j);
           y = Ysuper(i,j);
           val = Gaussian2D(x,y, ...
-            centre,const.c*0.2,-3*const.beta*const.MoS2Depth* ...
-            exp(2*const.alpha*(3+const.zOffset-Z(k))));
+            centre,const.c*0.2, ...
+            factor * exp(2*const.alpha*(3+const.zOffset-Z(k))));
           %These parameters have been fined tuned to match the requirements
           Vout(i,j,k) = Vout(i,j,k)+val;
           %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
