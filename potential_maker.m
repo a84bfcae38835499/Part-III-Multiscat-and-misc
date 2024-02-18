@@ -115,7 +115,7 @@ if interpolateDFTdata == true
       end
     end
   end
-  InterpolatedFn = scatteredInterpolant(XDFTvect,YDFTvect,ZDFTvect,VDFTvect,'linear','none');
+  InterpolatedFn = scatteredInterpolant(XDFTvect,YDFTvect,ZDFTvect,VDFTvect,'natural','none');
 
   Xvect = squeeze(zeros(Nxy*Nxy*Nz,1));
   Yvect = Xvect;
@@ -262,7 +262,7 @@ hbar = colorbar('southoutside');
 xlabel(hbar,'Energy / meV');
 %add indicators for where we're sampling the potential z
 fontsize(gcf,scale=1)
-plotPoints = false;
+plotPoints = true;
 if(plotPoints)
   hold on
   xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
@@ -352,7 +352,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V0func(Z,const.zOffset+1,const.MoS2Depth/2) ...
+    VmatrixElement = V0func(Z,const.zOffset+2,const.MoS2Depth/4) ...
         + V1func(Z,const.zOffset+3,const.MoS2Depth/10) * Qhexfunc(X,Y)/10 ...
         + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,const.zOffset+1.7,const.MoS2Depth/10)/10;
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
@@ -426,12 +426,15 @@ function PlotPotentialAlongZ(V,a1,a2,m,n,Z,zMin,dftPot,plotColor)
   NxyNsuper = size(V,1);
   SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper;
   k = int8(interp1(Z,1:numel(Z),zMin));
-
+  if(k == 0)
+    k = 1;
+  end
   centre = m*a1+n*a2;
   result = SpaghettiBolognaise\(centre');
   i = int8(result(1));
   j = int8(result(2));
   Vpiece = squeeze(V(i,j,:));
+  disp([i j k])
   figure
   p = plot(Z(k:end),Vpiece(k:end),'DisplayName','Estimated analytical potential');
   p.LineStyle = ":";
