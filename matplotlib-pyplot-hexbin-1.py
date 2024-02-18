@@ -115,7 +115,7 @@ ySpan = int(1+np.sqrt(3)*(xSpan))
 if(ySpan%2==0):
     ySpan = ySpan - 1
 
-fudge = 0.875
+fudge = np.sqrt(3)/2 #I have absolutely no idea why this is needed
 
 # from curved coordinate to rectlinear coordinate.
 def tr(x, y):
@@ -146,6 +146,7 @@ ax = fig.add_subplot(111,axes_class=AA.Axes, grid_helper=grid_helper,zorder=6)
 
 # Add the grid
 ax.grid(which='major', axis='both', linestyle='--')
+
 useLog = False
 if(useLog):
     h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.LogNorm(valmin,valmax))
