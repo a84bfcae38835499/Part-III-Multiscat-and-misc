@@ -364,7 +364,7 @@ function [DV] = Dropoff(z,z0)
 end
 
 function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z)
-factor = -1*const.beta*const.MoS2Depth;
+factor = -0.7*const.beta*const.MoS2Depth;
 %Adds a defect at sulphur site (m1,m2)
   Vout = Vin;
   NxySuper = size(Vout,1);
