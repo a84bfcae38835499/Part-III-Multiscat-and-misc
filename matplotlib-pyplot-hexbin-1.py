@@ -1,10 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.ticker as ticker
+import mpl_toolkits.axisartist as AA
+import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
 import datetime
 # Default theme
+#mpl.rc('axes',edgecolor='white')
 
 def import_multiscat(fname):    
     """Impot standrad multiscat output into a pandas data frame."""
@@ -53,14 +57,15 @@ while count < 2:
         count += 1
 
 Babs = np.sqrt(B1[0]**2+B1[1]**2)
-print("b1 = ") 
+print("B1 = ") 
 print(B1)
 print("b2 = ") 
 print(B2)
 print("Babs = ") 
 print(Babs)
 latticeFile.close()
-
+b1 = B1 / Babs
+b2 = B2 / Babs
 d = import_multiscat('diffrac10001.out')
 print(d)
 
@@ -93,21 +98,14 @@ for k in range(0,nOccCh):
         valmax = I
     #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
     plotValues[k] = I
-    plotCoordsY[k] = -B1[0] * n1 - B2[0] * n2 #for some reason everything gets inverted?? and x and y are swapped from what I'd expect?????
-    plotCoordsX[k] = -B1[1] * n1 - B2[1] * n2
+    plotCoordsY[k] = -b1[0] * n1 - b2[0] * n2 #for some reason everything gets inverted?? and x and y are swapped from what I'd expect?????
+    plotCoordsX[k] = -b1[1] * n1 - b2[1] * n2
 print(f"Valmin = {valmin}, valmax = {valmax}")
     
 
 print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
 print("Entropy = " + str(H))
-
-fig, ax = plt.subplots(figsize=(4, 4))
-#h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
-#print("x coords = ")
-#print(plotCoordsX)
-#print("y coords = ")
-#print(plotCoordsY)
 
 xSpan = nmax-nmin
 xSpan = xSpan*0.5
@@ -117,20 +115,52 @@ ySpan = int(1+np.sqrt(3)*(xSpan))
 if(ySpan%2==0):
     ySpan = ySpan - 1
 
+fudge = 0.875
+
+# from curved coordinate to rectlinear coordinate.
+def tr(x, y):
+    x, y = np.asarray(x), np.asarray(y)
+    return x * b1[0] + y * b1[1], x*b2[0]*fudge + y*b2[1]*fudge
+
+# from rectlinear coordinate to curved coordinate.
+def inv_tr(x, y):
+    matTrans = np.matrix([[ b1[0], b1[1] ],[ b2[0]*fudge, b2[1]*fudge]])
+    invMat = np.linalg.inv(matTrans)
+    x, y = np.asarray(x), np.asarray(y)
+    return x * invMat[0,0] + y * invMat[0,1],x * invMat[1,0] + y * invMat[1,1]
+
+grid_helper = AA.GridHelperCurveLinear((tr, inv_tr),
+                                       extreme_finder=gf.ExtremeFinderSimple(2,2),
+                                       grid_locator1=gf.MaxNLocator(nbins=1),
+                                       grid_locator2=gf.MaxNLocator(nbins=1))
+
+fig = plt.figure()
+#h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
+#print("x coords = ")
+#print(plotCoordsX)
+#print("y coords = ")
+#print(plotCoordsY)
+
+
+ax = fig.add_subplot(111,axes_class=AA.Axes, grid_helper=grid_helper,zorder=6)
+
+# Add the grid
+ax.grid(which='major', axis='both', linestyle='--')
 useLog = False
 if(useLog):
-    h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.LogNorm(valmin,valmax))
+    h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.LogNorm(valmin,valmax))
     plt.gca().set_aspect('equal')
     fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=valmin,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
 else:
-    h = ax.hexbin(plotCoordsX/Babs,plotCoordsY/Babs,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.Normalize(valmin,valmax))
+    h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.Normalize(valmin,valmax))
     plt.gca().set_aspect('equal')
     fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=valmin,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
 
 
 
+ax.set_aspect(1)
 
 savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
 plt.savefig(fname=savestr)
