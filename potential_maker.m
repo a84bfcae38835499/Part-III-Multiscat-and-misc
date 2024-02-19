@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 50; Nsuper = 2;
+Nxy = 64; Nz = 50; Nsuper = 1;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -271,7 +271,7 @@ hbar = colorbar('southoutside');
 xlabel(hbar,'Energy / meV');
 %add indicators for where we're sampling the potential z
 fontsize(gcf,scale=1)
-plotPoints = true;
+plotPoints = false;
 if(plotPoints)
   hold on
   xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
@@ -309,12 +309,13 @@ if(doingMSshit)
     Multiscat.prepareConfigFile(confStruct);
 end
 %===
-[X,Y] = meshgrid(-1:0.01:1,-1:0.01:1);
-Y_prime = Y/sqrt(3);
-Z = ((cos(2*pi*(X-Y_prime))+cos(4*pi*Y_prime)+cos(2*pi*(X+Y_prime))) + 3/2)/(4.5);
-surf(X,Y,Z)
-shading('interp')
-colormap(plasma)
+
+%[X,Y] = meshgrid(-1:0.01:1,-1:0.01:1);
+%Y_prime = Y/sqrt(3);
+%Z = ((cos(2*pi*(X-Y_prime))+cos(4*pi*Y_prime)+cos(2*pi*(X+Y_prime))) + 3/2)/(4.5);
+%surf(X,Y,Z)
+%shading('interp')
+%colormap(plasma)
 
 %% Function definitions
 
@@ -326,12 +327,12 @@ function [b1,b2,b3] = Reciprocal(a1,a2,a3)
 end
 
 function [VmatrixElement] = Vfunc(X,Y,Z)
-  function [V0] = V0func(z,z0,backgroundDepth)
-        V0 = backgroundDepth * exp(2*const.alpha*(z0-z))...
-            -2*backgroundDepth*exp(const.alpha*(z0-z));
+  function [V0] = V0func(z,z0,backgroundDepth,alpha)
+        V0 = backgroundDepth * exp(2*alpha*(z0-z))...
+            -2*backgroundDepth*exp(alpha*(z0-z));
     end
-    function [V1] = V1func(z,z0,wellDepth)
-        V1 = 2*const.beta*wellDepth*exp(2*const.alpha*(z0-z));
+    function [V1] = V1func(z,z0,D,alpha)
+        V1 = 2*const.beta*D*exp(2*alpha*(z0-z));
     end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
@@ -368,20 +369,15 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V0func(Z,const.zOffset+2,const.MoS2Depth/3) ...
-        + Qhexfunc(X,Y) * ... % purple
-        V1func(Z,const.zOffset+3,const.MoS2Depth/4) ...
-        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * ... % red
-        V1func(Z,const.zOffset+1.7,const.MoS2Depth) ...
-        + Qhexfunc(X,Y - (const.c/sqrt(3)))^5/100 * ...
-        V1func(Z,const.zOffset,const.MoS2Depth);
-    VmatrixElement = V0func(Z,const.zOffset+2.2,20) + ...
-      V1func(Z,const.zOffset+4.4,1)* ... %blue
-      Qhexfunc(X,Y) + ...
-      V1func(Z,const.zOffset+3,0) * ... % green
-      Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) + ...
-      V1func(Z,const.zOffset+1,15) * ... %red
-      Qhexfunc(X,Y - (const.c/sqrt(3)));
+    VmatrixElement = (V0func(Z,const.zOffset+2.1,25,1.2) ...
+       + V1func(Z,const.zOffset+3.7,0.5,1.6))... %blue
+       * Qhexfunc(X,Y) ...
+       + (V0func(Z,const.zOffset+2.15,20,1.2) + ...
+      + V1func(Z,const.zOffset+3,0,1.1)) ... % green
+      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
+      + (V0func(Z,const.zOffset+2.1,23,1.2) ...
+      + V1func(Z,const.zOffset+1,15,1.1)) ... %red
+      * Qhexfunc(X,Y - (const.c/sqrt(3)));
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
