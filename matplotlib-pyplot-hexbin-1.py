@@ -59,7 +59,7 @@ while count < 2:
 Babs = np.sqrt(B1[0]**2+B1[1]**2)
 print("B1 = ") 
 print(B1)
-print("b2 = ") 
+print("B2 = ") 
 print(B2)
 print("Babs = ") 
 print(Babs)
@@ -158,7 +158,7 @@ plt.tick_params(
     bottom=False,      # ticks along the bottom edge are off
     top=False,         # ticks along the top edge are off
     labelbottom=False) # labels along the bottom edge are off
-useLog = False
+useLog = True
 if(useLog):
     h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.LogNorm(valmin,valmax))
     #plt.gca().set_aspect('equal')
@@ -214,7 +214,7 @@ def slugify(value, allow_unicode=False):
     return re.sub(r'[-\s]+', '-', value).strip('-_')
 
 filenametxt=""
-filenametxt="4 defects"
+filenametxt=""
 plt.figtext(0.5, 0.01, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic')
 
 if(filenametxt == ""):
