@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 50; Nsuper = 2;
+Nxy = 16; Nz = 50; Nsuper = 2;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -65,6 +65,7 @@ end
 
 %%
 V = zeros(Nxy,Nxy,Nz);
+Vinterp = zeros(Nxy,Nxy,Nz);
 X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
 Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
@@ -141,7 +142,7 @@ if interpolateDFTdata == true
   for k = 1:Nz
     for j = 1:Nxy
       for i = 1:Nxy
-        V(i,j,k) = Vvect(Nxy*Nxy*(k-1)+Nxy*(j-1)+i);
+        Vinterp(i,j,k) = Vvect(Nxy*Nxy*(k-1)+Nxy*(j-1)+i);
       end   
     end
   end
@@ -153,6 +154,14 @@ for z = 1:Nz
     for nx = 1:Nxy:Nsuper*Nxy
         for ny = 1:Nxy:Nsuper*Nxy
             Vsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = V(:,:,z);
+        end
+    end
+end
+Vinterpsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
+for z = 1:Nz
+    for nx = 1:Nxy:Nsuper*Nxy
+        for ny = 1:Nxy:Nsuper*Nxy
+            Vinterpsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = Vinterp(:,:,z);
         end
     end
 end
@@ -168,14 +177,14 @@ end
 %% Plot the potential. Disabled for now, as if the grid res is too high it complains
 %nPlot = 2/3;mPlot = 1/2;
 nPlotDef = 1;mPlotDef = 1;
-aboveCol = [0.8 0.3 1];
-%PlotPotentialAlongZ(Vsuper,a1,a2,mPlotDef,nPlotDef,Z,0,dft.aboveDefect,aboveCol)
+aboveCol = [0.3 0. 1];
+ComparePotentials(Vsuper,Vinterpsuper,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,0,aboveCol)
 nPlotHol = 2/3;mPlotHol = 1/3;
-holCol = [0.0 1 0.6];
-%PlotPotentialAlongZ(Vsuper,a1,a2,mPlotHol,nPlotHol,Z,0,dft.aboveHollow,holCol)
+holCol = [0.0 0.6 0.2];
+ComparePotentials(Vsuper,Vinterpsuper,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,0,holCol)
 nPlotMo = 1/3;mPlotMo = 2/3;
-moCol = [1 0.4 0];
-%PlotPotentialAlongZ(Vsuper,a1,a2,mPlotMo,nPlotMo,Z,0,dft.aboveMo,moCol)
+moCol = [1 0.2 0];
+ComparePotentials(Vsuper,Vinterpsuper,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,0,moCol)
 
 %% Get min and max bounds of the potentials
 DFTmin = min(VDFTsuper,[],"all")
@@ -300,6 +309,13 @@ if(doingMSshit)
     Multiscat.prepareConfigFile(confStruct);
 end
 %===
+[X,Y] = meshgrid(-1:0.01:1,-1:0.01:1);
+Y_prime = Y/sqrt(3);
+Z = ((cos(2*pi*(X-Y_prime))+cos(4*pi*Y_prime)+cos(2*pi*(X+Y_prime))) + 3/2)/(4.5);
+surf(X,Y,Z)
+shading('interp')
+colormap(plasma)
+
 %% Function definitions
 
 function [b1,b2,b3] = Reciprocal(a1,a2,a3)
@@ -348,13 +364,24 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
   function [Q] = Qhexfunc(X,Y)
         X_n = X ./ (const.c);
         Y_n = Y ./ (const.c*sqrt(3));
-        Q = 2/3 * (cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n)));
+        Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V0func(Z,const.zOffset+2,const.MoS2Depth/4) ...
-        + V1func(Z,const.zOffset+3,const.MoS2Depth/10) * Qhexfunc(X,Y)/10 ...
-        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,const.zOffset+1.7,const.MoS2Depth/10)/10;
+    VmatrixElement = V0func(Z,const.zOffset+2,const.MoS2Depth/3) ...
+        + Qhexfunc(X,Y) * ... % purple
+        V1func(Z,const.zOffset+3,const.MoS2Depth/4) ...
+        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * ... % red
+        V1func(Z,const.zOffset+1.7,const.MoS2Depth) ...
+        + Qhexfunc(X,Y - (const.c/sqrt(3)))^5/100 * ...
+        V1func(Z,const.zOffset,const.MoS2Depth);
+    VmatrixElement = V0func(Z,const.zOffset+2.2,20) + ...
+      V1func(Z,const.zOffset+4.4,1)* ... %blue
+      Qhexfunc(X,Y) + ...
+      V1func(Z,const.zOffset+3,0) * ... % green
+      Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) + ...
+      V1func(Z,const.zOffset+1,15) * ... %red
+      Qhexfunc(X,Y - (const.c/sqrt(3)));
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
@@ -422,8 +449,8 @@ factor = -0.7*const.beta*const.MoS2Depth;
   end
 end
 
-function PlotPotentialAlongZ(V,a1,a2,m,n,Z,zMin,dftPot,plotColor)
-  NxyNsuper = size(V,1);
+function ComparePotentials(V1,V2,V1name,V2name,a1,a2,m,n,Z,zMin,plotColor)
+  NxyNsuper = size(V1,1);
   SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper;
   k = int8(interp1(Z,1:numel(Z),zMin));
   if(k == 0)
@@ -433,23 +460,27 @@ function PlotPotentialAlongZ(V,a1,a2,m,n,Z,zMin,dftPot,plotColor)
   result = SpaghettiBolognaise\(centre');
   i = int8(result(1));
   j = int8(result(2));
-  Vpiece = squeeze(V(i,j,:));
+  V1piece = squeeze(V1(i,j,:));
+  V2piece = squeeze(V2(i,j,:));
   disp([i j k])
   figure
-  p = plot(Z(k:end),Vpiece(k:end),'DisplayName','Estimated analytical potential');
+  p = plot(Z(k:end),V1piece(k:end),'DisplayName',V1name);
   p.LineStyle = ":";
   p.Color = plotColor;
   p.Marker = ".";
-  tit = 'Plot of potential at x, y = ' + string(centre(1)) + ', ' + string(centre(2));
+  p.LineWidth=2;
+  tit = 'Plot of potentials at x, y = ' + string(centre(1)) + ', ' + string(centre(2));
   title(tit)
   xlabel('z/Å')
   ylabel('Energy/meV')
   hold on
   legend()
-  d = plot(dft.zAxis,dftPot,'DisplayName','DFT result');
+  d = plot(Z(k:end),V2piece(k:end),'DisplayName',V2name);
   d.LineStyle = "-";
   d.Color = [0 0.4470 0.7410];
   d.Marker = ".";
-  ylim([1.1*min(dftPot) 1.1*max(dftPot)])
+  d.LineWidth=2;
+  xlim([1.5 6])
+  ylim([-30 100])
   hold off
 end
