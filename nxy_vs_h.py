@@ -1,14 +1,18 @@
 from matplotlib import pyplot as plt
 
-Nxys = [64, 32, 16, 8, 4]
-Entropies = [0.850912701202775, 0.850912701202775,0.850912701202775, 0.850912701202775, 0.850912701202775]
+DefectDensities = [0,0.25,0.5,0.75,1]
+Entropies = [0.6495282977909468,
+0.852275076163138,
+0.7376804580552242,
+0.7510843204920689,
+0.4909806615832078]
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.plot(Nxys,Entropies,linestyle="-",marker='o',c=[0,0,0])
-plt.title("Entropy vs Nxy")
-plt.xlim(0,64)
-plt.xlabel("Nxy")
+ax.plot(DefectDensities,Entropies,linestyle="-",marker='x',c=[0.1,0.5,1])
+plt.title("Entropy vs defect density")
+plt.xlim(0,1)
+plt.xlabel("Fraction of sulphur atoms missing")
 plt.ylim(0,1)
 plt.ylabel("Entropy")
 plt.show()
