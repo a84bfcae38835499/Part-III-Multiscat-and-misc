@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 4; Nz = 50; Nsuper = 2;
+Nxy = 16; Nz = 50; Nsuper = 2;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -387,7 +387,7 @@ function [DV] = Dropoff(z,z0)
 end
 
 function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z)
-factor = -0.7*const.beta*const.MoS2Depth;
+factor = -0.7*12;
 %Adds a defect at sulphur site (m1,m2)
   Vout = Vin;
   NxySuper = size(Vout,1);
