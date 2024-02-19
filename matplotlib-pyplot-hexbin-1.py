@@ -214,7 +214,7 @@ def slugify(value, allow_unicode=False):
     return re.sub(r'[-\s]+', '-', value).strip('-_')
 
 filenametxt=""
-filenametxt="Nxy = 64"
+filenametxt="Nxy = 32"
 plt.figtext(0.5, 0.01, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic')
 
 if(filenametxt == ""):
