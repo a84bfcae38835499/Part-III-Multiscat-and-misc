@@ -142,8 +142,8 @@ if interpolateDFTdata == true
   for k = 1:Nz
     for j = 1:Nxy
       for i = 1:Nxy
-        V(i,j,k) = Vvect(Nxy*Nxy*(k-1)+Nxy*(j-1)+i);
-      end   
+        Vinterp(i,j,k) = Vvect(Nxy*Nxy*(k-1)+Nxy*(j-1)+i);
+      end
     end
   end
 end
