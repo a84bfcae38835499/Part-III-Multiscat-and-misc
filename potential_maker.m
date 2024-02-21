@@ -11,8 +11,8 @@ zMax = 6; zMin = 1.5;%units Å
 %a2=[0,const.a]; 
 %a1=[const.c,0];
 %a2=[const.c/2,const.c * sqrt(3)/2];
-a1=[-const.c,0];
-a2=[const.c/2,const.c*sqrt(3)/2];
+a1=[0,const.c];
+a2=[const.c*sqrt(3)/2,-const.c/2];
 a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
@@ -368,10 +368,10 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         Q = Q/3;
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
   end
-  function [Q] = Qhexfunc(X,Y)
-        X_n = X ./ (const.c);
-        Y_n = Y ./ (const.c*sqrt(3));
-        Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
+  function [Q] = Qhexfunc(x,y)
+        x_n = x ./ (const.c*sqrt(3));
+        y_n = y ./ (const.c);
+        Q = ((cos(2*pi*(y_n+x_n))+cos(4*pi*x_n)+cos(2*pi*(y_n-x_n))) + 3/2)/(4.5);
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
@@ -380,11 +380,10 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
        * Qhexfunc(X,Y) ...
        + (V0func(Z,const.zOffset+2.15,20,1.2) + ...
       + V1func(Z,const.zOffset+3,0,1.1)) ... % green
-      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
+      * Qhexfunc(X-(const.c*1/(2*sqrt(3))),Y-const.c/2) ...
       + (V0func(Z,const.zOffset+2.1,23,1.2) ...
       + V1func(Z,const.zOffset+1,15,1.1)) ... %red
-      * Qhexfunc(X,Y - (const.c/sqrt(3)));
-      %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
+      * Qhexfunc(X - (const.c/sqrt(3)),Y);
 end
 
 function [DV] = Dropoff(z,z0)
