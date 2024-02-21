@@ -11,12 +11,15 @@ zMax = 6; zMin = 1.5;%units Å
 %a2=[0,const.a]; 
 %a1=[const.c,0];
 %a2=[const.c/2,const.c * sqrt(3)/2];
-a1=[0,const.c];
-a2=[const.c*sqrt(3)/2,-const.c/2];
+a1=[const.c*sqrt(3)/2,-const.c/2];
+a2=[0,const.c];
 a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
+dp = dot([a1,0],b1);
+disp("dp = ")
+disp(dp)
 %% Import Min's DFT
 
 importfile("DFT_Pure.mat")
@@ -193,10 +196,10 @@ moCol = [1 0.2 0];
 ComparePotentials(Vsuper,Vinterpsuper,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,0,moCol)
 
 %% Get min and max bounds of the potentials
-DFTmin = min(VDFTsuper,[],"all")
-DFTmax = max(VDFTsuper,[],"all")
-AnalyticMin = min(Vsuper,[],"all")
-AnalyticMax = max(Vsuper,[],"all")
+DFTmin = min(VDFTsuper,[],"all");
+DFTmax = max(VDFTsuper,[],"all");
+AnalyticMin = min(Vsuper,[],"all");
+AnalyticMax = max(Vsuper,[],"all");
 
 %% Now change all the crap to be Min's DFT
 copyDFT = false;
@@ -211,6 +214,10 @@ if copyDFT
   a1 = x1;a2=x2;
   b1 = y1; b2 = y2;
 end
+a1
+a2
+b1
+b2
 %% data for python hex plotter
 writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
 a1str = [char(num2str(a1))];
