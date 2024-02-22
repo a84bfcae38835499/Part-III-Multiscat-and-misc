@@ -4,7 +4,7 @@ rng default;
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 16; Nz = 50; Nsuper = 1;
-zMax = 6; zMin = -2;%units Å
+zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
@@ -92,7 +92,7 @@ end
 %actually check them lol
 %===
 %% Now interpolate the DFT data into a useful basis
-interpolateDFTdata = false;
+interpolateDFTdata = true;
 Vvect = zeros(Nz*Nxy*Nxy,1);
 if interpolateDFTdata == true
   VDFTvect = zeros(DFTsuper*DFTsuper*12*12*19,1);
@@ -372,13 +372,20 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
   function [Q] = Qhexfunc(X,Y)
         X_n = X ./ (const.c);
         Y_n = Y ./ (const.c*sqrt(3));
-        Q = 2/3 * (cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n)));
+        Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V0func(Z,2.4,const.MoS2Depth/3,1.1) ...
-        + V1func(Z,3,const.MoS2Depth/3,1.1) * Qhexfunc(X,Y)...
-        + Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) * V1func(Z,1.7,const.MoS2Depth/3,1.1);
+    VmatrixElement = (V0func(Z,const.zOffset+2.1,25,1.2) ...
+       + V1func(Z,const.zOffset+3.7,0.5,1.6))... %blue
+       * Qhexfunc(X,Y) ...
+       + (V0func(Z,const.zOffset+2.15,20,1.2) + ...
+      + V1func(Z,const.zOffset+3,0,1.1)) ... % green
+      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
+      + (V0func(Z,const.zOffset+2.1,23,1.2) ...
+      + V1func(Z,const.zOffset+1,15,1.1)) ... %red
+      * Qhexfunc(X,Y - (const.c/sqrt(3)));
+      %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
 function [DV] = Dropoff(z,z0)
