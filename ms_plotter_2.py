@@ -191,8 +191,6 @@ else:
 #create the figure with set figure size
 fig = plt.figure(figsize=(10,8))
 
-#puts a grid on the figure
-gs = gridspec.GridSpec(16, 10) 
 
 #creates two subplots
 ax = plt.subplot2grid((16,20), (0,17), colspan=1, rowspan=16)
@@ -225,18 +223,22 @@ for r in range(len(vor.point_region)):
 import matplotlib.patheffects as pe
 pathefts1 = [pe.Stroke(linewidth=1, foreground='w'), pe.Normal()]
 pathefts2 = [pe.Stroke(linewidth=2, foreground='w'), pe.Normal()]
-
-plt.arrow(0,0,b1[0]*Nsuper*0.7,b1[1]*Nsuper*0.7,width=0.1,color='r',zorder=7,path_effects=pathefts2)
-plt.arrow(0,0,b2[0]*Nsuper*0.7,b2[1]*Nsuper*0.7,width=0.1,color='g',zorder=7,path_effects=pathefts2)
-plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper),color='r',fontsize=12,weight='bold',path_effects=pathefts1,zorder=8)
-plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color='g',fontsize=12,weight='bold',path_effects=pathefts1,zorder=8)
-
+b1col = [0.9, 0.1, 0]
+b2col = [0, 0.7, 0.2]
 a1col = [1, 0.5, 0.6]
-a2col = [0.2, 0.7, 0.3]
-plt.arrow(0,0,a1[0],a1[1],width=0.1,color=a1col,zorder=6,path_effects=pathefts2)
-plt.arrow(0,0,a2[0],a2[1],width=0.1,color=a2col,zorder=6,path_effects=pathefts2)
+a2col = [0.5, 0.8, 0.6]
+hecol = [0, 0, 1]
+
+plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.1,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
+plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.1,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
+plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper),color=b1col,fontsize=12,weight='bold',path_effects=pathefts1,zorder=8)
+plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=12,weight='bold',path_effects=pathefts1,zorder=8)
+
+plt.arrow(0,0,a1[0],a1[1],width=0.1,color=a1col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
+plt.arrow(0,0,a2[0],a2[1],width=0.1,color=a2col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
 plt.annotate("a1", (a1[0],a1[1]+0.2),color=a1col,fontsize=12,weight='bold',path_effects=pathefts1)
 plt.annotate("a2", (a2[0],a2[1]+0.5),color=a2col,fontsize=12,weight='bold',path_effects=pathefts1)
+
 
 for k in range(0,nOccCh):
     row = d.iloc[k]
@@ -245,6 +247,8 @@ for k in range(0,nOccCh):
     n1n2 = str(n1) + ',' + str(n2)
     plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2)*Nsuper-0.3,(b1[1]*n1+b2[1]*n2)*Nsuper-0.12),fontsize=6,zorder=10)
 ax2.set_aspect('equal')
+plt.xticks([])  
+plt.yticks([])  
 
 scatFile = open('scatCond.in', 'r')
 E = -69
@@ -260,13 +264,22 @@ titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, 
 print(titelstr)
 scatFile.close()
 
+
+heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
+                      [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
+heliumDir = -heliumRot * np.reshape(np.array(a1),(2,1))/np.sqrt(np.dot(a1,a1))
+print("helium dir =")
+print(heliumDir)
+plt.arrow(0,0,heliumDir[0,0],heliumDir[1,0],width=0.1,color=hecol,zorder=7,head_width=0.15)
+
+
 ax2.set_title(titelstr)
 
 captiontxt="Entropy = " + "{:.6f}".format(H)
-plt.figtext(0.5, -0.07, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+plt.figtext(0.5, -0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
 filenametxt="Italicised comment here"
-plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
+plt.figtext(0.5, -0.1, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):
     savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
