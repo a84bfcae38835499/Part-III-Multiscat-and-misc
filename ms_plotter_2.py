@@ -37,9 +37,17 @@ count = 0
 
 B1 = [0,0]
 B2 = [0,0]
-while count < 2:
+Nsuper = 1337
+while count < 3:
     # Get next line from file
     line = latticeFile.readline()
+    if(line.startswith("Nsuper = ")):
+        line = line[len("Nsuper = "):]
+        split = line.split()
+        Nsuper = float(split[0])
+        print("Nsuper = " + split[0])
+        count += 1
+
     if line.startswith("b1 = "):
         line = line[len("b1 = "):]
         print("line = " + line)
@@ -114,6 +122,9 @@ for k in range(0,nOccCh):
     plotValues[k] = I
     plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
     plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
+plotCoordsArray = np.array([])
+plotCoordsArray = np.array(np.column_stack((plotCoordsX, plotCoordsY)))
+print(plotCoordsArray.shape)
 print(f"Valmin = {valmin}, valmax = {valmax}")
 print("===")
 print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
@@ -124,60 +135,57 @@ print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
 print("Entropy = " + str(H))
 
-n1Span = n1max-n1min
-xSpan = n1Span*0.5
-n2Span = n2max-n2min
-print(xSpan)
-ySpan = int(1+np.sqrt(3)*(xSpan))
-if(ySpan%2==0):
-    ySpan = ySpan - 1
+#packages to import
+from scipy.spatial import Voronoi
+from scipy.spatial import voronoi_plot_2d
+import matplotlib.cm as cm
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib import gridspec
 
-fig = plt.figure()
-#h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
-#print("x coords = ")
-#print(plotCoordsX)
-#print("y coords = ")
-#print(plotCoordsY)
-# from curved coordinate to rectlinear coordinate.
-fudge = 1 #I have absolutely no idea why this is needed
-def tr(x, y):
-    matTrans = np.matrix([[ 1/2, np.sqrt(3)/2],[0,1]])
-    x, y = np.asarray(x), np.asarray(y)
-    return x * matTrans[0,0] + y * matTrans[0,1],x * matTrans[1,0] + y * matTrans[1,1]
-
-# from rectlinear coordinate to curved coordinate.
-def inv_tr(x, y):
-    matTrans = np.matrix([[ 1/2, np.sqrt(3)/2],[0,1]])
-    invMat = np.linalg.inv(matTrans)
-    x, y = np.asarray(x), np.asarray(y)
-    return x * invMat[0,0] + y * invMat[0,1],x * invMat[1,0] + y * invMat[1,1]
-
-ax = fig.add_subplot(projection='skewx')
-# Add the grid
-plt.grid(True)
-ax.grid(which='major', axis='both', linestyle='--',color=[0., 0., 0.])
-
-# Plot the data using normal plotting functions, in this case using
-# log scaling in Y, as dictated by the typical meteorological plot
-# An example of a slanted line at constant X
-l = ax.axvline(0, color='C0')
-
-# Disables the log-formatting that comes with semilogy
-ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
-ax.yaxis.set_minor_formatter(ticker.NullFormatter())
-ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
-    
-useLog = True
+#sets the colour scale
+useLog = False
 if(useLog):
-    h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.LogNorm(valmin,valmax))
-    #plt.gca().set_aspect('equal')
-    fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=valmin,vmax=valmax), cmap='magma'),
-             ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
+    mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valmin,valmax))
 else:
-    h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.Normalize(valmin,valmax))
-    #plt.gca().set_aspect('equal')
-    fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=valmin,vmax=valmax), cmap='magma'),
-             ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
+    mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.Normalize(valmin,valmax))
+
+#create the figure with set figure size
+fig = plt.figure(figsize=(10,8))
+
+#puts a grid on the figure
+gs = gridspec.GridSpec(16, 10) 
+
+#creates two subplots
+ax = plt.subplot2grid((16,20), (0,17), colspan=1, rowspan=16)
+ax2 = plt.subplot2grid((16,20), (0,0), colspan=16, rowspan=16)
+
+#creates a colourbar on the first subplot
+if(useLog):
+    cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valmin,valmax), orientation='vertical')
+else:
+    cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valmin,valmax), orientation='vertical')
+cb1.set_label('P($n_1$,$n_2$)')
+
+vor = Voronoi(points=plotCoordsArray)
+
+#plots the voronoi diagram on the second subplot
+voronoi_plot_2d(vor, show_vertices =False, show_points =False, ax=ax2)
+
+#gives the order values for colour scale (which come from a data frame in a different part of the code)
+order = plotValues
+
+#colours the voronoi cells    
+for r in range(len(vor.point_region)):
+    region = vor.regions[vor.point_region[r]]
+    if not -1 in region:
+        polygon = [vor.vertices[i] for i in region]
+        plt.fill(*zip(*polygon), color=mapper.to_rgba(order[r]))
+        #plt.fill(*zip(*polygon))
+plt.arrow(0,0,b1[0]*Nsuper*0.8,b1[1]*Nsuper*0.8,width=0.1,color='r',zorder=7)
+plt.arrow(0,0,b2[0]*Nsuper*0.8,b2[1]*Nsuper*0.8,width=0.1,color='g',zorder=7)
+plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper),color='r',fontsize=12,weight='bold')
+plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color='g',fontsize=12,weight='bold')
 
 scatFile = open('scatCond.in', 'r')
 E = -69
