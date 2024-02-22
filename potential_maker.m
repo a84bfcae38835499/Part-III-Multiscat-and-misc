@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 50; Nsuper = 1;
+Nxy = 16; Nz = 50; Nsuper = 2;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -11,15 +11,12 @@ zMax = 6; zMin = 1.5;%units Å
 %a2=[0,const.a]; 
 %a1=[const.c,0];
 %a2=[const.c/2,const.c * sqrt(3)/2];
-a1=[const.c*sqrt(3)/2,-const.c/2];
-a2=[0,const.c];
+a1=[-const.c,0];
+a2=[const.c/2,const.c*sqrt(3)/2];
 a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
-dp = dot([a1,0],b1);
-disp("dp = ")
-disp(dp)
 %% Import Min's DFT
 
 importfile("DFT_Pure.mat")
@@ -196,10 +193,10 @@ moCol = [1 0.2 0];
 ComparePotentials(Vsuper,Vinterpsuper,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,0,moCol)
 
 %% Get min and max bounds of the potentials
-DFTmin = min(VDFTsuper,[],"all");
-DFTmax = max(VDFTsuper,[],"all");
-AnalyticMin = min(Vsuper,[],"all");
-AnalyticMax = max(Vsuper,[],"all");
+DFTmin = min(VDFTsuper,[],"all")
+DFTmax = max(VDFTsuper,[],"all")
+AnalyticMin = min(Vsuper,[],"all")
+AnalyticMax = max(Vsuper,[],"all")
 
 %% Now change all the crap to be Min's DFT
 copyDFT = false;
@@ -214,10 +211,6 @@ if copyDFT
   a1 = x1;a2=x2;
   b1 = y1; b2 = y2;
 end
-a1
-a2
-b1
-b2
 %% data for python hex plotter
 writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
 a1str = [char(num2str(a1))];
@@ -375,10 +368,10 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         Q = Q/3;
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
   end
-  function [Q] = Qhexfunc(x,y)
-        x_n = x ./ (const.c*sqrt(3));
-        y_n = y ./ (const.c);
-        Q = ((cos(2*pi*(y_n+x_n))+cos(4*pi*x_n)+cos(2*pi*(y_n-x_n))) + 3/2)/(4.5);
+  function [Q] = Qhexfunc(X,Y)
+        X_n = X ./ (const.c);
+        Y_n = Y ./ (const.c*sqrt(3));
+        Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
@@ -387,10 +380,11 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
        * Qhexfunc(X,Y) ...
        + (V0func(Z,const.zOffset+2.15,20,1.2) + ...
       + V1func(Z,const.zOffset+3,0,1.1)) ... % green
-      * Qhexfunc(X-(const.c*1/(2*sqrt(3))),Y-const.c/2) ...
+      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
       + (V0func(Z,const.zOffset+2.1,23,1.2) ...
       + V1func(Z,const.zOffset+1,15,1.1)) ... %red
-      * Qhexfunc(X - (const.c/sqrt(3)),Y);
+      * Qhexfunc(X,Y - (const.c/sqrt(3)));
+      %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
 function [DV] = Dropoff(z,z0)
