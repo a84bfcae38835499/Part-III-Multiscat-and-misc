@@ -129,13 +129,15 @@ nOccCh = len(d.index)
 plotValues = np.zeros((nOccCh))
 plotCoordsX = np.zeros((nOccCh))
 plotCoordsY = np.zeros((nOccCh))
+pCXS = np.array([])
+pCYS = np.array([])
 n1min = 0
 n1max = 0
 n2min = 0
 n2max = 0
 valmin = 1
 valmax = 0
-smolVal = 1e-10
+smolVal = 1e-5
 for k in range(0,nOccCh):
     row = d.iloc[k]
     n1 = getattr(row,'n1')
@@ -152,6 +154,9 @@ for k in range(0,nOccCh):
     if(I == 0):
         print(f"Zero found, setting to {smolVal}")
         I = smolVal
+    elif(I > smolVal):
+        pCXS = np.append(pCXS,b1[0] * n1 + b2[0] * n2)
+        pCYS = np.append(pCYS,b1[1] * n1 + b2[1] * n2)
     if(I < valmin):
         valmin = I
     if(I > valmax):
@@ -160,14 +165,10 @@ for k in range(0,nOccCh):
     plotValues[k] = I
     plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
     plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
-plotCoordsArray = np.array([])
-plotCoordsArray = np.array(np.column_stack((plotCoordsX, plotCoordsY)))
-print(plotCoordsArray.shape)
 print(f"Valmin = {valmin}, valmax = {valmax}")
 print("===")
 print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
 print("===")
-    
 
 print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
@@ -196,28 +197,6 @@ fig = plt.figure(figsize=(10,8))
 ax = plt.subplot2grid((16,20), (0,17), colspan=1, rowspan=16)
 ax2 = plt.subplot2grid((16,20), (0,0), colspan=16, rowspan=16)
 
-#creates a colourbar on the first subplot
-if(useLog):
-    cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valmin,valmax), orientation='vertical')
-else:
-    cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valmin,valmax), orientation='vertical')
-cb1.set_label('P($n_1$,$n_2$)')
-
-vor = Voronoi(points=plotCoordsArray,furthest_site=False)
-
-#plots the voronoi diagram on the second subplot
-voronoi_plot_2d(vor, show_vertices =False, show_points =False, ax=ax2)
-
-#gives the order values for colour scale (which come from a data frame in a different part of the code)
-order = plotValues
-
-#colours the voronoi cells    
-for r in range(len(vor.point_region)):
-    region = vor.regions[vor.point_region[r]]
-    if not -1 in region:
-        polygon = [vor.vertices[i] for i in region]
-        plt.fill(*zip(*polygon), color=mapper.to_rgba(order[r]))
-        #plt.fill(*zip(*polygon))
 
 
 import matplotlib.patheffects as pe
@@ -229,15 +208,15 @@ a1col = [1, 0.5, 0.6]
 a2col = [0.5, 0.8, 0.6]
 hecol = [0, 0.3, 0.8]
 
-plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.1,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
-plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.1,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
-plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper),color=b1col,fontsize=12,weight='bold',path_effects=pathefts1,zorder=8)
-plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=12,weight='bold',path_effects=pathefts1,zorder=8)
+plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
+plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
+plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper),color=b1col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=8)
+plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=8)
 
-plt.arrow(0,0,a1[0],a1[1],width=0.1,color=a1col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
-plt.arrow(0,0,a2[0],a2[1],width=0.1,color=a2col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
-plt.annotate("a1", (a1[0],a1[1]+0.2),color=a1col,fontsize=12,weight='bold',path_effects=pathefts1)
-plt.annotate("a2", (a2[0],a2[1]+0.5),color=a2col,fontsize=12,weight='bold',path_effects=pathefts1)
+plt.arrow(0,0,a1[0],a1[1],width=0.05,color=a1col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
+plt.arrow(0,0,a2[0],a2[1],width=0.05,color=a2col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
+plt.annotate("a1", (a1[0],a1[1]+0.2),color=a1col,fontsize=8,weight='bold',path_effects=pathefts1)
+plt.annotate("a2", (a2[0],a2[1]+0.5),color=a2col,fontsize=8,weight='bold',path_effects=pathefts1)
 
 
 for k in range(0,nOccCh):
@@ -245,10 +224,12 @@ for k in range(0,nOccCh):
     n1 = int(getattr(row,'n1'))
     n2 = int(getattr(row,'n2'))
     n1n2 = str(n1) + ',' + str(n2)
-    plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2)*Nsuper-0.3,(b1[1]*n1+b2[1]*n2)*Nsuper-0.12),fontsize=6,zorder=10)
+    plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2)*Nsuper,(b1[1]*n1+b2[1]*n2)*Nsuper),fontsize=6,zorder=10,ha='center',va='center')
 ax2.set_aspect('equal')
 plt.xticks([])  
-plt.yticks([])  
+plt.yticks([])
+ax2.set_ylim(min(pCYS),max(pCYS))
+ax2.set_xlim(min(pCXS),max(pCXS))
 
 scatFile = open('scatCond.in', 'r')
 E = -69
@@ -264,21 +245,66 @@ titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, 
 print(titelstr)
 scatFile.close()
 
-
+import math
 heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
-                      [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
+                    [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
 heliumDir = -heliumRot * np.reshape(np.array(a1),(2,1))/np.sqrt(np.dot(a1,a1))
-print("helium dir =")
-print(heliumDir)
-plt.arrow(0,0,heliumDir[0,0],heliumDir[1,0],width=0.03,color=hecol,zorder=7,head_width=0.1)
-
-
+e = 1.602176634E-19
+hbar = 6.62607015e-34/(2*np.pi)
+m = 4 * 1.66053906660e-27
+#heliumk = np.sin(np.deg2rad(theta))*heliumDir * np.sqrt(2*m*e*E/1000)/hbar
+heliumk = heliumDir * np.sqrt(2*m*e*E/1000)/hbar
+heliumk_n = heliumk/(Babs*1e10)
+print("heliumk_n =")
+print(heliumk_n)
+if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
+    plt.arrow(0,0,heliumk_n[0,0],heliumk_n[1,0],width=0.03,color=hecol,zorder=7,head_width=0.1)
 ax2.set_title(titelstr)
+
+#creates a colourbar on the first subplot
+if(useLog):
+    cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valmin,valmax), orientation='vertical')
+else:
+    cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valmin,valmax), orientation='vertical')
+cb1.set_label('P($n_1$,$n_2$)')
+
+
+additionalX = []
+additionalY = []
+additionalVals = []
+
+limN = 36
+for i in range(limN):
+    angle = 2*np.pi*i/limN
+    iRot = np.matrix([[np.cos(angle),np.sin(angle)],
+                    [-np.sin(angle),np.cos(angle)]])
+    r = iRot * np.reshape(heliumk_n,(2,1))
+    print(r)
+    additionalX.append(r[0,0])
+    additionalY.append(r[1,0])
+    additionalVals.append(0.)
+
+plotCoordsArray = np.array(np.column_stack((np.append(plotCoordsX,additionalX), np.append(plotCoordsY,additionalY))))
+order = np.append(plotValues,additionalVals)
+points = plotCoordsArray
+vor = Voronoi(points=points,furthest_site=False)
+
+#plots the voronoi diagram on the second subplot
+voronoi_plot_2d(vor, show_vertices =False, show_points =True, ax=ax2,line_width=0)
+    
+
+#colours the voronoi cells    
+for r in range(len(vor.point_region)):
+    region = vor.regions[vor.point_region[r]]
+    if not -1 in region:
+        polygon = [vor.vertices[i] for i in region]
+        plt.fill(*zip(*polygon), color=mapper.to_rgba(order[r]))
+        #plt.fill(*zip(*polygon))
 
 captiontxt="Entropy = " + "{:.6f}".format(H)
 plt.figtext(0.5, -0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
-filenametxt="~ Ride that helium wave ~"
+filenametxt="DFT fitted potential"
 plt.figtext(0.5, -0.1, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):
