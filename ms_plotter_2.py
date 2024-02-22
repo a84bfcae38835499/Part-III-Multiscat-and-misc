@@ -10,6 +10,25 @@ import datetime
 import skewaxes
 # Default theme
 #mpl.rc('axes',edgecolor='white')
+import unicodedata
+import re
+
+def slugify(value, allow_unicode=False):
+    """
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value.lower())
+    return re.sub(r'[-\s]+', '-', value).strip('-_')
+
 
 def import_multiscat(fname):    
     """Impot standrad multiscat output into a pandas data frame."""
@@ -37,8 +56,10 @@ count = 0
 
 B1 = [0,0]
 B2 = [0,0]
+a1 = [0,0]
+a2 = [0,0]
 Nsuper = 1337
-while count < 3:
+while count < 5:
     # Get next line from file
     line = latticeFile.readline()
     if(line.startswith("Nsuper = ")):
@@ -46,6 +67,23 @@ while count < 3:
         split = line.split()
         Nsuper = float(split[0])
         print("Nsuper = " + split[0])
+        count += 1
+
+    if line.startswith("a1 = "):
+        line = line[len("a1 = "):]
+        print("line = " + line)
+        split = line.split()
+
+        a1[0] = float(split[0])
+        a1[1] = float(split[1])
+        count += 1
+ 
+    if line.startswith("a2 = "):
+        line = line[len("a2 = "):]
+        print("line = " + line)
+        split = line.split()
+        a2[0] = float(split[0])
+        a2[1] = float(split[1])
         count += 1
 
     if line.startswith("b1 = "):
@@ -167,7 +205,7 @@ else:
     cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valmin,valmax), orientation='vertical')
 cb1.set_label('P($n_1$,$n_2$)')
 
-vor = Voronoi(points=plotCoordsArray)
+vor = Voronoi(points=plotCoordsArray,furthest_site=False)
 
 #plots the voronoi diagram on the second subplot
 voronoi_plot_2d(vor, show_vertices =False, show_points =False, ax=ax2)
@@ -182,10 +220,31 @@ for r in range(len(vor.point_region)):
         polygon = [vor.vertices[i] for i in region]
         plt.fill(*zip(*polygon), color=mapper.to_rgba(order[r]))
         #plt.fill(*zip(*polygon))
-plt.arrow(0,0,b1[0]*Nsuper*0.8,b1[1]*Nsuper*0.8,width=0.1,color='r',zorder=7)
-plt.arrow(0,0,b2[0]*Nsuper*0.8,b2[1]*Nsuper*0.8,width=0.1,color='g',zorder=7)
-plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper),color='r',fontsize=12,weight='bold')
-plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color='g',fontsize=12,weight='bold')
+
+
+import matplotlib.patheffects as pe
+pathefts1 = [pe.Stroke(linewidth=1, foreground='w'), pe.Normal()]
+pathefts2 = [pe.Stroke(linewidth=2, foreground='w'), pe.Normal()]
+
+plt.arrow(0,0,b1[0]*Nsuper*0.7,b1[1]*Nsuper*0.7,width=0.1,color='r',zorder=7,path_effects=pathefts2)
+plt.arrow(0,0,b2[0]*Nsuper*0.7,b2[1]*Nsuper*0.7,width=0.1,color='g',zorder=7,path_effects=pathefts2)
+plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper),color='r',fontsize=12,weight='bold',path_effects=pathefts1,zorder=8)
+plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color='g',fontsize=12,weight='bold',path_effects=pathefts1,zorder=8)
+
+a1col = [1, 0.5, 0.6]
+a2col = [0.2, 0.7, 0.3]
+plt.arrow(0,0,a1[0],a1[1],width=0.1,color=a1col,zorder=6,path_effects=pathefts2)
+plt.arrow(0,0,a2[0],a2[1],width=0.1,color=a2col,zorder=6,path_effects=pathefts2)
+plt.annotate("a1", (a1[0],a1[1]+0.2),color=a1col,fontsize=12,weight='bold',path_effects=pathefts1)
+plt.annotate("a2", (a2[0],a2[1]+0.5),color=a2col,fontsize=12,weight='bold',path_effects=pathefts1)
+
+for k in range(0,nOccCh):
+    row = d.iloc[k]
+    n1 = int(getattr(row,'n1'))
+    n2 = int(getattr(row,'n2'))
+    n1n2 = str(n1) + ',' + str(n2)
+    plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2)*Nsuper-0.3,(b1[1]*n1+b2[1]*n2)*Nsuper-0.12),fontsize=6,zorder=10)
+ax2.set_aspect('equal')
 
 scatFile = open('scatCond.in', 'r')
 E = -69
@@ -201,38 +260,18 @@ titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, 
 print(titelstr)
 scatFile.close()
 
-ax.set_title(titelstr)
+ax2.set_title(titelstr)
 
 captiontxt="Entropy = " + "{:.6f}".format(H)
-plt.figtext(0.5, 0.04, captiontxt, wrap=True, horizontalalignment='center', fontsize=12)
-
-import unicodedata
-import re
-
-def slugify(value, allow_unicode=False):
-    """
-    Taken from https://github.com/django/django/blob/master/django/utils/text.py
-    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
-    dashes to single dashes. Remove characters that aren't alphanumerics,
-    underscores, or hyphens. Convert to lowercase. Also strip leading and
-    trailing whitespace, dashes, and underscores.
-    """
-    value = str(value)
-    if allow_unicode:
-        value = unicodedata.normalize('NFKC', value)
-    else:
-        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
-    value = re.sub(r'[^\w\s-]', '', value.lower())
-    return re.sub(r'[-\s]+', '-', value).strip('-_')
-
+plt.figtext(0.5, -0.07, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
-filenametxt=""
-plt.figtext(0.5, 0.005, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic')
+filenametxt="Italicised comment here"
+plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):
     savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
 else:
     savestr = "Figures/Diffraction/" +slugify(filenametxt) +datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + ".png"
 print(savestr)
-plt.savefig(fname=savestr)
+plt.savefig(fname=savestr,dpi=300)
 plt.show()
