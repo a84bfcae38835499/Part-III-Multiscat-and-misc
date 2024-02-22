@@ -227,7 +227,7 @@ b1col = [0.9, 0.1, 0]
 b2col = [0, 0.7, 0.2]
 a1col = [1, 0.5, 0.6]
 a2col = [0.5, 0.8, 0.6]
-hecol = [0, 0, 1]
+hecol = [0, 0.3, 0.8]
 
 plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.1,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
 plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.1,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
@@ -270,7 +270,7 @@ heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
 heliumDir = -heliumRot * np.reshape(np.array(a1),(2,1))/np.sqrt(np.dot(a1,a1))
 print("helium dir =")
 print(heliumDir)
-plt.arrow(0,0,heliumDir[0,0],heliumDir[1,0],width=0.1,color=hecol,zorder=7,head_width=0.15)
+plt.arrow(0,0,heliumDir[0,0],heliumDir[1,0],width=0.03,color=hecol,zorder=7,head_width=0.1)
 
 
 ax2.set_title(titelstr)
@@ -278,13 +278,13 @@ ax2.set_title(titelstr)
 captiontxt="Entropy = " + "{:.6f}".format(H)
 plt.figtext(0.5, -0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
-filenametxt="Italicised comment here"
+filenametxt="~ Ride that helium wave ~"
 plt.figtext(0.5, -0.1, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):
-    savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + "_Hex.png"
+    savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + ".png"
 else:
-    savestr = "Figures/Diffraction/" +slugify(filenametxt) +datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + ".png"
+    savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') +slugify(filenametxt)+ ".png"
 print(savestr)
 plt.savefig(fname=savestr,dpi=300)
 plt.show()
