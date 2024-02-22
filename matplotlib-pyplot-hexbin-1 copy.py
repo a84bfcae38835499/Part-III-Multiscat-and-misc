@@ -7,6 +7,7 @@ import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
 import datetime
+import skewaxes
 # Default theme
 #mpl.rc('axes',edgecolor='white')
 
@@ -71,6 +72,8 @@ print("b1 = ")
 print(b1)
 print("b2 = ") 
 print(b2)
+print("Babs = ")
+
 d = import_multiscat('diffrac10001.out')
 print(d)
 
@@ -86,10 +89,6 @@ n2min = 0
 n2max = 0
 valmin = 1
 valmax = 0
-ymin = 100
-ymax = -100
-xmin = 100
-xmax = -100
 smolVal = 1e-10
 for k in range(0,nOccCh):
     row = d.iloc[k]
@@ -112,22 +111,12 @@ for k in range(0,nOccCh):
     if(I > valmax):
         valmax = I
     #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
-    coordinate = n1 * b1 + n2 * b2
-    if(coordinate[0] < xmin):
-        xmin =coordinate[0]
-    if(coordinate[0] > xmax):
-        xmax =coordinate[0]
-    if(coordinate[1] < ymin):
-        ymin =coordinate[0]
-    if(coordinate[1] > ymax):
-        ymax =coordinate[0]
     plotValues[k] = I
     plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
     plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
 print(f"Valmin = {valmin}, valmax = {valmax}")
 print("===")
 print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
-print(f"xmax = {xmax}, xmin = {xmin}, ymax = {ymax}, ymin = {ymin}")
 print("===")
     
 
@@ -135,9 +124,14 @@ print("Number of occupied channels = " + str(nOccCh))
 H = calculate_entropy(plotValues)
 print("Entropy = " + str(H))
 
-xSpan = xmax - xmin
-ySpan = ymax - ymin
-print(f"xSpan = {xSpan}, ySpan = {ySpan}")
+n1Span = n1max-n1min
+xSpan = n1Span*0.5
+n2Span = n2max-n2min
+print(xSpan)
+ySpan = int(1+np.sqrt(3)*(xSpan))
+if(ySpan%2==0):
+    ySpan = ySpan - 1
+
 fig = plt.figure()
 #h = ax.hexbin(x, y, gridsize=(int(np.sqrt(3)*scalefact), int(scalefact)))
 #print("x coords = ")
@@ -147,45 +141,40 @@ fig = plt.figure()
 # from curved coordinate to rectlinear coordinate.
 fudge = 1 #I have absolutely no idea why this is needed
 def tr(x, y):
-    matTrans = np.matrix([[b1[0], b1[1]],[b2[0], b2[1]]])
+    matTrans = np.matrix([[ 1/2, np.sqrt(3)/2],[0,1]])
     x, y = np.asarray(x), np.asarray(y)
     return x * matTrans[0,0] + y * matTrans[0,1],x * matTrans[1,0] + y * matTrans[1,1]
 
 # from rectlinear coordinate to curved coordinate.
 def inv_tr(x, y):
-    matTrans = np.matrix([[b1[0], b1[1]],[b2[0], b2[1]]])
+    matTrans = np.matrix([[ 1/2, np.sqrt(3)/2],[0,1]])
     invMat = np.linalg.inv(matTrans)
     x, y = np.asarray(x), np.asarray(y)
     return x * invMat[0,0] + y * invMat[0,1],x * invMat[1,0] + y * invMat[1,1]
 
-grid_helper = AA.GridHelperCurveLinear((tr, inv_tr),
-                                       extreme_finder=gf.ExtremeFinderSimple(200,200),
-                                       grid_locator1=gf.MaxNLocator(nbins=15),
-                                       grid_locator2=gf.MaxNLocator(nbins=15)
-                                       )
-
-ax = fig.add_subplot(111,axes_class=AA.AxesZero, grid_helper=grid_helper,zorder=6)
+ax = fig.add_subplot(projection='skewx')
 # Add the grid
+plt.grid(True)
 ax.grid(which='major', axis='both', linestyle='--',color=[0., 0., 0.])
-ax.axis["bottom"].toggle(all=True)
-ax.set_xlim([xmax,xmin])
-ax.set_ylim([ymax,ymin])
-ax.set_aspect(1)
 
+# Plot the data using normal plotting functions, in this case using
+# log scaling in Y, as dictated by the typical meteorological plot
+# An example of a slanted line at constant X
+l = ax.axvline(0, color='C0')
 
-ySpan = int(1+np.sqrt(3)*(xSpan))
-if(ySpan%2==0):
-    ySpan = ySpan - 1
-
-
+# Disables the log-formatting that comes with semilogy
+ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
+ax.yaxis.set_minor_formatter(ticker.NullFormatter())
+ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    
 useLog = True
 if(useLog):
-    h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(int(xSpan), int(ySpan/2)),cmap='magma',norm=mpl.colors.LogNorm(valmin,valmax))
+    h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.LogNorm(valmin,valmax))
     #plt.gca().set_aspect('equal')
     fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.LogNorm(vmin=valmin,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
 else:
-    h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(int(xSpan), int(ySpan/2)),cmap='magma',norm=mpl.colors.Normalize(valmin,valmax))
+    h = ax.hexbin(plotCoordsX,plotCoordsY,C=plotValues,gridsize=(ySpan, int(xSpan)),cmap='magma',norm=mpl.colors.Normalize(valmin,valmax))
     #plt.gca().set_aspect('equal')
     fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=valmin,vmax=valmax), cmap='magma'),
              ax=ax, orientation='vertical', label='P($n_1$,$n_2$)')
