@@ -225,11 +225,7 @@ for k in range(0,nOccCh):
     n2 = int(getattr(row,'n2'))
     n1n2 = str(n1) + ',' + str(n2)
     plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2)*Nsuper,(b1[1]*n1+b2[1]*n2)*Nsuper),fontsize=6,zorder=10,ha='center',va='center')
-ax2.set_aspect('equal')
-plt.xticks([])  
-plt.yticks([])
-ax2.set_ylim(min(pCYS),max(pCYS))
-ax2.set_xlim(min(pCXS),max(pCXS))
+
 
 scatFile = open('scatCond.in', 'r')
 E = -69
@@ -290,7 +286,7 @@ points = plotCoordsArray
 vor = Voronoi(points=points,furthest_site=False)
 
 #plots the voronoi diagram on the second subplot
-voronoi_plot_2d(vor, show_vertices =False, show_points =True, ax=ax2,line_width=0)
+voronoi_plot_2d(vor, show_vertices =False, show_points =False, ax=ax2,line_width=1)
     
 
 #colours the voronoi cells    
@@ -300,6 +296,11 @@ for r in range(len(vor.point_region)):
         polygon = [vor.vertices[i] for i in region]
         plt.fill(*zip(*polygon), color=mapper.to_rgba(order[r]))
         #plt.fill(*zip(*polygon))
+ax2.set_aspect('equal')
+plt.xticks([])  
+plt.yticks([])
+ax2.set_ylim(min(pCYS),max(pCYS))
+ax2.set_xlim(min(pCXS),max(pCXS))
 
 captiontxt="Entropy = " + "{:.6f}".format(H)
 plt.figtext(0.5, -0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
