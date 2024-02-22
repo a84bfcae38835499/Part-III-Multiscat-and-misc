@@ -217,8 +217,9 @@ a1str = [char(num2str(a1))];
 a2str = [char(num2str(a2))];
 b1str = [char(num2str(b1(1:2)))];
 b2str = [char(num2str(b2(1:2)))];
+nsupstr = [char(num2str(Nsuper))];
 S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
-realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str];
+realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str,newline,'Nsuper = ',nsupstr];
 recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
 
 S = [realStr,newline,recpStr,S];
