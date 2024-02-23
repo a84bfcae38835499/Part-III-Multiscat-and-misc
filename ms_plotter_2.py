@@ -305,11 +305,11 @@ ax2.set_xlim(min(pCXS),max(pCXS))
 captiontxt="Entropy = " + "{:.6f}".format(H)
 plt.figtext(0.5, -0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
-filenametxt="DFT fitted potential"
+filenametxt=""
 plt.figtext(0.5, -0.1, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):
-    savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('Diffraction_%Y-%m-%d_%H-%M') + ".png"
+    savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + ".png"
 else:
     savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') +slugify(filenametxt)+ ".png"
 print(savestr)
