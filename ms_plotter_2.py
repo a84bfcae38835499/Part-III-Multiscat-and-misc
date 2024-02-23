@@ -224,7 +224,7 @@ for k in range(0,nOccCh):
     n1 = int(getattr(row,'n1'))
     n2 = int(getattr(row,'n2'))
     n1n2 = str(n1) + ',' + str(n2)
-    plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2)*Nsuper,(b1[1]*n1+b2[1]*n2)*Nsuper),fontsize=6,zorder=10,ha='center',va='center')
+    plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2)*Nsuper,(b1[1]*n1+b2[1]*n2)*Nsuper),fontsize=12,zorder=10,ha='center',va='center')
 
 
 scatFile = open('scatCond.in', 'r')
