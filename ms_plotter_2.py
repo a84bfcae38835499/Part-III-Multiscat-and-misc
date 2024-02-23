@@ -215,8 +215,8 @@ plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=8,weight='bo
 
 plt.arrow(0,0,a1[0],a1[1],width=0.05,color=a1col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
 plt.arrow(0,0,a2[0],a2[1],width=0.05,color=a2col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
-plt.annotate("a1", (a1[0],a1[1]+0.2),color=a1col,fontsize=8,weight='bold',path_effects=pathefts1)
-plt.annotate("a2", (a2[0],a2[1]+0.5),color=a2col,fontsize=8,weight='bold',path_effects=pathefts1)
+plt.annotate("a1", (a1[0],a1[1]),color=a1col,fontsize=8,weight='bold',path_effects=pathefts1)
+plt.annotate("a2", (a2[0],a2[1]),color=a2col,fontsize=8,weight='bold',path_effects=pathefts1)
 
 
 for k in range(0,nOccCh):
