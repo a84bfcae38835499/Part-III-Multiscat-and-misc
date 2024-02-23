@@ -210,8 +210,8 @@ hecol = [0, 0.3, 0.8]
 
 plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
 plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
-plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper),color=b1col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=8)
-plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=8)
+plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.1),color=b1col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
+plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
 
 plt.arrow(0,0,a1[0],a1[1],width=0.05,color=a1col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
 plt.arrow(0,0,a2[0],a2[1],width=0.05,color=a2col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
