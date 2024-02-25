@@ -200,13 +200,13 @@ end
 %nPlot = 2/3;mPlot = 1/2;
 nPlotDef = 1;mPlotDef = 1;
 aboveCol = [0.3 0. 1];
-ComparePotentials(Vsuper,dft.aboveDefect,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol)
+ComparePotentials(Vsuper,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,Z,0,aboveCol)
 nPlotHol = 2/3;mPlotHol = 1/3;
 holCol = [0.0 0.6 0.2];
-ComparePotentials(Vsuper,dft.aboveHollow,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol)
+ComparePotentials(Vsuper,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,Z,0,holCol)
 nPlotMo = 1/3;mPlotMo = 2/3;
 moCol = [1 0.2 0];
-ComparePotentials(Vsuper,dft.aboveMo,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol)
+ComparePotentials(Vsuper,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,Z,0,moCol)
 
 %% for fitit
 Zdefect = dft.zAxis;
@@ -372,7 +372,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
             -2*backgroundDepth*exp(alpha*(z0-z));
     end
     function [V1] = V1func(z,z0,D,alpha)
-        V1 = -2*const.beta*D*exp(2*alpha*(z0-z));
+        V1 = -0.2*D*exp(2*alpha*(z0-z));
     end
   function [V] = V1(z)
     D1 = 17;
@@ -445,15 +445,27 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         Y_n = Y ./ (const.c*sqrt(3));
         Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
-    end
+  end
+fittingDFT = false;
+if(fittingDFT)
         %+ V1func(Z) * Qfunc(X,Y)...
     VmatrixElement = V1(Z) ... %blue, sulphur
-       * Qhexfunc(X,Y) * 3 ...
+       * Qhexfunc(X,Y) ...
        + V2(Z) ... %red, molybdenum
-      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) *3...
+      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
       + V3(Z) ...%green, hollow site
       * Qhexfunc(X,Y - (const.c/sqrt(3)));
-    
+else
+    VmatrixElement = (V0func(Z,3.5,18,1.3) ...
+       + V1func(Z,2.3,0.5,1.6))... %blue
+       * Qhexfunc(X,Y) ...
+       + (V0func(Z,3.15,20,1.2) + ...
+      + V1func(Z,4,0,1.1)) ... % green
+      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
+      + (V0func(Z,3.1,23,1.2) ...
+      + V1func(Z,2,15,1.1)) ... %green
+      * Qhexfunc(X,Y - (const.c/sqrt(3)));
+end
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
@@ -537,8 +549,8 @@ function ComparePotentials(V1,V2,V1name,V2name,a1,a2,m,n,Z1,Z2,zMin,plotColor)
   result = SpaghettiBolognaise2\(centre');
   i2 = int8(result(1));
   j2 = int8(result(2));
-  %V2piece = squeeze(V2(i2,j2,:));
-  V2piece = V2;
+  V2piece = squeeze(V2(i2,j2,:));
+  %V2piece = V2;
   disp([i1 j1 k1])
   disp([i2 j2 k2])
   figure
