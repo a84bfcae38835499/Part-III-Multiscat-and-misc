@@ -1,18 +1,17 @@
 from matplotlib import pyplot as plt
+import numpy as np
+n1 = range(-3,0)
+intensities = np.array([0.303588E-01,0.584517E-01,0.266187E-01,0.697172E-01])
 
-DefectDensities = [0,0.25,0.5,0.75,1]
-Entropies = [0.6495282977909468,
-0.852275076163138,
-0.7376804580552242,
-0.7510843204920689,
-0.4909806615832078]
+intensities_n = intensities/max(intensities)
+print(intensities_n)
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.plot(DefectDensities,Entropies,linestyle="-",marker='x',c=[0.1,0.5,1])
-plt.title("Entropy vs defect density")
-plt.xlim(0,1)
-plt.xlabel("Fraction of sulphur atoms missing")
+ax.hist(intensities_n,n1)
+plt.title("Intensity (normalised)")
 plt.ylim(0,1)
+plt.xlabel("n1")
+plt.xlim(-3,0)
 plt.ylabel("Entropy")
 plt.show()
