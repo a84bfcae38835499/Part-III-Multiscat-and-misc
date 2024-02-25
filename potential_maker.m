@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 50; Nsuper = 2;
+Nxy = 64; Nz = 50; Nsuper = 1;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -194,7 +194,7 @@ if(avoidNearestNeighbors)
 else
 
 end
-Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+%Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 %===
 %% Plot the potential. Disabled for now, as if the grid res is too high it complains
 %nPlot = 2/3;mPlot = 1/2;
