@@ -61,7 +61,5 @@ classdef dft
                   -0.001
                   -0.0008]*1000
 
-    pureAboveS = 
-
   end
 end

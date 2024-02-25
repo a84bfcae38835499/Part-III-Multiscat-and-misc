@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 50; Nsuper = 1;
+Nxy = 64; Nz = 50; Nsuper = 2;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -17,6 +17,8 @@ a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
+
+Theta = 0.5;
 %% Import Min's DFT
 
 importfile("DFT_Pure.mat")
@@ -178,20 +180,57 @@ if(copyInterp)
 end
 
 %% Now add imperfections to the lattice
-%Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+Nsites = Nsuper*Nsuper;
+disp("Target number of sites = " + (Nsites * Theta))
+Ndefect = int8(Nsites * Theta);
+ms = 0:1:Nsites;
+ns = 0:1:Nsites;
+
+%The question is - How do we decide which sites to add defects on to?
+%Do we directly implement avoidance of nearest-neighbors?
+avoidNearestNeighbors = false
+if(avoidNearestNeighbors)
+  error("Nearest neighbour avoidance not yet implemented!")
+else
+
+end
+Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 %===
 %% Plot the potential. Disabled for now, as if the grid res is too high it complains
 %nPlot = 2/3;mPlot = 1/2;
 nPlotDef = 1;mPlotDef = 1;
 aboveCol = [0.3 0. 1];
-ComparePotentials(Vsuper,Vinterpsuper,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,0,aboveCol)
+ComparePotentials(Vsuper,dft.aboveDefect,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol)
 nPlotHol = 2/3;mPlotHol = 1/3;
 holCol = [0.0 0.6 0.2];
-ComparePotentials(Vsuper,Vinterpsuper,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,0,holCol)
+ComparePotentials(Vsuper,dft.aboveHollow,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol)
 nPlotMo = 1/3;mPlotMo = 2/3;
 moCol = [1 0.2 0];
-ComparePotentials(Vsuper,Vinterpsuper,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,0,moCol)
+ComparePotentials(Vsuper,dft.aboveMo,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol)
 
+%% for fitit
+Zdefect = dft.zAxis;
+Vdefect = dft.aboveDefect;
+SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/(Nxy*Nsuper);
+zFitMin = 1.5;
+k = int8(interp1(Z,1:numel(Z),zFitMin));
+if(k == 0)
+  k = 1;
+end
+m = 1; n = 1;
+centre = m*a1+n*a2;
+result = SpaghettiBolognaise\(centre');
+i = int8(result(1));
+j = int8(result(2));
+V1piece = squeeze(Vinterpsuper(i,j,k:end));
+Zpiece = Z(k:end);
+
+weights = Zpiece;
+for k = 1:numel(Zpiece)
+  weights(k) = 1/(exp((3-Zpiece(k))*7)+1);
+end
+figure
+plot(Zpiece,weights)
 %% Get min and max bounds of the potentials
 DFTmin = min(VDFTsuper,[],"all")
 DFTmax = max(VDFTsuper,[],"all")
@@ -247,6 +286,7 @@ figure
 fileindx = 1;
 for i = 0
   Vsoup = single(i);
+  figure
   equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
   shading interp
   hold on
@@ -278,7 +318,7 @@ hbar = colorbar('southoutside');
 xlabel(hbar,'Energy / meV');
 %add indicators for where we're sampling the potential z
 fontsize(gcf,scale=1)
-plotPoints = false;
+plotPoints = true;
 if(plotPoints)
   hold on
   xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
@@ -317,13 +357,6 @@ if(doingMSshit)
 end
 %===
 
-%[X,Y] = meshgrid(-1:0.01:1,-1:0.01:1);
-%Y_prime = Y/sqrt(3);
-%Z = ((cos(2*pi*(X-Y_prime))+cos(4*pi*Y_prime)+cos(2*pi*(X+Y_prime))) + 3/2)/(4.5);
-%surf(X,Y,Z)
-%shading('interp')
-%colormap(plasma)
-
 %% Function definitions
 
 function [b1,b2,b3] = Reciprocal(a1,a2,a3)
@@ -339,8 +372,46 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
             -2*backgroundDepth*exp(alpha*(z0-z));
     end
     function [V1] = V1func(z,z0,D,alpha)
-        V1 = 2*const.beta*D*exp(2*alpha*(z0-z));
+        V1 = -2*const.beta*D*exp(2*alpha*(z0-z));
     end
+  function [V] = V1(z)
+    D1 = 17;
+    alpha1 = 1.4267;
+    b1 = -0.1991;
+    beta1 = 0.3116;
+    c1 = 14.1590;
+    lambda1 = -0.6126;
+    z01 = 3.4411;
+    z11 = 5.5355;
+    z21 = 3.5000;
+    V = D1*(exp(2*alpha1*(z01-z))-2*exp(alpha1*(z01-z))-2*(b1*10)*exp(2*beta1*(z11-z))-c1*exp(lambda1*-(z21-z)));
+  end
+
+  function [V] = V2(z)
+    D2 = 21;
+    alpha2 = 1.2000;
+    b2 = 2.0000;
+    beta2 = 1.3000;
+    c2 = 0.0400;
+    lambda2 = 0.6000;
+    z02 = 3.1500;
+    z12 = 0;
+    z22 = 6.0000;
+    V = D2*(exp(2*alpha2*(z02-z))-2*exp(alpha2*(z02-z))-2*(b2*10)*exp(2*beta2*(z12-z))-c2*exp(lambda2*-(z22-z)));
+  end
+
+  function [V] = V3(z)
+    D3 = 20;
+    alpha3 = 1.1706;
+    b3 = 0.6386;
+    beta3 = 0.7456;
+    c3 = 0.0064;
+    lambda3 = 0.7557;
+    z03 = 3.1578;
+    z13 = -0.0261;
+    z23 = 3.5021;
+    V = D3*(exp(2*alpha3*(z03-z))-2*exp(alpha3*(z03-z))-2*(b3*10)*exp(2*beta3*(z13-z))-c3*exp(lambda3*-(z23-z)));
+  end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
     end
@@ -376,15 +447,13 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = (V0func(Z,const.zOffset+2.1,25,1.2) ...
-       + V1func(Z,const.zOffset+3.7,0.5,1.6))... %blue
+    VmatrixElement = V1(Z) ... %blue
        * Qhexfunc(X,Y) ...
-       + (V0func(Z,const.zOffset+2.15,20,1.2) + ...
-      + V1func(Z,const.zOffset+3,0,1.1)) ... % green
+       + V2(Z) ... %red
       * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
-      + (V0func(Z,const.zOffset+2.1,23,1.2) ...
-      + V1func(Z,const.zOffset+1,15,1.1)) ... %red
+      + V3(Z) ...
       * Qhexfunc(X,Y - (const.c/sqrt(3)));
+    
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
 end
 
@@ -394,9 +463,15 @@ function [DV] = Dropoff(z,z0)
 end
 
 function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z)
-factor = -0.7*12;
 %Adds a defect at sulphur site (m1,m2)
   Vout = Vin;
+  function [v] = val(x,y,Z,k,centre)
+    d = 8.4;
+    gamma = 1.1;
+    v = -d * exp(2*gamma*(4-Z(k))) * ...
+    Gaussian2D(x,y, ...
+    centre,const.c*0.2);
+  end
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
   centresX = zeros(3);
@@ -404,28 +479,19 @@ factor = -0.7*12;
   centre = m*a1+n*a2;
   disp("Centre:")
   disp(centre)
-  if doWeRepeat %This is awful optimisation lolololo
+
+  if doWeRepeat
     for m = -1:1
       for n = -1:1
         centresX(m+2,n+2) = centre(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper;
         centresY(m+2,n+2) = centre(2)+m*a1(2)*Nsuper+n*a2(2)*Nsuper;
-      end
-    end
-  end
-  if doWeRepeat
-    for m = -1:1
-      for n = -1:1
         for k = 1:Nz
           for i = 1:NxySuper
             for j = 1:NxySuper
               x = Xsuper(i,j);
               y = Ysuper(i,j);
               centre = [centresX(m+2,n+2) centresY(m+2,n+2)];
-              val = Gaussian2D(x,y, ...
-                centre,const.c*0.2, ...
-                factor * exp(2*const.alpha*(const.zOffset+3-Z(k))));
-              %These parameters have been fined tuned to match the requirements
-              Vout(i,j,k) = Vout(i,j,k)+val;
+              Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z,k,centre);
               %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
               %    ", Value = " + val);
             end
@@ -439,11 +505,7 @@ factor = -0.7*12;
         for j = 1:NxySuper
           x = Xsuper(i,j);
           y = Ysuper(i,j);
-          val = Gaussian2D(x,y, ...
-            centre,const.c*0.2, ...
-            factor * exp(2*const.alpha*(3+const.zOffset-Z(k))));
-          %These parameters have been fined tuned to match the requirements
-          Vout(i,j,k) = Vout(i,j,k)+val;
+          Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z,k,centre);
           %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
           %    ", Value = " + val);
         end
@@ -452,22 +514,35 @@ factor = -0.7*12;
   end
 end
 
-function ComparePotentials(V1,V2,V1name,V2name,a1,a2,m,n,Z,zMin,plotColor)
-  NxyNsuper = size(V1,1);
-  SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper;
-  k = int8(interp1(Z,1:numel(Z),zMin));
-  if(k == 0)
-    k = 1;
+function ComparePotentials(V1,V2,V1name,V2name,a1,a2,m,n,Z1,Z2,zMin,plotColor)
+  NxyNsuper1 = size(V1,1);
+  SpaghettiBolognaise1 = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper1;
+  k1 = int8(interp1(Z1,1:numel(Z1),zMin));
+  if(k1 == 0)
+    k1 = 1;
   end
   centre = m*a1+n*a2;
-  result = SpaghettiBolognaise\(centre');
-  i = int8(result(1));
-  j = int8(result(2));
-  V1piece = squeeze(V1(i,j,:));
-  V2piece = squeeze(V2(i,j,:));
-  disp([i j k])
+  result = SpaghettiBolognaise1\(centre');
+  i1 = int8(result(1));
+  j1 = int8(result(2));
+  V1piece = squeeze(V1(i1,j1,:));
+  
+  NxyNsuper2 = size(V2,1);
+  SpaghettiBolognaise2 = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper2;
+  k2 = int8(interp1(Z2,1:numel(Z2),zMin));
+  if(k2 == 0)
+    k2 = 1;
+  end
+  centre = m*a1+n*a2;
+  result = SpaghettiBolognaise2\(centre');
+  i2 = int8(result(1));
+  j2 = int8(result(2));
+  %V2piece = squeeze(V2(i2,j2,:));
+  V2piece = V2;
+  disp([i1 j1 k1])
+  disp([i2 j2 k2])
   figure
-  p = plot(Z(k:end),V1piece(k:end),'DisplayName',V1name);
+  p = plot(Z1(k1:end),V1piece(k1:end),'DisplayName',V1name);
   p.LineStyle = ":";
   p.Color = plotColor;
   p.Marker = ".";
@@ -478,7 +553,9 @@ function ComparePotentials(V1,V2,V1name,V2name,a1,a2,m,n,Z,zMin,plotColor)
   ylabel('Energy/meV')
   hold on
   legend()
-  d = plot(Z(k:end),V2piece(k:end),'DisplayName',V2name);
+  disp(size(Z2))
+  disp(size(V2piece))
+  d = plot(Z2(k2:end),V2piece(k2:end),'DisplayName',V2name);
   d.LineStyle = "-";
   d.Color = [0 0.4470 0.7410];
   d.Marker = ".";
