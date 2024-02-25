@@ -372,7 +372,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
             -2*backgroundDepth*exp(alpha*(z0-z));
     end
     function [V1] = V1func(z,z0,D,alpha)
-        V1 = -0.2*D*exp(2*alpha*(z0-z));
+        V1 = 2*const.beta*D*exp(2*alpha*(z0-z));
     end
   function [V] = V1(z)
     D1 = 17;
@@ -456,14 +456,14 @@ if(fittingDFT)
       + V3(Z) ...%green, hollow site
       * Qhexfunc(X,Y - (const.c/sqrt(3)));
 else
-    VmatrixElement = (V0func(Z,3.5,18,1.4) ...%blue
-       + V1func(Z,2.3,3,1.6))... 
+    VmatrixElement = (V0func(Z,const.zOffset+2.1,25,1.2) ...
+       + V1func(Z,const.zOffset+3.7,0.5,1.6))... %blue
        * Qhexfunc(X,Y) ...
-       + (V0func(Z,3.15,22,1.2) + ...% red
-      + V1func(Z,4,0,1.1)) ... 
+       + (V0func(Z,const.zOffset+2.15,20,1.2) + ...
+      + V1func(Z,const.zOffset+3,0,1.1)) ... % green
       * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
-      + (V0func(Z,3.1,23,1.2) ... %green
-      + V1func(Z,2,15,1.1)) ...
+      + (V0func(Z,const.zOffset+2.1,23,1.2) ...
+      + V1func(Z,const.zOffset+1,15,1.1)) ... %red
       * Qhexfunc(X,Y - (const.c/sqrt(3)));
 end
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
