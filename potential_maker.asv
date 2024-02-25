@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 50; Nsuper = 2;
+Nxy = 64; Nz = 50; Nsuper = 1;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -183,7 +183,8 @@ end
 Nsites = Nsuper*Nsuper;
 disp("Target number of sites = " + (Nsites * Theta))
 Ndefect = int8(Nsites * Theta);
-ms = 0:1:Ns
+ms = 0:1:Nsites;
+ns = 0:1:Nsites;
 
 %The question is - How do we decide which sites to add defects on to?
 %Do we directly implement avoidance of nearest-neighbors?
@@ -193,7 +194,7 @@ if(avoidNearestNeighbors)
 else
 
 end
-Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+%Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 %===
 %% Plot the potential. Disabled for now, as if the grid res is too high it complains
 %nPlot = 2/3;mPlot = 1/2;
@@ -446,11 +447,11 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
     end
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V1(Z) ... %blue
-       * Qhexfunc(X,Y) ...
-       + V2(Z) ... %red
-      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
-      + V3(Z) ...
+    VmatrixElement = V1(Z) ... %blue, sulphur
+       * Qhexfunc(X,Y) * 3 ...
+       + V2(Z) ... %red, molybdenum
+      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) *3...
+      + V3(Z) ...%green, hollow site
       * Qhexfunc(X,Y - (const.c/sqrt(3)));
     
       %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;

@@ -1,7 +1,12 @@
 from matplotlib import pyplot as plt
 import numpy as np
 n1 = range(-3,0)
-intensities = np.array([0.303588E-01,0.584517E-01,0.266187E-01,0.697172E-01])
+intensities = np.array([0.360322E-01,0.520823E-01,0.138636E-01,0.811935E-01])
+
+#     -3     0          0.360322E-01
+#     -2     0          0.520823E-01
+#     -1     0          0.138636E-01
+#      0     0          0.811935E-01
 
 intensities_n = intensities/max(intensities)
 print(intensities_n)
