@@ -20,7 +20,7 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     if ~exist('V0', 'var')
         V0 = 0;
     end
-    disp("V0 = " + num2str(V0,'%.2f'))
+    %disp("V0 = " + num2str(V0,'%.2f'))
 
     n1 = size(V, 1);
     n2 = size(V, 2);
@@ -47,7 +47,7 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     %f = figure('visible','off');
     potMin = min(pot_height,[],"all");
     potMax = max(pot_height,[],"all");
-    disp("Min = " + num2str(potMin) + ", max = " + num2str(potMax));
+    %disp("Min = " + num2str(potMin) + ", max = " + num2str(potMax));
     surf(X, Y, pot_height)
     zMin = min(z,[],"all");
     zMax = max(z,[],"all");

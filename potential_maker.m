@@ -3,7 +3,7 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 50; Nsuper = 1;
+Nxy = 8; Nz = 50; Nsuper = 2;
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -18,7 +18,7 @@ a3=[0,0,const.c];
 %A2 = a2;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
 
-Theta = 0.5;
+Theta = 0.4;
 %% Import Min's DFT
 
 importfile("DFT_Pure.mat")
@@ -119,7 +119,6 @@ if interpolateDFTdata == true
     end
   end
   InterpolatedFn = scatteredInterpolant(XDFTvect,YDFTvect,ZDFTvect,VDFTvect,'natural','none');
-
   Xvect = squeeze(zeros(Nxy*Nxy*Nz,1));
   Yvect = Xvect;
   Zvect = Xvect;
@@ -182,33 +181,210 @@ end
 %% Now add imperfections to the lattice
 Nsites = Nsuper*Nsuper;
 disp("Target number of sites = " + (Nsites * Theta))
-Ndefect = int8(Nsites * Theta);
-ms = 0:1:Nsites;
-ns = 0:1:Nsites;
-
-%The question is - How do we decide which sites to add defects on to?
-%Do we directly implement avoidance of nearest-neighbors?
-avoidNearestNeighbors = false
-if(avoidNearestNeighbors)
-  error("Nearest neighbour avoidance not yet implemented!")
-else
-
+Ndefect = round(Nsites * Theta);
+disp("Actual number of sites = " + Ndefect)
+Nensemble = (factorial(Nsites)) ...
+  /(factorial(Nsites - Ndefect)*factorial(Ndefect));
+disp("Total ensemble size = " + Nensemble)
+Nensemble_limit = 10;
+if(Nensemble > Nensemble_limit)
+  disp("Truncating ensemble to just " + Nensemble_limit)
+  Nensemble = Nensemble_limit;
 end
-%Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
-%===
-%% Plot the potential. Disabled for now, as if the grid res is too high it complains
-%nPlot = 2/3;mPlot = 1/2;
-nPlotDef = 1;mPlotDef = 1;
-aboveCol = [0.3 0. 1];
-ComparePotentials(Vsuper,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,Z,0,aboveCol)
-nPlotHol = 2/3;mPlotHol = 1/3;
-holCol = [0.0 0.6 0.2];
-ComparePotentials(Vsuper,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,Z,0,holCol)
-nPlotMo = 1/3;mPlotMo = 2/3;
-moCol = [1 0.2 0];
-ComparePotentials(Vsuper,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,Z,0,moCol)
+potStructArray = struct([]);
+ms_ensemble = squeeze(ones(1,Ndefect,Nensemble,'int8'))*1337;
+ns_ensemble = squeeze(ones(1,Ndefect,Nensemble,'int8'))*1337;
+if(Ndefect == 0)
+  potStructArray.V = Vsuper;
+  potStructArray.a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
+  potStructArray.zmin=Z(1);
+  potStructArray.zmax=Z(end);
+  potStructArray.zPoints=length(Z);
+else
+  %for the ensemble of potentials, how do we guarentee that they're
+  %different???
+  %we've got ms_ensemble and ns_ensemble, but how do we check wehther or
+  %not they contain the same coordinates? I guec  ss what we do is take a
+  %single set of the coordinates that we've generated, and then check them
+  %against every single coordinate we have so far. Either that or create
+  %some kind of weird information-theoretic checksum style thing to
+  %automatically determine if two arrays of coordinate pairs are the same
 
-%% for fitit
+  %or we could just not bother and hope that they're different lol
+  checkingEnsembleUniqueness = false;
+  if(checkingEnsembleUniqueness)
+    error("Uniqueness checking not yet implemented!")
+  end
+  for Ne = 1:Nensemble
+    ms = squeeze(ones(1,Ndefect,1,1,'int8'))*69;
+    ns = squeeze(ones(1,Ndefect,1,1,'int8'))*69;
+    ms_available = 0:Ndefect-1;
+    ns_available = 0:Ndefect-1;
+    %Another question is - How do we decide which sites to add defects on to?
+    %Do we directly implement avoidance of nearest-neighbors?
+    avoidNearestNeighbors = false;
+    if(avoidNearestNeighbors)
+      error("Nearest neighbour avoidance not yet implemented!")
+    else
+      for d = 1:Ndefect
+        disp("d = " + d)
+        solved = false;
+        while(~solved)
+          idx=randperm(length(ms_available),1);
+          m = int8(ms_available(idx));
+          m = int8(ns_available(idx));
+          disp("m, n = ")
+          disp([m n])
+          if(isempty(find(ms==m, 1)))
+            if(isempty(find(ns==n, 1)))
+              ms(d) = m;
+              ns(d) = n;
+              solved = true;
+            end
+          else
+            indicies = find(ms==m);
+            for i = indicies
+              if(ns(i) == n)
+                %overlapping site found! move on to next possible site
+                solved = false;
+              else
+                %no overlap found on site (m,n)!
+                ms(d) = m;
+                ns(d) = n;
+                solved = true;
+              end
+            end
+          end
+        end
+        disp("Solved!")
+      end
+    end
+    disp("Defects for ensemble " + Ne + " = ")
+    disp([ms;ns])
+    ms_ensemble(:,Ne) = ms;
+    ns_ensemble(:,Ne) = ns;
+  end
+    
+  for Ne = 1:Nensemble
+    disp("Ensemble number " + Ne)
+    %Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+    ms = transpose(ms_ensemble(:,Ne));
+    ns = transpose(ns_ensemble(:,Ne));
+    index = 1;
+    for m = ms
+      for n = ms
+        Vout = Vsuper;
+        if((m == 0) || (n == 0) || (m == Nsuper-1) || (n == Nsuper-1))
+          Vout = AddSulphurDefect(true,Vsuper,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+        else
+          Vout = AddSulphurDefect(false,Vsuper,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z);
+        end
+      end
+    end
+    potStructArray(Ne).V=Vout;
+    potStructArray(Ne).a1=Nsuper*a1; potStructArray(Ne).a2=Nsuper*a2;
+    potStructArray(Ne).zmin=Z(1);
+    potStructArray(Ne).zmax=Z(end);
+    potStructArray(Ne).zPoints=length(Z);
+    %% Plot the potential
+    plotPot = true;
+    if(plotPot)
+      Vplotted = Vout;
+      %% Plot the potential. Disabled for now, as if the grid res is too high it complains
+      %nPlot = 2/3;mPlot = 1/2;
+      comparePots = false;
+      nPlotDef = 1;mPlotDef = 1;
+      aboveCol = [0.3 0. 1];
+
+      nPlotHol = 2/3;mPlotHol = 1/3;
+      holCol = [0.0 0.6 0.2];
+
+      nPlotMo = 1/3;mPlotMo = 2/3;
+      moCol = [1 0.2 0];
+
+      if(comparePots)
+        ComparePotentials(Vplotted,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,Z,0,aboveCol)
+        ComparePotentials(Vplotted,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,Z,0,holCol)
+        ComparePotentials(Vplotted,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,Z,0,moCol)
+      end
+      % Plot of a slice of the potential in the nth row, that is for constant x
+        row = floor(Nxy/2);
+      figure
+      contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
+          reshape(Vplotted(row,:,:), [Nxy*Nsuper,Nz]), linspace(-30,100,24))
+      
+          fontsize(gcf,scale=1)
+      xlabel('z/Å')
+      ylabel('y/Å') %is this x or y? I think y but idrk
+      colorbar
+      xlim([1.5,6])
+      title('Potential in z, used in simulation')
+      hbar = colorbar;
+      ylabel(hbar,'Energy / meV');
+      figure
+      fileindx = 1;
+      for i = 0
+        Vsoup = single(i);
+        figure
+        equipotential_plot('V', Vplotted, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+        shading interp
+        hold on
+        view([15 45])
+        %equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
+        shading interp
+        xlim([-3.5 2]*Nsuper);
+        ylim([-0.5 3]*Nsuper);
+        daspect([1 1 1])
+        hold off
+        savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg"
+        fileindx = fileindx + 1;
+        saveas(gcf,savestr,'jpg')
+        
+        %clf
+      end
+      %% Plot the potential
+      fontsize(gcf,scale=1)
+      zSample = 3;
+      zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
+      figure
+      contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),10)
+      daspect([1 1 1])
+      xlabel('x/Å')
+      ylabel('y/Å')
+      title('Potentials at z = ' + string(zSample) + ' Å');
+      colormap(parula(15))
+      hbar = colorbar('southoutside');
+      xlabel(hbar,'Energy / meV');
+      %add indicators for where we're sampling the potential z
+      fontsize(gcf,scale=1)
+      plotPoints = true;
+      if(plotPoints)
+        hold on
+        xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
+        yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
+        plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
+        plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
+      
+        xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
+        yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
+        plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
+        plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
+      
+        xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
+        yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
+        plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
+        plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
+         hold off
+      end
+      
+    end
+    %===
+    
+  end
+end
+%===
+
+%% for fitting
 Zdefect = dft.zAxis;
 Vdefect = dft.aboveDefect;
 SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/(Nxy*Nsuper);
@@ -229,13 +405,13 @@ weights = Zpiece;
 for k = 1:numel(Zpiece)
   weights(k) = 1/(exp((3-Zpiece(k))*7)+1);
 end
-figure
-plot(Zpiece,weights)
+%figure
+%plot(Zpiece,weights)
 %% Get min and max bounds of the potentials
-DFTmin = min(VDFTsuper,[],"all")
-DFTmax = max(VDFTsuper,[],"all")
-AnalyticMin = min(Vsuper,[],"all")
-AnalyticMax = max(Vsuper,[],"all")
+DFTmin = min(VDFTsuper,[],"all");
+DFTmax = max(VDFTsuper,[],"all");
+AnalyticMin = min(Vsuper,[],"all");
+AnalyticMax = max(Vsuper,[],"all");
 
 %% Now change all the crap to be Min's DFT
 copyDFT = false;
@@ -257,106 +433,29 @@ a2str = [char(num2str(a2))];
 b1str = [char(num2str(b1(1:2)))];
 b2str = [char(num2str(b2(1:2)))];
 nsupstr = [char(num2str(Nsuper))];
+thetastr = [char(num2str(Theta))];
+nens = [char(num2str(Nensemble))];
 S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
 realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str,newline,'Nsuper = ',nsupstr];
 recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
-
-S = [realStr,newline,recpStr,S];
+defectStr = ['Defect data:',newline,'Theta = ', thetastr,newline,'Ensenble size = ', nens];
+S = [realStr,newline,recpStr,newline,defectStr,S];
 FID = fopen('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'w');
 if FID == -1, error('Cannot open file %s', FileName); end
 fwrite(FID, S, 'char');
 fclose(FID);
 
-%% Plot the potential
-% Plot of a slice of the potential in the nth row, that is for constant x
-  row = floor(Nxy/2);
-figure
-contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
-    reshape(Vsuper(row,:,:), [Nxy*Nsuper,Nz]), linspace(-30,100,24))
-
-    fontsize(gcf,scale=1)
-xlabel('z/Å')
-ylabel('y/Å') %is this x or y? I think y but idrk
-colorbar
-xlim([1.5,6])
-title('Potential in z, used in simulation')
-hbar = colorbar;
-ylabel(hbar,'Energy / meV');
-figure
-fileindx = 1;
-for i = 0
-  Vsoup = single(i);
-  figure
-  equipotential_plot('V', Vsuper, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
-  shading interp
-  hold on
-  view([15 45])
-  %equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
-  shading interp
-  xlim([-3.5 2]*Nsuper);
-  ylim([-0.5 3]*Nsuper);
-  daspect([1 1 1])
-  hold off
-  savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg"
-  fileindx = fileindx + 1;
-  saveas(gcf,savestr,'jpg')
-  figure
-  %clf
-end
-%% Plot the potential
-fontsize(gcf,scale=1)
-zSample = 3;
-zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
-figure
-contourf(Xsuper,Ysuper,Vsuper(:,:,zRow),10)
-daspect([1 1 1])
-xlabel('x/Å')
-ylabel('y/Å')
-title('Potentials at z = ' + string(zSample) + ' Å');
-colormap(parula(15))
-hbar = colorbar('southoutside');
-xlabel(hbar,'Energy / meV');
-%add indicators for where we're sampling the potential z
-fontsize(gcf,scale=1)
-plotPoints = true;
-if(plotPoints)
-  hold on
-  xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
-  yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
-  plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
-  plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
-
-  xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
-  yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
-  plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
-  plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
-
-  xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
-  yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
-  plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
-  plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
-   hold off
-end
-%===
-
 %% We supply the lattice to the mulitscat script so it can do its thing
 doingMSshit = true;
 if(doingMSshit)
-    potStructArray.V = Vsuper;
+    %potStructArray.V = Vsuper;
     Multiscat.PreparePotentialFiles(potStructArray);
     
     Multiscat.prepareFourierLabels(Vsuper);
-    
-    potStructArray.a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
-    potStructArray.zmin=Z(1);
-    potStructArray.zmax=Z(end);
-    potStructArray.zPoints=length(Z);
-    
     confStruct=Multiscat.createConfigStruct(potStructArray);
     Multiscat.prepareConfigFile(confStruct);
 end
 %===
-
 %% Function definitions
 
 function [b1,b2,b3] = Reciprocal(a1,a2,a3)
@@ -416,29 +515,29 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
     end
   function [Q] = QhexfuncSingle(x,y)
-        %disp("[][][][][]")
-        %disp(v1)
-        %disp(const.sheerMat)
-        %disp("[][][][][]")
-        %nu = y * 2/sqrt(3);
-        %mu = x - (y/(sqrt(3)));
-        x_n = x / (const.c);
-        y_n = y / (const.c/sqrt(3));
-        Q = 0;
-        
-        mu_n1 = x_n*2;
-        nu_n1 = y_n - x_n;
-        Q = Q + cos(2*pi*nu_n1) + cos(2*pi*mu_n1);
+    %disp("[][][][][]")
+    %disp(v1)
+    %disp(const.sheerMat)
+    %disp("[][][][][]")
+    %nu = y * 2/sqrt(3);
+    %mu = x - (y/(sqrt(3)));
+    x_n = x / (const.c);
+    y_n = y / (const.c/sqrt(3));
+    Q = 0;
+    
+    mu_n1 = x_n*2;
+    nu_n1 = y_n - x_n;
+    Q = Q + cos(2*pi*nu_n1) + cos(2*pi*mu_n1);
 
-        mu_n2 = x_n*2;
-        nu_n2 = -y_n - x_n;
-        Q = Q + cos(2*pi*nu_n2) + cos(2*pi*mu_n2);
+    mu_n2 = x_n*2;
+    nu_n2 = -y_n - x_n;
+    Q = Q + cos(2*pi*nu_n2) + cos(2*pi*mu_n2);
 
-        nu_n3 = y_n - x_n;
-        mu_n3 = -y_n - x_n;
-        Q = Q + cos(2*pi*nu_n3) + cos(2*pi*mu_n3);
-        Q = Q/3;
-        %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
+    nu_n3 = y_n - x_n;
+    mu_n3 = -y_n - x_n;
+    Q = Q + cos(2*pi*nu_n3) + cos(2*pi*mu_n3);
+    Q = Q/3;
+    %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
   end
   function [Q] = Qhexfunc(X,Y)
         X_n = X ./ (const.c);
@@ -474,8 +573,8 @@ function [DV] = Dropoff(z,z0)
     DV = exp(2*const.alpha*(z0-z));
 end
 
-function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z)
-%Adds a defect at sulphur site (m1,m2)
+function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ysuper,Z)
+%Adds a defect at sulphur site (m,n)
   Vout = Vin;
   function [v] = val(x,y,Z,k,centre)
     d = 8.4;
@@ -488,15 +587,14 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper
   Nz = size(Vout,3);
   centresX = zeros(3);
   centresY = zeros(3);
-  centre = m*a1+n*a2;
-  disp("Centre:")
-  disp(centre)
-
+  centre0 = double(min)*a1+double(nin)*a2;
+  
   if doWeRepeat
+    disp("Repeating!")
     for m = -1:1
       for n = -1:1
-        centresX(m+2,n+2) = centre(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper;
-        centresY(m+2,n+2) = centre(2)+m*a1(2)*Nsuper+n*a2(2)*Nsuper;
+        centresX(m+2,n+2) = centre0(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper;
+        centresY(m+2,n+2) = centre0(2)+m*a1(2)*Nsuper+n*a2(2)*Nsuper;
         for k = 1:Nz
           for i = 1:NxySuper
             for j = 1:NxySuper
@@ -505,19 +603,31 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m,n,a1,a2,Nsuper,Xsuper,Ysuper
               centre = [centresX(m+2,n+2) centresY(m+2,n+2)];
               Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z,k,centre);
               %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
-              %    ", Value = " + val);
+              %     ", Value = " + val(x,y,Z,k,centre));
             end
           end
         end
+      %disp("m, n = " + m + ", " + n)
+      %disp("Centre:")
+      %disp(centre)
+      %equipotential_plot('V', Vout, 'V0', 0, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+      %hold on
+      %plot3(centresX(m+2,n+2),centresY(m+2,n+2),5,'.');
+      %hold off
+      %xlim([-3.5 2]*Nsuper);
+      %ylim([-0.5 3]*Nsuper);
+      %daspect([1 1 1])
+      %shading interp
       end
     end
   else
+    disp("Not repeating!")
     for k = 1:Nz
       for i = 1:NxySuper
         for j = 1:NxySuper
           x = Xsuper(i,j);
           y = Ysuper(i,j);
-          Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z,k,centre);
+          Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z,k,centre0);
           %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
           %    ", Value = " + val);
         end
@@ -575,4 +685,17 @@ function ComparePotentials(V1,V2,V1name,V2name,a1,a2,m,n,Z1,Z2,zMin,plotColor)
   xlim([1.5 6])
   ylim([-30 100])
   hold off
+end
+
+function [checksum] = vivCheckSum(intArray1, intArray2)
+  %Calculates checksum for two, non-ordered, but between them paired,
+  %arrays of integers
+  if(size(intArray1) ~= size(intArray2))
+    error("Sizes of arrays do not match!")
+  end
+  length = size(intArray1,1);
+  for i = 1:length
+    m = intArray1(i);
+    n = intArray2(i);
+  end
 end
