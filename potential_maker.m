@@ -605,7 +605,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         V1 = 2*const.beta*D*exp(2*alpha*(z0-z));
     end
   function [V] = VSulph(z)
-    D = 19.9886;
+    D = 100.9886;
     a = 0.8122;
     alpha = 1.4477;
     b = 0.1958;
@@ -631,7 +631,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     a = 0.9242;
     alpha = 1.1656;
     b = 0.0841;
-    beta = 1.2710;
+    beta = 4.2710;
     z0 = 3.0991;
     z1 = 2.1265;
     V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
