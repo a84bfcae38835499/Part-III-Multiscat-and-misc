@@ -529,7 +529,7 @@ centre = m*a1+n*a2;
 result = SpaghettiBolognaise\(centre');
 i = int8(result(1))+1;
 j = int8(result(2))+1;
-V1piece = squeeze(Vinterpsuper(i,j,k:end));
+V1piece = squeeze(Vsuper(i,j,k:end));
 Zpiece = Z(k:end);
 
 weights = Zpiece;
@@ -631,7 +631,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     a = 0.9242;
     alpha = 1.1656;
     b = 0.0841;
-    beta = 4.2710;
+    beta = 1.2710;
     z0 = 3.0991;
     z1 = 2.1265;
     V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
