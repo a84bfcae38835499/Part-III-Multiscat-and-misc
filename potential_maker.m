@@ -247,7 +247,7 @@ if(Ndefect == 0)
     Vplotted = Vsuper;
     %% Plot the potential. Disabled for now, as if the grid res is too high it complains
     %nPlot = 2/3;mPlot = 1/2;
-    comparePots = false;
+    comparePots = true;
     nPlotDef = 0;mPlotDef = 0;
     aboveCol = [0.3 0. 1];
 
@@ -299,7 +299,7 @@ if(Ndefect == 0)
     end
     %% Plot the potential
     fontsize(gcf,scale=1)
-    zSample = 3;
+    zSample = 3.5;
     zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
     figure
     contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),10)
@@ -519,12 +519,12 @@ end
 %Zdefect = dft.zAxis;
 %Vdefect = dft.aboveDefect;
 SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/(Nxy*Nsuper);
-zFitMin = 2;
+zFitMin = 1.5;
 k = int8(interp1(Z,1:numel(Z),zFitMin));
 if(k == 0)
   k = 1;
 end
-m = mPlotMo; n = nPlotMo;
+m = mPlotDef; n = nPlotDef;
 centre = m*a1+n*a2;
 result = SpaghettiBolognaise\(centre');
 i = int8(result(1))+1;
@@ -605,7 +605,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         V1 = 2*const.beta*D*exp(2*alpha*(z0-z));
     end
   function [V] = VSulph(z)
-    D = 40.9886;
+    D = 19.9886;
     a = 0.8122;
     alpha = 1.4477;
     b = 0.1958;
@@ -616,7 +616,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
   end
 
   function [V] = VHollow(z)
-    D = 24.9674;
+    D = 30.9674;
     a = 0.4641;
     alpha = 1.1029;
     b = 0.1993;
@@ -627,7 +627,7 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
   end
 
   function [V] = VMolyb(z)
-    D = 24.8733;
+    D = 30.8733;
     a = 0.9242;
     alpha = 1.1656;
     b = 0.0841;
@@ -764,26 +764,20 @@ end
 function ComparePotentials(V1,V2,V1name,V2name,a1,a2,m,n,Z1,Z2,zMin,plotColor)
   NxyNsuper1 = size(V1,1);
   SpaghettiBolognaise1 = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper1;
-  k1 = int8(interp1(Z1,1:numel(Z1),zMin));
-  if(k1 == 0)
-    k1 = 1;
-  end
+  k1 = int8(interp1(Z1,1:numel(Z1),zMin))+1;
   centre = m*a1+n*a2;
   result = SpaghettiBolognaise1\(centre');
-  i1 = int8(result(1));
-  j1 = int8(result(2));
+  i1 = int8(result(1))+1;
+  j1 = int8(result(2))+1;
   V1piece = squeeze(V1(i1,j1,:));
   
   NxyNsuper2 = size(V2,1);
   SpaghettiBolognaise2 = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper2;
-  k2 = int8(interp1(Z2,1:numel(Z2),zMin));
-  if(k2 == 0)
-    k2 = 1;
-  end
+  k2 = int8(interp1(Z2,1:numel(Z2),zMin))+1;
   centre = m*a1+n*a2;
   result = SpaghettiBolognaise2\(centre');
-  i2 = int8(result(1));
-  j2 = int8(result(2));
+  i2 = int8(result(1))+1;
+  j2 = int8(result(2))+1;
   V2piece = squeeze(V2(i2,j2,:));
   %V2piece = V2;
   disp([i1 j1 k1])
