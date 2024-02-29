@@ -3,9 +3,9 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 8; Nz = 50; Nsuper = 3;
+Nxy = 8; Nz = 50; Nsuper = 4;
 Theta = (1/(Nsuper*Nsuper));
-zMax = 6; zMin = 0;%units Å
+zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
@@ -126,7 +126,7 @@ end
 %actually check them lol
 %===
 %% Now interpolate the DFT data into a useful basis
-interpolateDFTdata = false;
+interpolateDFTdata = true;
 Vvect = zeros(Nz*Nxy*Nxy,1);
 
 if(interpolateDFTdata)
@@ -778,7 +778,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     else
       macaroni = false;
       c  = 0.0928;
-      extentFactor = 0.5;
+      extentFactor = 0.75;
       d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extentFactor))* ...
         67.6754;
       e = 16.3770;
