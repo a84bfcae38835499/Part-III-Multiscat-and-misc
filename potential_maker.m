@@ -3,11 +3,11 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 8; Nz = 50; Nsuper = 4;
+Nxy = 8; Nz = 50; Nsuper = 2;
+%Theta = 0.;
 Theta = (1/(Nsuper*Nsuper));
 zMax = 6; zMin = 1.5;%units Å
 
-%a = 2.84Å. see const.m for more stuff
 %a1=[const.a,0];
 %a2=[0,const.a]; 
 %a1=[const.c,0];
@@ -264,6 +264,7 @@ if(Ndefect == 0)
   plotPot = true;
   if(plotPot)
     Vplotted = Vsuper;
+    comparePots = true;
     if(comparePots)
       ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,1.5,aboveCol)
       ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,1.5,holCol)
@@ -301,8 +302,6 @@ if(Ndefect == 0)
       savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg"
       fileindx = fileindx + 1;
       saveas(gcf,savestr,'jpg')
-      
-      %clf
     end
     fontsize(gcf,scale=1)
     zSample = 1.6;
@@ -778,7 +777,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     else
       macaroni = false;
       c  = 0.0928;
-      extentFactor = 0.75;
+      extentFactor = 0.5;
       d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extentFactor))* ...
         67.6754;
       e = 16.3770;
