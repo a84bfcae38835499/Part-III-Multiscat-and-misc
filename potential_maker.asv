@@ -3,8 +3,8 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 1;
-Theta = 0.;
+Nxy = 32; Nz = 100; Nsuper = 4;
+Theta = (1/16);
 zMax = 6; zMin = 1.5;%units Å
 
 %a = 2.84Å. see const.m for more stuff
@@ -18,6 +18,18 @@ a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
+
+%% alskdjhshfjgd
+
+nPlotDef = 0;mPlotDef = 0;
+aboveCol = [0.3 0. 1];
+
+nPlotHol = 2/3;mPlotHol = 1/3;
+holCol = [0.0 0.6 0.2];
+
+nPlotMo = 1/3;mPlotMo = 2/3;
+moCol = [1 0.2 0];
+
 
 %% Import Min's DFT
 
@@ -118,7 +130,7 @@ interpolateDFTdata = true;
 Vvect = zeros(Nz*Nxy*Nxy,1);
 
 if(interpolateDFTdata)
-  oldmethod = false;
+  oldmethod = true;
   if(oldmethod)
     VDFTvect = zeros(DFTsuper*DFTsuper*12*12*19,1);
     XDFTvect = VDFTvect;
@@ -159,11 +171,9 @@ if(interpolateDFTdata)
     end
     %Vvect = interp3(XDFTvect,YDFTvect,ZDFTvect,VDFTsuper,Xvect,Yvect,Zvect,'linear');
     Vvect = InterpolatedFn(Xvect,Yvect,Zvect);%<- Beware! this step takes absolutely forever
-    
     if(anynan(Vvect))
       error("Nan found!")
-    end
-  
+    end  
     for k = 1:Nz
       for j = 1:Nxy
         for i = 1:Nxy
@@ -173,13 +183,22 @@ if(interpolateDFTdata)
     end
   else
     %use new method
+
     N1 = linspace(0,12,Nxy);
     N2 = linspace(0,12,Nxy);
-    N1_a = [N1 const.c*(Nxy+1/Nxy)];
-    N2_a = [N2 const.c*(Nxy+1/Nxy)];
+    N1_a = [N1 13];
+    N2_a = [N2 13];
+
+    %N1 = linspace(0,const.c,Nxy);
+    %N2 = linspace(0,const.c,Nxy);
+    %N1_a = [N1 const.c*(Nxy+1/Nxy)];
+    %N2_a = [N2 const.c*(Nxy+1/Nxy)];
     [x1, y1, z1] =  ndgrid(N1_a, N1_a, Z);
     Vinterp_a = interp3(VDFT_a, x1, y1, z1, 'nearest');
     Vinterp = Vinterp_a(1:Nxy, 1:Nxy, :);
+    figure
+    equipotential_plot('V', Vinterp, 'V0', 0, 'z', Z, 'X', N1, 'Y', N2)
+    shading interp
   end
 end
 %% Now we duplicate the lattice to get a superlattice
@@ -207,7 +226,7 @@ end
 
 %===
 %% oh fuck
-copyInterp = true;
+copyInterp = false;
 if(copyInterp)
   Vsuper = Vinterpsuper;
 end
@@ -215,12 +234,19 @@ end
 %% Now add imperfections to the lattice
 Nsites = Nsuper*Nsuper;
 disp("Target number of sites = " + (Nsites * Theta))
-Ndefect = round(Nsites * Theta);
+Ndefect = int8(round(Nsites * Theta));
 disp("Actual number of sites = " + Ndefect)
-Nensemble = (factorial(Nsites)) ...
-  /(factorial(Nsites - Ndefect)*factorial(Ndefect));
+
+%Assume that we always have a defect at the (0,0) position, to fix
+%translational invariance leadings to degeneracy
+if(Ndefect ~= 0 && Nsites-1 - Ndefect > 0)
+  Nensemble = (factorial(Nsites-1)) ...
+    /(factorial(Nsites-1 - Ndefect)*factorial(Ndefect-1));
+else
+  Nensemble = 1;
+end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = 6;
+Nensemble_limit = 1;
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
@@ -228,32 +254,20 @@ end
 potStructArray = struct([]);
 boolgrid_ensemble = zeros(Nsuper,Nsuper,Nensemble,'logical');
 if(Ndefect == 0)
+  %% 0 defects
   potStructArray(1).V = Vsuper;
   potStructArray(1).a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
   potStructArray(1).zmin=Z(1);
   potStructArray(1).zmax=Z(end);
   potStructArray(1).zPoints=length(Z);
 
-    %% Plot the potential
   plotPot = true;
   if(plotPot)
     Vplotted = Vsuper;
-    %% Plot the potential. Disabled for now, as if the grid res is too high it complains
-    %nPlot = 2/3;mPlot = 1/2;
-    comparePots = false;
-    nPlotDef = 0;mPlotDef = 0;
-    aboveCol = [0.3 0. 1];
-
-    nPlotHol = 2/3;mPlotHol = 1/3;
-    holCol = [0.0 0.6 0.2];
-
-    nPlotMo = 1/3;mPlotMo = 2/3;
-    moCol = [1 0.2 0];
-
     if(comparePots)
-      ComparePotentials(Vplotted,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,Z,0,aboveCol)
-      ComparePotentials(Vplotted,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,Z,0,holCol)
-      ComparePotentials(Vplotted,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,Z,0,moCol)
+      ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,1.5,aboveCol)
+      ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,1.5,holCol)
+      ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,1.5,moCol)
     end
     % Plot of a slice of the potential in the nth row, that is for constant x
       row = floor(Nxy/2);
@@ -290,9 +304,8 @@ if(Ndefect == 0)
       
       %clf
     end
-    %% Plot the potential
     fontsize(gcf,scale=1)
-    zSample = 3;
+    zSample = 1.6;
     zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
     figure
     contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),10)
@@ -327,6 +340,8 @@ if(Ndefect == 0)
     
   end
 else
+  %% One or more defects
+
   %for the ensemble of potentials, how do we guarentee that they're
   %different???
   %we've got ms_ensemble and ns_ensemble, but how do we check wehther or
@@ -335,7 +350,7 @@ else
   %against every single coordinate we have so far. Either that or create
   %some kind of weird information-theoretic checksum style thing to
   %automatically determine if two arrays of coordinate pairs are the same
-
+  
   for Ne = 1:Nensemble
     solved = false;
     while(~solved)
@@ -349,9 +364,14 @@ else
       if(avoidNearestNeighbors)
         error("Nearest neighbour avoidance not yet implemented!")
       end
-
+      
       boolgrid = zeros(Nsuper,Nsuper,'logical');
-      for d = 1:Ndefect
+      
+      boolgrid(1,1) = true;
+      ms(1) = 0;
+      ns(1) = 0;
+
+      for d = 2:Ndefect
         disp("d = " + d)
         foundValidSpot = false;
         while(~foundValidSpot)
@@ -388,16 +408,14 @@ else
     disp("Solved!")
     boolgrid_ensemble(:,:,Ne) = testgrid;
   end
-end
-  
 for Ne = 1:Nensemble
   disp("Ensemble number " + Ne)
   %Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 
   Vout = Vsuper;
-  for m = 1:Nsuper
-    for n = 1:Nsuper
-      if(boolgrid_ensemble(m,n,Ne) == true)
+  for m = 0:int8(Nsuper-1)
+    for n = 0:int8(Nsuper-1)
+      if(boolgrid_ensemble(m+1,n+1,Ne) == true)
         if((m == 0) || (n == 0) || (m == Nsuper-1) || (n == Nsuper-1))
           Vout = AddSulphurDefect(true,Vout,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z);
         else
@@ -411,13 +429,11 @@ for Ne = 1:Nensemble
   potStructArray(Ne).zmin=Z(1);
   potStructArray(Ne).zmax=Z(end);
   potStructArray(Ne).zPoints=length(Z);
-  %% Plot the potential
   plotPot = true;
   if(plotPot)
     Vplotted = Vout;
-    %% Plot the potential. Disabled for now, as if the grid res is too high it complains
     %nPlot = 2/3;mPlot = 1/2;
-    comparePots = false;
+    comparePots = true;
     nPlotDef = 0;mPlotDef = 0;
     aboveCol = [0.3 0. 1];
 
@@ -428,9 +444,9 @@ for Ne = 1:Nensemble
     moCol = [1 0.2 0];
 
     if(comparePots)
-      ComparePotentials(Vplotted,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,Z,0,aboveCol)
-      ComparePotentials(Vplotted,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,Z,0,holCol)
-      ComparePotentials(Vplotted,Vinterp,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,Z,0,moCol)
+      ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT -  Defect',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,1.5,aboveCol)
+      ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollwo',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,1.5,holCol)
+      ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,1.5,moCol)
     end
     % Plot of a slice of the potential in the nth row, that is for constant x
       row = floor(Nxy/2);
@@ -467,7 +483,6 @@ for Ne = 1:Nensemble
       
       %clf
     end
-    %% Plot the potential
     fontsize(gcf,scale=1)
     zSample = 3;
     zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
@@ -508,26 +523,32 @@ for Ne = 1:Nensemble
 end
 %===
 
+end
+  
 %% for fitting
 %Zdefect = dft.zAxis;
 %Vdefect = dft.aboveDefect;
+
+%nPlot = 2/3;mPlot = 1/2;
+comparePots = true;
 SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/(Nxy*Nsuper);
-zFitMin = 2.5;
+zFitMin = 1.5;
 k = int8(interp1(Z,1:numel(Z),zFitMin));
 if(k == 0)
   k = 1;
 end
-m = 0; n = 0;
+m = mPlotDef; n = nPlotDef;
 centre = m*a1+n*a2;
 result = SpaghettiBolognaise\(centre');
 i = int8(result(1))+1;
 j = int8(result(2))+1;
-V1piece = squeeze(Vinterpsuper(i,j,k:end));
-Zpiece = Z(k:end);
-
+%V1piece = squeeze(Vsuper(i,j,k:end));
+%Zpiece = Z(k:end);
+Zpiece = dft.zAxis;
+V1piece = dft.aboveSd;
 weights = Zpiece;
 for k = 1:numel(Zpiece)
-  weights(k) = 1/(exp((3-Zpiece(k))*7)+1);
+  weights(k) = 1/(exp((2-Zpiece(k))*6)+1);
 end
 %figure
 %plot(Zpiece,weights)
@@ -597,43 +618,37 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     function [V1] = V1func(z,z0,D,alpha)
         V1 = 2*const.beta*D*exp(2*alpha*(z0-z));
     end
-  function [V] = V1(z)
-    D1 = 17;
-    alpha1 = 1.4267;
-    b1 = -0.1991;
-    beta1 = 0.3116;
-    c1 = 14.1590;
-    lambda1 = -0.6126;
-    z01 = 3.4411;
-    z11 = 5.5355;
-    z21 = 3.5000;
-    V = D1*(exp(2*alpha1*(z01-z))-2*exp(alpha1*(z01-z))-2*(b1*10)*exp(2*beta1*(z11-z))-c1*exp(lambda1*-(z21-z)));
+  function [V] = VSulph(z)
+    D = 19.9886;
+    a = 0.8122;
+    alpha = 1.4477;
+    b = 0.1958;
+    beta = 0.2029;
+    z0 = 3.3719;
+    z1 = 1.7316;
+    V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
   end
 
-  function [V] = V2(z)
-    D2 = 21;
-    alpha2 = 1.2000;
-    b2 = 2.0000;
-    beta2 = 1.3000;
-    c2 = 0.0400;
-    lambda2 = 0.6000;
-    z02 = 3.1500;
-    z12 = 0;
-    z22 = 6.0000;
-    V = D2*(exp(2*alpha2*(z02-z))-2*exp(alpha2*(z02-z))-2*(b2*10)*exp(2*beta2*(z12-z))-c2*exp(lambda2*-(z22-z)));
+  function [V] = VHollow(z)
+    D = 24.9674;
+    a = 0.4641;
+    alpha = 1.1029;
+    b = 0.1993;
+    beta = 0.6477;
+    z0 = 3.1411;
+    z1 = 3.8323;
+    V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
   end
 
-  function [V] = V3(z)
-    D3 = 20;
-    alpha3 = 1.1706;
-    b3 = 0.6386;
-    beta3 = 0.7456;
-    c3 = 0.0064;
-    lambda3 = 0.7557;
-    z03 = 3.1578;
-    z13 = -0.0261;
-    z23 = 3.5021;
-    V = D3*(exp(2*alpha3*(z03-z))-2*exp(alpha3*(z03-z))-2*(b3*10)*exp(2*beta3*(z13-z))-c3*exp(lambda3*-(z23-z)));
+  function [V] = VMolyb(z)
+    D = 20.1000;
+    a = 0.9996;
+    alpha = 1.1500;
+    b = 0.0026;
+    beta = 1.2439;
+    z0 = 3.2200;
+    z1 = 4.1864;
+    V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
   end
     function [Q] = Qfunc(x,y)
         Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
@@ -669,15 +684,15 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
         Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
         %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
   end
-fittingDFT = false;
+fittingDFT = true;
 if(fittingDFT)
         %+ V1func(Z) * Qfunc(X,Y)...
-    VmatrixElement = V1(Z) ... %blue, sulphur
+    VmatrixElement = VSulph(Z) ... %blue, sulphur
        * Qhexfunc(X,Y) ...
-       + V2(Z) ... %red, molybdenum
-      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
-      + V3(Z) ...%green, hollow site
-      * Qhexfunc(X,Y - (const.c/sqrt(3)));
+       + VHollow(Z) ... %green, hollow site
+      * Qhexfunc(X,Y - (const.c/sqrt(3))) ...
+      + VMolyb(Z) ...%red, molybdenum
+      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3))));
 else
     VmatrixElement = (V0func(Z,const.zOffset+2.1,25,1.2) ...
        + V1func(Z,const.zOffset+3.7,0.5,1.6))... %blue
@@ -700,13 +715,6 @@ end
 function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ysuper,Z)
 %Adds a defect at sulphur site (m,n)
   Vout = Vin;
-  function [v] = val(x,y,Z,k,centre)
-    d = 8.4;
-    gamma = 1.1;
-    v = -d * exp(2*gamma*(4-Z(k))) * ...
-    Gaussian2D(x,y, ...
-    centre,const.c*0.2);
-  end
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
   centresX = zeros(3);
@@ -725,7 +733,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
               x = Xsuper(i,j);
               y = Ysuper(i,j);
               centre = [centresX(m+2,n+2) centresY(m+2,n+2)];
-              Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z,k,centre);
+              Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z(k),centre);
               %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
               %     ", Value = " + val(x,y,Z,k,centre));
             end
@@ -751,11 +759,42 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
         for j = 1:NxySuper
           x = Xsuper(i,j);
           y = Ysuper(i,j);
-          Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z,k,centre0);
+          Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z(k),centre0);
           %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
           %    ", Value = " + val);
         end
       end
+    end
+  end
+
+  function [v] = val(x,y,z,centre)
+    usingFit = true;
+    if(~usingFit)
+      d = 8.4;
+      gamma = 1.1;
+      v = -d * exp(2*gamma*(4-z)) * ...
+      Gaussian2D(x,y, ...
+      centre,const.c*0.2);
+    else
+      macaroni = false;
+      c  = 0.0928;
+      extentFactor = 0.77;
+      d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extentFactor))* ...
+        67.6754;
+      e = 16.3770;
+      gamma = 1.3607;
+      lambda = 1.2462;
+      z2 = 3.4655;
+      z3 = 1.9998;
+      v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
+        -2*e*exp(2*lambda*(z3-z))) * ...
+      Gaussian2D(x,y, ...
+      centre,const.c*extentFactor);
+
+      %disp("Gaussian2D(0,0) = ")
+      %disp(Gaussian2D(0,0,[0 0],const.c*extentFactor));
+      %disp("Well depth at sulphur = ")
+      %disp(d * Gaussian2D(0,0,[0 0],const.c*extentFactor));
     end
   end
 end
@@ -763,28 +802,22 @@ end
 function ComparePotentials(V1,V2,V1name,V2name,a1,a2,m,n,Z1,Z2,zMin,plotColor)
   NxyNsuper1 = size(V1,1);
   SpaghettiBolognaise1 = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper1;
-  k1 = int8(interp1(Z1,1:numel(Z1),zMin));
-  if(k1 == 0)
-    k1 = 1;
-  end
+  k1 = int8(interp1(Z1,1:numel(Z1),zMin))+1;
   centre = m*a1+n*a2;
   result = SpaghettiBolognaise1\(centre');
-  i1 = int8(result(1));
-  j1 = int8(result(2));
+  i1 = int8(result(1))+1;
+  j1 = int8(result(2))+1;
   V1piece = squeeze(V1(i1,j1,:));
   
   NxyNsuper2 = size(V2,1);
   SpaghettiBolognaise2 = [a1(1) a2(1);a1(2) a2(2)]/NxyNsuper2;
-  k2 = int8(interp1(Z2,1:numel(Z2),zMin));
-  if(k2 == 0)
-    k2 = 1;
-  end
+  k2 = int8(interp1(Z2,1:numel(Z2),zMin))+1;
   centre = m*a1+n*a2;
   result = SpaghettiBolognaise2\(centre');
-  i2 = int8(result(1));
-  j2 = int8(result(2));
-  V2piece = squeeze(V2(i2,j2,:));
-  %V2piece = V2;
+  i2 = int8(result(1))+1;
+  j2 = int8(result(2))+1;
+  %V2piece = squeeze(V2(i2,j2,:));
+  V2piece = V2;
   disp([i1 j1 k1])
   disp([i2 j2 k2])
   figure
