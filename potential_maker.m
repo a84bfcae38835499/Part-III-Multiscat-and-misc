@@ -775,9 +775,9 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       r = sqrt(r)/const.c;
       extent = 0.3; %units of lattice parameter
       s = extent * const.c;
-      donutStart = 0.5;
+      donutStart = 0.65;
       donutEnd = 0.6;
-      cutoff = 0.7;
+      cutoff = sqrt(3)/2;
       %if(r<cutoffExtent*1.5)
         c  = 0.0928;
         %d = ((0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
