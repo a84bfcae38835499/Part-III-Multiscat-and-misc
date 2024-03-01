@@ -774,16 +774,17 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       r = (x-centre(1))^2+(y-centre(2))^2;
       r = sqrt(r)/const.c;
       extent = 0.3; %units of lattice parameter
-      s = extent * const.c;
+      s1 = extent * const.c;
+      s2 = extent * const.c*0.2;
       donutStart = 0.65;
       donutEnd = 0.6;
       cutoff = sqrt(3)/2;
       %if(r<cutoffExtent*1.5)
         c  = 0.0928;
-        %d = ((0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
+        %d = ((0.6312/Gaussian2D(0,0,[0 0],const.c*extent*0.3))* ...
         %  67.6754)
-        d = 101.5070;
-        d2 = 0;
+        d = 101.5070/100;
+        d2 = 0 * 15.4521;
         %d = 67.6754;
         e = 16.3770;
         gamma = 1.3607;
@@ -792,12 +793,10 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
         z3 = 1.9998;
         v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
           -2*e*exp(2*lambda*(z3-z))) * ...
-        (1/(s*sqrt(2*pi)))*exp(-(r*r/(2*s^2)));
+          (1/(s1*sqrt(2*pi)))*exp(-(r*r/(2*s1^2)));
         v = v - d2 * (exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-          -2*e*exp(2*lambda*(z3-z))) *...
-          (1/(1+exp((r-donutStart)*10)))*...
-          (1/(1+exp((donutEnd-r)*10)));
-        v = v/(1+exp((r-cutoff)*10));
+          -2*e*exp(2*lambda*(z3-z))) * ...
+          (1/(s2*sqrt(2*pi)))*exp(-(r*r/(2*s2^2)));
         %disp((1/(exp((r-cutoffExtent)*6)+1)))
       %else
       %  v = 0;
