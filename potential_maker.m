@@ -1,12 +1,13 @@
 clear; close all; clc;
 rng default;
+rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 12; Nz = 50; Nsuper = 4;
+Nxy = 8; Nz = 50; Nsuper = 3;
 %Theta = 0.;
-Theta = (1/(Nsuper*Nsuper));
-zMax = 6; zMin = -2;%units Å
+Theta = (0/(Nsuper*Nsuper))
+zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
 %a2=[0,const.a]; 
@@ -464,7 +465,7 @@ for Ne = 1:Nensemble
     ylabel(hbar,'Energy / meV');
     figure
     fileindx = 1;
-    for i = 0
+    for i = 1e-5
       Vsoup = single(i);
       figure
       equipotential_plot('V', Vplotted, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
@@ -514,6 +515,19 @@ for Ne = 1:Nensemble
       yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
       plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
       plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
+
+      defCol = [0.3 0.7 1];
+      for ne = 1:Nensemble
+        for m = 0:int8(Nsuper-1)
+          for n = 0:int8(Nsuper-1)
+            if(boolgrid_ensemble(m+1,n+1,Ne))
+              xPlot = double(m)*a1(1)+double(n)*a2(1);
+              yPlot = double(m)*a1(2)+double(n)*a2(2);
+              plot(xPlot,yPlot,'p',MarkerSize=24, MarkerEdgeColor=[0 0 0],MarkerFaceColor=defCol);
+            end
+          end
+        end
+      end
        hold off
     end
     
@@ -572,24 +586,7 @@ if copyDFT
   b1 = y1; b2 = y2;
 end
 %% data for python hex plotter
-writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
-a1str = [char(num2str(a1))];
-a2str = [char(num2str(a2))];
-b1str = [char(num2str(b1(1:2)))];
-b2str = [char(num2str(b2(1:2)))];
-nsupstr = [char(num2str(Nsuper))];
-thetastr = [char(num2str(Theta))];
-nens = [char(num2str(Nensemble))];
-S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
-realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str,newline,'Nsuper = ',nsupstr];
-recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
-defectStr = ['Defect data:',newline,'Theta = ', thetastr,newline,'Ensenble size = ', nens];
-S = [realStr,newline,recpStr,newline,defectStr,S];
-FID = fopen('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'w');
-if FID == -1, error('Cannot open file %s', FileName); end
-fwrite(FID, S, 'char');
-fclose(FID);
-
+WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble);
 %% We supply the lattice to the mulitscat script so it can do its thing
 doingMSshit = true;
 if(doingMSshit)
@@ -776,15 +773,17 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       macaroni = false;
       r = (x-centre(1))^2+(y-centre(2))^2;
       r = sqrt(r)/const.c;
-      cutoffExtent = 1.5;
       extent = 0.3; %units of lattice parameter
-      donutStart = 0.6;
-      donutEnd = 0.7;
+      s = extent * const.c;
+      donutStart = 0.5;
+      donutEnd = 0.6;
+      cutoff = 0.7;
       %if(r<cutoffExtent*1.5)
         c  = 0.0928;
-        d = ((0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
-          67.6754);
-        d2 = 50;
+        %d = ((0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
+        %  67.6754)
+        d = 101.5070;
+        d2 = 101.5070;
         %d = 67.6754;
         e = 16.3770;
         gamma = 1.3607;
@@ -793,12 +792,12 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
         z3 = 1.9998;
         v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
           -2*e*exp(2*lambda*(z3-z))) * ...
-        (Gaussian2D(x,y, ...
-        centre,const.c*extent));
+        (1/(s*sqrt(2*pi)))*exp(-(r*r/(2*s^2)));
         v = v - d2 * (exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
           -2*e*exp(2*lambda*(z3-z))) *...
-          (1/(1+exp((r-donutStart)*40)))*...
-          (1/(1+exp((donutEnd-r)*40)));
+          (1/(1+exp((r-donutStart)*10)))*...
+          (1/(1+exp((donutEnd-r)*10)));
+        v = v/(1+exp((r-cutoff)*1000));
         %disp((1/(exp((r-cutoffExtent)*6)+1)))
       %else
       %  v = 0;

@@ -32,4 +32,4 @@ Qhexfunc(X,Y)
         V1 = 2*const.beta*D*exp(2*alpha*(z0-z));
 
 
-backgroundDepth1*(exp(2*alpha1*(z01-z))-gamma1*exp(alpha1*(z01-z))-2*b*exp(2*beta1*(z11-z))) - A*exp(lambda*-z)
+D*(exp(2*alpha*(z0-z))-2*gamma*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)))
