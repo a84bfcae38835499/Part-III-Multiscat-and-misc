@@ -6,7 +6,7 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 32; Nz = 50; Nsuper = 2;
 %Theta = 0.;
-Theta = (0/(Nsuper*Nsuper))
+Theta = (1/(Nsuper*Nsuper))
 zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
