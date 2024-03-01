@@ -783,7 +783,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
         c  = 0.0928;
         %d = ((0.6312/Gaussian2D(0,0,[0 0],const.c*extent*0.3))* ...
         %  67.6754)
-        d = 101.5070/100;
+        d = 101.5070/10;
         d2 = 0 * 15.4521;
         %d = 67.6754;
         e = 16.3770;
