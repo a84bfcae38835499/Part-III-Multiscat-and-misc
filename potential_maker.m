@@ -797,7 +797,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
           -2*e*exp(2*lambda*(z3-z))) *...
           (1/(1+exp((r-donutStart)*10)))*...
           (1/(1+exp((donutEnd-r)*10)));
-        v = v/(1+exp((r-cutoff)*1000));
+        v = v/(1+exp((r-cutoff)*10));
         %disp((1/(exp((r-cutoffExtent)*6)+1)))
       %else
       %  v = 0;
