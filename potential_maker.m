@@ -3,10 +3,10 @@ rng default;
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 50; Nsuper = 3;
+Nxy = 12; Nz = 50; Nsuper = 4;
 %Theta = 0.;
 Theta = (1/(Nsuper*Nsuper));
-zMax = 6; zMin = 1.5;%units Å
+zMax = 6; zMin = -2;%units Å
 
 %a1=[const.a,0];
 %a2=[0,const.a]; 
@@ -126,7 +126,7 @@ end
 %actually check them lol
 %===
 %% Now interpolate the DFT data into a useful basis
-interpolateDFTdata = true;
+interpolateDFTdata = false;
 Vvect = zeros(Nz*Nxy*Nxy,1);
 
 if(interpolateDFTdata)
@@ -255,6 +255,7 @@ potStructArray = struct([]);
 boolgrid_ensemble = zeros(Nsuper,Nsuper,Nensemble,'logical');
 if(Ndefect == 0)
   %% 0 defects
+  disp("No defects!!!")
   potStructArray(1).V = Vsuper;
   potStructArray(1).a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
   potStructArray(1).zmin=Z(1);
@@ -340,7 +341,7 @@ if(Ndefect == 0)
   end
 else
   %% One or more defects
-
+  disp("One or more defects!!!")
   %for the ensemble of potentials, how do we guarentee that they're
   %different???
   %we've got ms_ensemble and ns_ensemble, but how do we check wehther or
@@ -443,9 +444,9 @@ for Ne = 1:Nensemble
     moCol = [1 0.2 0];
 
     if(comparePots)
-      ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT -  Defect',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,1.5,aboveCol)
-      ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollwo',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,1.5,holCol)
-      ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,1.5,moCol)
+      ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Defect',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol)
+      ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollwo',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol)
+      ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol)
     end
     % Plot of a slice of the potential in the nth row, that is for constant x
       row = floor(Nxy/2);
@@ -716,22 +717,19 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
   Vout = Vin;
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
-  centresX = zeros(3);
-  centresY = zeros(3);
   centre0 = double(min)*a1+double(nin)*a2;
   
   if doWeRepeat
     disp("Repeating!")
     for m = -1:1
       for n = -1:1
-        centresX(m+2,n+2) = centre0(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper;
-        centresY(m+2,n+2) = centre0(2)+m*a1(2)*Nsuper+n*a2(2)*Nsuper;
         for k = 1:Nz
           for i = 1:NxySuper
             for j = 1:NxySuper
               x = Xsuper(i,j);
               y = Ysuper(i,j);
-              centre = [centresX(m+2,n+2) centresY(m+2,n+2)];
+              centre = [centre0(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
+                        centre0(2)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
               Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z(k),centre);
               %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
               %     ", Value = " + val(x,y,Z,k,centre));
@@ -776,20 +774,35 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       centre,const.c*0.2);
     else
       macaroni = false;
-      c  = 0.0928;
-      extentFactor = 0.5;
-      d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extentFactor))* ...
-        67.6754;
-      e = 16.3770;
-      gamma = 1.3607;
-      lambda = 1.2462;
-      z2 = 3.4655;
-      z3 = 1.9998;
-      v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-        -2*e*exp(2*lambda*(z3-z))) * ...
-      Gaussian2D(x,y, ...
-      centre,const.c*extentFactor);
-
+      r = (x-centre(1))^2+(y-centre(2))^2;
+      r = sqrt(r)/const.c;
+      cutoffExtent = 1.5;
+      extent = 0.3; %units of lattice parameter
+      donutStart = 0.6;
+      donutEnd = 0.7;
+      %if(r<cutoffExtent*1.5)
+        c  = 0.0928;
+        d = ((0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
+          67.6754);
+        d2 = 50;
+        %d = 67.6754;
+        e = 16.3770;
+        gamma = 1.3607;
+        lambda = 1.2462;
+        z2 = 3.4655;
+        z3 = 1.9998;
+        v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
+          -2*e*exp(2*lambda*(z3-z))) * ...
+        (Gaussian2D(x,y, ...
+        centre,const.c*extent));
+        v = v - d2 * (exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
+          -2*e*exp(2*lambda*(z3-z))) *...
+          (1/(1+exp((r-donutStart)*40)))*...
+          (1/(1+exp((donutEnd-r)*40)));
+        %disp((1/(exp((r-cutoffExtent)*6)+1)))
+      %else
+      %  v = 0;
+      %end
       %disp("Gaussian2D(0,0) = ")
       %disp(Gaussian2D(0,0,[0 0],const.c*extentFactor));
       %disp("Well depth at sulphur = ")
