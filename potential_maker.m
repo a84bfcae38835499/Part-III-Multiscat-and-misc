@@ -771,32 +771,19 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       centre,const.c*0.2);
     else
       macaroni = false;
-      r = (x-centre(1))^2+(y-centre(2))^2;
-      r = sqrt(r)/const.c;
-      extent = 0.3; %units of lattice parameter
-      s1 = extent * const.c;
-      s2 = extent * const.c*0.2;
-      donutStart = 0.65;
-      donutEnd = 0.6;
-      cutoff = sqrt(3)/2;
-      %if(r<cutoffExtent*1.5)
-        c  = 0.0928;
-        %d = ((0.6312/Gaussian2D(0,0,[0 0],const.c*extent*0.3))* ...
-        %  67.6754)
-        d = 101.5070/10;
-        d2 = 0 * 15.4521;
-        %d = 67.6754;
-        e = 16.3770;
-        gamma = 1.3607;
-        lambda = 1.2462;
-        z2 = 3.4655;
-        z3 = 1.9998;
-        v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-          -2*e*exp(2*lambda*(z3-z))) * ...
-          (1/(s1*sqrt(2*pi)))*exp(-(r*r/(2*s1^2)));
-        v = v - d2 * (exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-          -2*e*exp(2*lambda*(z3-z))) * ...
-          (1/(s2*sqrt(2*pi)))*exp(-(r*r/(2*s2^2)));
+      c  = 0.0928;
+      extentFactor = 0.3;
+      d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extentFactor))* ...
+        67.6754;
+      e = 16.3770;
+      gamma = 1.3607;
+      lambda = 1.2462;
+      z2 = 3.4655;
+      z3 = 1.9998;
+      v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
+        -2*e*exp(2*lambda*(z3-z))) * ...
+      Gaussian2D(x,y, ...
+      centre,const.c*extentFactor);
         %disp((1/(exp((r-cutoffExtent)*6)+1)))
       %else
       %  v = 0;
