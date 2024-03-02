@@ -774,14 +774,14 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       c  = 0.0928;
       extentFactor = 0.3;
       d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extentFactor))* ...
-        67.6754*0.75;
+        67.6754;
       e = 16.3770;
       gamma = 1.3607;
       lambda = 1.2462;
       z2 = 3.4655;
       z3 = 1.9998;
       v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-        -2*e*exp(2*lambda*(z3-z))) * ...
+        -2*e*exp(2*lambda*(z3-z)) - 100 * exp((0.5-z)*10)) * ...
       Gaussian2D(x,y, ...
       centre,const.c*extentFactor);
         %disp((1/(exp((r-cutoffExtent)*6)+1)))
