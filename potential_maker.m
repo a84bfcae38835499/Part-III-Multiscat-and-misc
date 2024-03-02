@@ -485,7 +485,7 @@ for Ne = 1:Nensemble
       %clf
     end
     fontsize(gcf,scale=1)
-    zSample = 3;
+    zSample = 1;
     zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
     figure
     contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),10)
@@ -781,8 +781,8 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       z2 = 3.4655;
       z3 = 1.9998;
       v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-        -2*e*exp(2*lambda*(z3-z)) - 100 * exp((0.5-z)*10)) * ...
-      Gaussian2D(x,y, ...
+        -2*e*exp(2*lambda*(z3-z)) - 100 * exp((1-z)*10)) * ...
+      Gaussian2D(x,y, ...x
       centre,const.c*extentFactor);
         %disp((1/(exp((r-cutoffExtent)*6)+1)))
       %else
