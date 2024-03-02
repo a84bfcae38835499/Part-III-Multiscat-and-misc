@@ -4,7 +4,7 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 50; Nsuper = 2;
+Nxy = 8; Nz = 25; Nsuper = 2;
 %Theta = 0.;
 Theta = (1/(Nsuper*Nsuper))
 zMax = 6; zMin = 0;%units Å
@@ -445,8 +445,8 @@ for Ne = 1:Nensemble
     moCol = [1 0.2 0];
 
     if(comparePots)
-      ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Defect',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol)
-      ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollwo',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol)
+      ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol)
+      ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol)
       ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol)
     end
     % Plot of a slice of the potential in the nth row, that is for constant x
@@ -457,7 +457,7 @@ for Ne = 1:Nensemble
     
         fontsize(gcf,scale=1)
     xlabel('z/Å')
-    ylabel('y/Å') %is this x or y? I think y but idrk
+    ylabel('y/Å') %is this x or y? I think y but idrk;
     colorbar
     xlim([1.5,6])
     title('Potential in z, used in simulation')
