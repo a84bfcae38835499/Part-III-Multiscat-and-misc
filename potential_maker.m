@@ -4,7 +4,7 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 8; Nz = 25; Nsuper = 2;
+Nxy = 16; Nz = 50; Nsuper = 2;
 %Theta = 0.;
 Theta = (1/(Nsuper*Nsuper))
 zMax = 6; zMin = 0;%units Å
@@ -774,7 +774,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       c  = 0.0928;
       extentFactor = 0.3;
       d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extentFactor))* ...
-        67.6754;
+        67.6754/2;
       e = 16.3770;
       gamma = 1.3607;
       lambda = 1.2462;
