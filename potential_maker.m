@@ -25,10 +25,10 @@ a3=[0,0,const.c];
 nPlotDef = 0;mPlotDef = 0;
 aboveCol = [0.3 0. 1];
 
-nPlotHol = 2/6;mPlotHol = 1/6;
+nPlotHol = 2/3;mPlotHol = 1/3;
 holCol = [0.0 0.6 0.2];
 
-nPlotMo = 1/6;mPlotMo = 2/6;
+nPlotMo = 1/3;mPlotMo = 2/3;
 moCol = [1 0.2 0];
 
 %% Defect density calculations
@@ -487,15 +487,15 @@ for Ne = 1:Nensemble
       %clf
     end
     fontsize(gcf,scale=1)
-    zSample = 1;
+    zSample = 3;
     zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
     figure
-    contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),10)
+    contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),16)
     daspect([1 1 1])
     xlabel('x/Å')
     ylabel('y/Å')
     title('Potentials at z = ' + string(zSample) + ' Å');
-    colormap(parula(15))
+    colormap(parula(16))
     hbar = colorbar('southoutside');
     xlabel(hbar,'Energy / meV');
     %add indicators for where we're sampling the potential z
@@ -589,6 +589,16 @@ if copyDFT
 end
 %% data for python hex plotter
 WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble);
+
+%% Plot corrugation
+%[newx,newy] = meshgrid(-const.c:0.01:const.c,-const.c:0.01:const.c);
+%newz = Qhexfunc(newx,newy);
+%r = sqrt(newx.^2+newy.^2)/const.c;
+%newz = newz .* (1./(1+exp((1/sqrt(3)-r)*1000)));
+%surf(newx,newy,newz)
+%shading interp
+%colormap(plasma)
+%daspect([1 1 1])
 %% We supply the lattice to the mulitscat script so it can do its thing
 doingMSshit = true;
 if(doingMSshit)
@@ -677,12 +687,6 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     Q = Q/3;
     %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
   end
-  function [Q] = Qhexfunc(X,Y)
-        X_n = X ./ (const.c);
-        Y_n = Y ./ (const.c*sqrt(3));
-        Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
-        %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
-  end
 fittingDFT = true;
 if(fittingDFT)
         %+ V1func(Z) * Qfunc(X,Y)...
@@ -717,7 +721,6 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
   centre0 = double(min)*a1+double(nin)*a2;
-  
   if doWeRepeat
     disp("Repeating!")
     for m = -1:1
@@ -729,7 +732,15 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
               y = Ysuper(i,j);
               centre = [centre0(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
                         centre0(2)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
+
+              %r = (x-centre(1))^2+(y-centre(2))^2;
+              %r = sqrt(r)/const.c;
+              %disp("r = " + num2str(r))
+              %disp("vmatrixelem = " + Vout(i,j,k))
+              %disp("defect val  = " + val(x,y,Z(k),centre))
+              %disp("sum         = " + num2str(Vout(i,j,k) + val(x,y,Z(k),centre)));
               Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z(k),centre);
+              %disp("------------- ")
               %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
               %     ", Value = " + val(x,y,Z,k,centre));
             end
@@ -764,6 +775,36 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
   end
 
   function [v] = val(x,y,z,centre)
+    function [V] = VSulph(z)
+      D = 19.9886;
+      a = 0.8122;
+      alpha = 1.4477;
+      b = 0.1958;
+      beta = 0.2029;
+      z0 = 3.3719;
+      z1 = 1.7316;
+      V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
+    end
+    function [V] = VHollow(z)
+      D = 24.9674;
+      a = 0.4641;
+      alpha = 1.1029;
+      b = 0.1993;
+      beta = 0.6477;
+      z0 = 3.1411;
+      z1 = 3.8323;
+      V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
+    end  
+    function [V] = VMolyb(z)
+      D = 20.1000;
+      a = 0.9996;
+      alpha = 1.1500;
+      b = 0.0026;
+      beta = 1.2439;
+      z0 = 3.2200;
+      z1 = 4.1864;
+      V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
+    end
     usingFit = true;
     if(~usingFit)
       d = 8.4;
@@ -772,27 +813,42 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       Gaussian2D(x,y, ...
       centre,const.c*0.2);
     else
-      macaroni = false;
       r = (x-centre(1))^2+(y-centre(2))^2;
       r = sqrt(r)/const.c;
-      c  = 0.0928;
       extent = 0.3;
       cutoff = 1;
       s = extent * const.c;
+      v = 0;
       %d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
       %  67.6754;
-      d = 101.5070;
-      e = 16.3770;
-      gamma = 1.3607;
-      lambda = 1.2462;
+      %c  = 0.0928;
+      %d = 101.5070;
+      %e = 16.3770;
+      %gamma = 1.3607;
+      %lambda = 1.2462;
+      %z2 = 3.4655;
+      %z3 = 1.9998;
+      %v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
+      %  -2*e*exp(2*lambda*(z3-z))) * ...
+      %(1/(s*sqrt(2*pi)))*exp(-(x - centre(1)).^2/(2*s^2))*exp(-(y - centre(2)).^2/(2*s^2));
+      c = 0.2631;
+      d = 32.7202;
+      e = 8.3365;
+      gamma	= 1.0065;
+      lambda = 1.0000;
       z2 = 3.4655;
-      z3 = 1.9998;
-      v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-        -2*e*exp(2*lambda*(z3-z))) * ...
-      (1/(s*sqrt(2*pi)))*exp(-(x - centre(1)).^2/(2*s^2))*exp(-(y - centre(2)).^2/(2*s^2));
+      z3 = 2.0312;
+      VmatrixElement = VSulph(z) ... %blue, sulphur
+         * Qhexfunc(x,y) ...
+         + VHollow(z) ... %green, hollow site
+        * Qhexfunc(x,y - (const.c/sqrt(3))) ...
+        + VMolyb(z) ...%red, molybdenum
+        * Qhexfunc(x-const.c/2,y-(const.c*1/(2*sqrt(3))));
+        v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
+          -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-1/sqrt(3))*10) ));
       %Gaussian2D(x,y, ...
       %centre,const.c*extent);
-      v = v + 1000 * exp((1-z)*10) * (1/(exp((r-cutoff)*4)+1));
+      %v = v + 1000 * exp((1-z)*10) * (1/(exp((r-cutoff)*4)+1));
         %disp()
       %else
       %  v = 0;
@@ -861,4 +917,11 @@ function [checksum] = vivCheckSum(intArray1, intArray2)
     m = intArray1(i);
     n = intArray2(i);
   end
+end
+
+function [Q] = Qhexfunc(X,Y)
+  X_n = X ./ (const.c);
+  Y_n = Y ./ (const.c*sqrt(3));
+  Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
+  %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
 end

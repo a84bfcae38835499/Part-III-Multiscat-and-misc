@@ -32,13 +32,14 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
         for ia2=1:n2
             %for indz=1:length(z)-1
             %    if V(ia1,ia2,indz) > V0 && V(ia1,ia2,indz+1) < V0
-            for indz=length(z):-1:2
+            for indz=length(z)-1:-1:2
                 if V(ia1,ia2,indz) < V0 && V(ia1,ia2,indz-1) > V0
                 %if V(ia1,ia2,indz+1) < V0
                     m = (V(ia1,ia2,indz) - V(ia1, ia2, indz+1))/(indz - (indz+1));
                     c = V(ia1, ia2,indz) - m*indz;
                     %inds0(ia1,ia2) = -c/m;
                     inds0(ia1,ia2) = indz;
+                    break;
                 end
             end
         end
