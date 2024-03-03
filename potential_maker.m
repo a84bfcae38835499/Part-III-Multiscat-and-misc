@@ -25,11 +25,27 @@ a3=[0,0,const.c];
 nPlotDef = 0;mPlotDef = 0;
 aboveCol = [0.3 0. 1];
 
-nPlotHol = 2/3;mPlotHol = 1/3;
+nPlotHol = 2/6;mPlotHol = 1/6;
 holCol = [0.0 0.6 0.2];
 
-nPlotMo = 1/3;mPlotMo = 2/3;
+nPlotMo = 1/6;mPlotMo = 2/6;
 moCol = [1 0.2 0];
+
+%% Defect density calculations
+cellArea = abs(a1(1)*a2(2) - a1(2)*a1(2));
+disp("Unit cell area = " + cellArea + "Å^2")
+cellArea = cellArea * (Nsuper^2);
+disp("Supercell area = " + cellArea + "Å^2")
+
+Nsites = Nsuper*Nsuper;
+disp("Target number of sites = " + (Nsites * Theta))
+Ndefect = int8(round(Nsites * Theta));
+disp("Actual number of sites = " + Ndefect)
+defectDensity = double(Ndefect)/cellArea;
+disp("defectDensity = " + defectDensity + "/Å^2")
+defectDensity = defectDensity * ((1e10/1e2)^2);
+disp("              = " + num2str(defectDensity,'%e') + "/cm^2")
+
 
 
 %% Import Min's DFT
@@ -233,11 +249,6 @@ if(copyInterp)
 end
 
 %% Now add imperfections to the lattice
-Nsites = Nsuper*Nsuper;
-disp("Target number of sites = " + (Nsites * Theta))
-Ndefect = int8(round(Nsites * Theta));
-disp("Actual number of sites = " + Ndefect)
-
 %Assume that we always have a defect at the (0,0) position, to fix
 %translational invariance leadings to degeneracy
 if(Ndefect ~= 0 && Nsites-1 - Ndefect > 0)
@@ -435,15 +446,6 @@ for Ne = 1:Nensemble
     Vplotted = Vout;
     %nPlot = 2/3;mPlot = 1/2;
     comparePots = true;
-    nPlotDef = 0;mPlotDef = 0;
-    aboveCol = [0.3 0. 1];
-
-    nPlotHol = 2/3;mPlotHol = 1/3;
-    holCol = [0.0 0.6 0.2];
-
-    nPlotMo = 1/3;mPlotMo = 2/3;
-    moCol = [1 0.2 0];
-
     if(comparePots)
       ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol)
       ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol)
@@ -771,20 +773,27 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       centre,const.c*0.2);
     else
       macaroni = false;
+      r = (x-centre(1))^2+(y-centre(2))^2;
+      r = sqrt(r)/const.c;
       c  = 0.0928;
-      extentFactor = 0.3;
-      d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extentFactor))* ...
-        67.6754;
+      extent = 0.3;
+      cutoff = 0.8;
+      s = extent * const.c;
+      %d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
+      %  67.6754;
+      d = 101.5070;
       e = 16.3770;
       gamma = 1.3607;
       lambda = 1.2462;
       z2 = 3.4655;
       z3 = 1.9998;
       v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-        -2*e*exp(2*lambda*(z3-z)) - 100 * exp((1-z)*10)) * ...
-      Gaussian2D(x,y, ...x
-      centre,const.c*extentFactor);
-        %disp((1/(exp((r-cutoffExtent)*6)+1)))
+        -2*e*exp(2*lambda*(z3-z))) * ...
+      (1/(s*sqrt(2*pi)))*exp(-(x - centre(1)).^2/(2*s^2))*exp(-(y - centre(2)).^2/(2*s^2));
+      %Gaussian2D(x,y, ...
+      %centre,const.c*extent);
+      v = v + 100 * exp((1.3-z)*10) * (1/(exp((r-cutoff)*4)+1));
+        %disp()
       %else
       %  v = 0;
       %end
