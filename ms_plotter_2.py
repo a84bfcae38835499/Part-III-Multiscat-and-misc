@@ -114,12 +114,6 @@ latticeFile.close()
 b1 = B1 / Babs
 b2 = B2 / Babs
 
-print("b1 = ") 
-print(b1)
-print("b2 = ") 
-print(b2)
-print("Babs = ")
-
 d = import_multiscat('diffrac10001.out')
 print(d)
 
@@ -138,7 +132,7 @@ n2max = 0
 valmin = 1
 valmax = 0
 smolVal = 1e-100
-vanityVal = 1e-3
+vanityVal = 0
 
 paddingCells = 40
 for k in range(0,nOccCh):
@@ -282,7 +276,7 @@ additionalVals = []
 
 vanity = True
 if(vanity):
-    paddingCells = 30
+    paddingCells = 20
     for n in range(-paddingCells,paddingCells):
         for m in range(-paddingCells,paddingCells):
             canPlaceSiteHere = True
@@ -328,7 +322,7 @@ ax2.set_xlim(min(pCXS)-1/2,max(pCXS)+1/2)
 captiontxt="Entropy = " + "{:.6f}".format(H)
 plt.figtext(0.5, -0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
-filenametxt="Full vacancy + ad hoc repulsion"
+filenametxt="Saxon-Woods defect, exponent = 10, mu = 0.5"
 plt.figtext(0.5, -0.1, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):
