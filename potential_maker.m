@@ -777,7 +777,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       r = sqrt(r)/const.c;
       c  = 0.0928;
       extent = 0.3;
-      cutoff = 0.8;
+      cutoff = 1;
       s = extent * const.c;
       %d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
       %  67.6754;
@@ -792,7 +792,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       (1/(s*sqrt(2*pi)))*exp(-(x - centre(1)).^2/(2*s^2))*exp(-(y - centre(2)).^2/(2*s^2));
       %Gaussian2D(x,y, ...
       %centre,const.c*extent);
-      v = v + 100 * exp((1.3-z)*10) * (1/(exp((r-cutoff)*4)+1));
+      v = v + 1000 * exp((1-z)*10) * (1/(exp((r-cutoff)*4)+1));
         %disp()
       %else
       %  v = 0;
