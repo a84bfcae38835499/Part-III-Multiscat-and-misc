@@ -3,10 +3,10 @@ import numpy as np
 n1 = range(-3,0)
 intensities = np.array([0.360322E-01,0.520823E-01,0.138636E-01,0.811935E-01])
 
-#     -3     0          0.360322E-01
-#     -2     0          0.520823E-01
-#     -1     0          0.138636E-01
-#      0     0          0.811935E-01
+#     -3     0          0.409479E-01
+#     -2     0          0.513849E-01
+#     -1     0          0.120501E-01
+#      0     0          0.724793E-01
 
 intensities_n = intensities/max(intensities)
 print(intensities_n)

@@ -129,7 +129,7 @@ nOccCh = len(d.index)
 plotValues = np.zeros((nOccCh))
 plotCoordsX = np.zeros((nOccCh))
 plotCoordsY = np.zeros((nOccCh))
-pCXS = np.array([])
+pCXS = np.array([]) #These variables stand for something but icr what it is lmao
 pCYS = np.array([])
 n1min = 0
 n1max = 0
@@ -137,7 +137,10 @@ n2min = 0
 n2max = 0
 valmin = 1
 valmax = 0
-smolVal = 1e-5
+smolVal = 1e-100
+vanityVal = 1e-3
+
+paddingCells = 40
 for k in range(0,nOccCh):
     row = d.iloc[k]
     n1 = getattr(row,'n1')
@@ -150,11 +153,11 @@ for k in range(0,nOccCh):
         n2min = n2
     if(n2 > n2max):
         n2max = n2
-    I = getattr(row,'I')
+    I = float(getattr(row,'I'))
     if(I == 0):
         print(f"Zero found, setting to {smolVal}")
         I = smolVal
-    elif(I > smolVal):
+    elif(I > vanityVal):
         pCXS = np.append(pCXS,b1[0] * n1 + b2[0] * n2)
         pCYS = np.append(pCYS,b1[1] * n1 + b2[1] * n2)
     if(I < valmin):
@@ -213,18 +216,25 @@ plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,path_eff
 plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.1),color=b1col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
 plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
 
-plt.arrow(0,0,a1[0],a1[1],width=0.05,color=a1col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
-plt.arrow(0,0,a2[0],a2[1],width=0.05,color=a2col,zorder=6,path_effects=pathefts2,linestyle='--',length_includes_head=True)
-plt.annotate("a1", (a1[0],a1[1]),color=a1col,fontsize=8,weight='bold',path_effects=pathefts1)
-plt.annotate("a2", (a2[0],a2[1]),color=a2col,fontsize=8,weight='bold',path_effects=pathefts1)
+plt.arrow(0,0,a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2),width=0.05,color=a1col,zorder=6,length_includes_head=True,alpha=0.5)
+plt.arrow(0,0,a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2),width=0.05,color=a2col,zorder=6,length_includes_head=True,alpha=0.5)
+plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
+plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
 
 
 for k in range(0,nOccCh):
     row = d.iloc[k]
     n1 = int(getattr(row,'n1'))
     n2 = int(getattr(row,'n2'))
-    n1n2 = str(n1) + ',' + str(n2)
-    plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2)*Nsuper,(b1[1]*n1+b2[1]*n2)*Nsuper),fontsize=12,zorder=10,ha='center',va='center')
+    I = getattr(row,'I')
+    if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
+        n1n2 = str(int(n1/Nsuper)) + ',' + str(int(n2/Nsuper))
+        if(I < (valmax-valmin)*0.9):
+            col = 'w'
+        else:
+            col = 'k'
+        plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2),(b1[1]*n1+b2[1]*n2)),fontsize=8,zorder=10,ha='center',va='center',c=col)
+            
 
 
 scatFile = open('scatCond.in', 'r')
@@ -254,7 +264,8 @@ heliumk_n = heliumk/(Babs*1e10)
 print("heliumk_n =")
 print(heliumk_n)
 if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
-    plt.arrow(0,0,heliumk_n[0,0],heliumk_n[1,0],width=0.03,color=hecol,zorder=7,head_width=0.1)
+    plt.arrow(0,0,Nsuper*heliumk_n[0,0],Nsuper*heliumk_n[1,0],width=0.03,color='b',zorder=7,head_width=0.1)
+    ax2.add_patch(plt.Circle((0, 0), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
 ax2.set_title(titelstr)
 
 #creates a colourbar on the first subplot
@@ -269,24 +280,36 @@ additionalX = []
 additionalY = []
 additionalVals = []
 
-limN = 36
-for i in range(limN):
-    angle = 2*np.pi*i/limN
-    iRot = np.matrix([[np.cos(angle),np.sin(angle)],
-                    [-np.sin(angle),np.cos(angle)]])
-    r = iRot * np.reshape(heliumk_n,(2,1))
-    print(r)
-    additionalX.append(r[0,0])
-    additionalY.append(r[1,0])
-    additionalVals.append(0.)
+vanity = True
+if(vanity):
+    paddingCells = 30
+    for n in range(-paddingCells,paddingCells):
+        for m in range(-paddingCells,paddingCells):
+            canPlaceSiteHere = True
+            for k in range(0,nOccCh):
+                row = d.iloc[k]
+                n1 = int(getattr(row,'n1'))
+                n2 = int(getattr(row,'n2'))
+                if(m == n1 and n == n2):
+                    canPlaceSiteHere = False
+                    
+            if(canPlaceSiteHere):
+                #print(f"site added at n1, n2 = {m}, {n}")
+                additionalX.append([b1[0]*float(m)+b2[0]*float(n)])
+                additionalY.append([b1[1]*float(m)+b2[1]*float(n)])
+                additionalVals.append(smolVal)
+                #plt.annotate('+',((b1[0]*float(m)+b2[0]*float(n)),(b1[1]*float(m)+b2[1]*float(n))),fontsize=8,zorder=10,ha='center',va='center',color=[1., 0., 0.])
+            #else:
+                #print(f"no site at n1, n2 = {m}, {n}")
 
+print(additionalX)
 plotCoordsArray = np.array(np.column_stack((np.append(plotCoordsX,additionalX), np.append(plotCoordsY,additionalY))))
 order = np.append(plotValues,additionalVals)
 points = plotCoordsArray
 vor = Voronoi(points=points,furthest_site=False)
 
 #plots the voronoi diagram on the second subplot
-voronoi_plot_2d(vor, show_vertices =False, show_points =False, ax=ax2,line_width=1)
+voronoi_plot_2d(vor, show_vertices =False, show_points =False, ax=ax2,line_width=0.5,line_colors=[0.5, 0.5, 0.5])
     
 
 #colours the voronoi cells    
@@ -299,13 +322,13 @@ for r in range(len(vor.point_region)):
 ax2.set_aspect('equal')
 plt.xticks([])  
 plt.yticks([])
-ax2.set_ylim(min(pCYS),max(pCYS))
-ax2.set_xlim(min(pCXS),max(pCXS))
+ax2.set_ylim(min(pCYS)-1/2,max(pCYS)+1/2)
+ax2.set_xlim(min(pCXS)-1/2,max(pCXS)+1/2)
 
 captiontxt="Entropy = " + "{:.6f}".format(H)
 plt.figtext(0.5, -0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
-filenametxt="Old potential"
+filenametxt="Full vacancy + ad hoc repulsion"
 plt.figtext(0.5, -0.1, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):

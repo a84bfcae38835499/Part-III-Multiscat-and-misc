@@ -708,6 +708,10 @@ c
      + '# Polar angle        theta = ',5e14.6/1x,
      + '# Azimuthal angle      phi = ',e10.4/1x,36('-')//1x,
      + '# Diffraction Spot         Intensity'/'#',1x,36('-'))
- 602  format ('#',i7,i6,e22.6)
+ 602  format ('#',i7,i6,es24.16e3)
  612  format ('#',37('-')/5x,'Unitarity',e22.6/'#',1x,36('-'))
+c 		I edited the above format line, as I was getting very very small
+c 		intensities (10E-250) which were leading to printing errors.
+c			- Viv, 2024
+ 
       end
