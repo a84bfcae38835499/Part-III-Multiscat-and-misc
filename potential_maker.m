@@ -845,7 +845,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
         + VMolyb(z) ...%red, molybdenum
         * Qhexfunc(x-const.c/2,y-(const.c*1/(2*sqrt(3))));
         v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-          -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-0.5)*10) ));
+          -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-0.51)*10) ));
       %Gaussian2D(x,y, ...
       %centre,const.c*extent);
       %v = v + 1000 * exp((1-z)*10) * (1/(exp((r-cutoff)*4)+1));
