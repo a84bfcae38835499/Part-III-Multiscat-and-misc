@@ -419,7 +419,7 @@ else
       solved = true;
       for ne = 1:Ne
         samplegrid = boolgrid_ensemble(:,:,Ne);
-        if(samplegrid == testgrid)
+        if((samplegrid == testgrid) || (samplegrid == transpose(testgrid)))
           disp("This defect arrangement has already been stored!")
           solved = false;
         end

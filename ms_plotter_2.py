@@ -138,62 +138,67 @@ latticeFile.close()
 b1 = B1 / Babs
 b2 = B2 / Babs
 
-d = import_multiscat('diffrac10001.out')
-print(d)
 
-#print(d2)
-#print(d2.values)
-nOccCh = len(d.index)
-plotValues = np.zeros((nOccCh))
+nOccCh = len(import_multiscat('diffrac10001.out').index)
+plotValuesAvg = np.zeros((nOccCh))
 plotCoordsX = np.zeros((nOccCh))
 plotCoordsY = np.zeros((nOccCh))
-pCXS = np.array([]) #These variables stand for something but icr what it is lmao
-pCYS = np.array([])
-n1min = 0
-n1max = 0
-n2min = 0
-n2max = 0
-valmin = 1
-valmax = 0
-smolVal = 1e-100
-vanityVal = 0
+entropiesOut = np.zeros((1,Nensemble))
 
-paddingCells = 40
-for k in range(0,nOccCh):
-    row = d.iloc[k]
-    n1 = getattr(row,'n1')
-    if(n1 < n1min):
-        n1min = n1
-    if(n1 > n1max):
-        n1max = n1
-    n2 = getattr(row,'n2')
-    if(n2 < n2min):
-        n2min = n2
-    if(n2 > n2max):
-        n2max = n2
-    I = float(getattr(row,'I'))
-    if(I == 0):
-        print(f"Zero found, setting to {smolVal}")
-        I = smolVal
-    elif(I > vanityVal):
-        pCXS = np.append(pCXS,b1[0] * n1 + b2[0] * n2)
-        pCYS = np.append(pCYS,b1[1] * n1 + b2[1] * n2)
-    if(I < valmin):
-        valmin = I
-    if(I > valmax):
-        valmax = I
-    #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
-    plotValues[k] = I
-    plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
-    plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
-print(f"Valmin = {valmin}, valmax = {valmax}")
-print("===")
-print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
-print("===")
+for index in range(10000,10000+Nensemble):
+    importname =  'diffrac' + str(index) + '.out'
+    plotValues = np.zeros((nOccCh))
+    plotCoords = np.zeros((nOccCh))
+    plotCoords = np.zeros((nOccCh))
+    d = import_multiscat(importname)
+    print(d)
+    pCXS = np.array([]) #These variables stand for something but icr what it is lmao
+    pCYS = np.array([])
+    n1min = 0
+    n1max = 0
+    n2min = 0
+    n2max = 0
+    valmin = 1
+    valmax = 0
+    smolVal = 1e-100
+    vanityVal = 0
 
-print("Number of occupied channels = " + str(nOccCh))
-entropyOut = calculate_entropy(plotValues)
-print("Diffraction pattern entropy = " + str(entropyOut))
+    paddingCells = 40
+    for k in range(0,nOccCh):
+        row = d.iloc[k]
+        n1 = getattr(row,'n1')
+        if(n1 < n1min):
+            n1min = n1
+        if(n1 > n1max):
+            n1max = n1
+        n2 = getattr(row,'n2')
+        if(n2 < n2min):
+            n2min = n2
+        if(n2 > n2max):
+            n2max = n2
+        I = float(getattr(row,'I'))
+        if(I == 0):
+            print(f"Zero found, setting to {smolVal}")
+            I = smolVal
+        elif(I > vanityVal):
+            pCXS = np.append(pCXS,b1[0] * n1 + b2[0] * n2)
+            pCYS = np.append(pCYS,b1[1] * n1 + b2[1] * n2)
+        if(I < valmin):
+            valmin = I
+        if(I > valmax):
+            valmax = I
+        #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
+        plotValues[k] += I
+        plotCoordsX[k] += b1[0] * n1 + b2[0] * n2
+        plotCoordsY[k] += b1[1] * n1 + b2[1] * n2
+        print(f"Valmin = {valmin}, valmax = {valmax}")
+        print("===")
+        print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
+        print("===")
+
+        print("Number of occupied channels = " + str(nOccCh))
+        entropiesOut[index] = calculate_entropy(plotValues)
+        print("Diffraction pattern entropy = " + str(entropyOut))
 
 #packages to import
 from scipy.spatial import Voronoi
