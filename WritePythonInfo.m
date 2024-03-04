@@ -7,8 +7,8 @@ function [] = WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,de
   nsupstr = [char(num2str(Nsuper))];
   thetastr = [char(num2str(Theta))];
   nens = [char(num2str(Nensemble))];
-  entropstr = [char(num2str(inputEntropy,'%e'))];
-  defectstr = [char(num2str(defectDensity))];
+  entropstr = [char(num2str(inputEntropy))];
+  defectstr = [char(num2str(defectDensity,'%e'))];
   S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
   realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str,newline,'Nsuper = ',nsupstr];
   recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
