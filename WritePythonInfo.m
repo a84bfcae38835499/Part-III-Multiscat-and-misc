@@ -1,4 +1,4 @@
-function [] = WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble)
+function [] = WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble,inputEntropy)
   writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
   a1str = [char(num2str(a1))];
   a2str = [char(num2str(a2))];
@@ -7,10 +7,11 @@ function [] = WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble)
   nsupstr = [char(num2str(Nsuper))];
   thetastr = [char(num2str(Theta))];
   nens = [char(num2str(Nensemble))];
+  entropstr = [char(num2str(inputEntropy,'%e'))];
   S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
   realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str,newline,'Nsuper = ',nsupstr];
   recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
-  defectStr = ['Defect data:',newline,'Theta = ', thetastr,newline,'Ensenble size = ', nens];
+  defectStr = ['Defect data:',newline,'Theta = ', thetastr,newline,'Ensenble size = ', nens,newline,'Positional entropy = ',entropstr];
   S = [realStr,newline,recpStr,newline,defectStr,S];
   FID = fopen('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'w');
   if FID == -1, error('Cannot open file %s', FileName); end

@@ -5,7 +5,7 @@ rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 16; Nz = 50; Nsuper = 2;
-%Theta = 0.;
+%Theta = 0.1;
 Theta = (1/(Nsuper*Nsuper))
 zMax = 6; zMin = 0;%units Å
 
@@ -46,8 +46,16 @@ disp("defectDensity = " + defectDensity + "/Å^2")
 defectDensity = defectDensity * ((1e10/1e2)^2);
 disp("              = " + num2str(defectDensity,'%e') + "/cm^2")
 
-
-
+probV = double(Ndefect)/double(Nsuper*Nsuper);
+probS = 1 - probV;
+if(probV > 0. && probS > 0.)
+  inputEntropy = - double(Ndefect) * probV*log(probV) - ...
+    (Nsuper^2-double(Ndefect)) * probS*log(probS);
+  inputEntropy = inputEntropy/(-Nsuper^2*0.5*log(0.5));
+else
+  inputEntropy = 0;
+end
+disp("Input entropy = " + num2str(inputEntropy))
 %% Import Min's DFT
 
 importfile("DFT_Pure.mat")
@@ -588,7 +596,7 @@ if copyDFT
   b1 = y1; b2 = y2;
 end
 %% data for python hex plotter
-WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble);
+WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble,inputEntropy);
 
 %% Plot corrugation
 %[newx,newy] = meshgrid(-const.c:0.01:const.c,-const.c:0.01:const.c);
