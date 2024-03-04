@@ -4,9 +4,9 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 100; Nsuper = 2;
-Theta = 1;
-%Theta = (1/(Nsuper*Nsuper));
+Nxy = 16; Nz = 50; Nsuper = 2;
+%Theta = 0.1;
+Theta = (1/(Nsuper*Nsuper))
 zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
@@ -628,6 +628,12 @@ function [b1,b2,b3] = Reciprocal(a1,a2,a3)
 end
 
 function [VmatrixElement] = Vfunc(X,Y,Z)
+        V0 = backgroundDepth * exp(2*alpha*(z0-z))...
+            -2*backgroundDepth*exp(alpha*(z0-z));
+    end
+    function [V1] = V1func(z,z0,D,alpha)
+        V1 = 2*const.beta*D*exp(2*alpha*(z0-z));
+    end
   function [V] = VSulph(z)
     D = 19.9886;
     a = 0.8122;
@@ -660,13 +666,60 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     z1 = 4.1864;
     V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
   end
+    function [Q] = Qfunc(x,y)
+        Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
+    end
+  function [Q] = QhexfuncSingle(x,y)
+    %disp("[][][][][]")
+    %disp(v1)
+    %disp(const.sheerMat)
+    %disp("[][][][][]")
+    %nu = y * 2/sqrt(3);
+    %mu = x - (y/(sqrt(3)));
+    x_n = x / (const.c);
+    y_n = y / (const.c/sqrt(3));
+    Q = 0;
+    
+    mu_n1 = x_n*2;
+    nu_n1 = y_n - x_n;
+    Q = Q + cos(2*pi*nu_n1) + cos(2*pi*mu_n1);
 
-  VmatrixElement = VSulph(Z) ... %blue, sulphur
-     * Qhexfunc(X,Y) ...
-     + VHollow(Z) ... %green, hollow site
-    * Qhexfunc(X,Y - (const.c/sqrt(3))) ...
-    + VMolyb(Z) ...%red, molybdenum
-    * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3))));
+    mu_n2 = x_n*2;
+    nu_n2 = -y_n - x_n;
+    Q = Q + cos(2*pi*nu_n2) + cos(2*pi*mu_n2);
+
+    nu_n3 = y_n - x_n;
+    mu_n3 = -y_n - x_n;
+    Q = Q + cos(2*pi*nu_n3) + cos(2*pi*mu_n3);
+    Q = Q/3;
+    %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
+  end
+fittingDFT = true;
+if(fittingDFT)
+        %+ V1func(Z) * Qfunc(X,Y)...
+    VmatrixElement = VSulph(Z) ... %blue, sulphur
+       * Qhexfunc(X,Y) ...
+       + VHollow(Z) ... %green, hollow site
+      * Qhexfunc(X,Y - (const.c/sqrt(3))) ...
+      + VMolyb(Z) ...%red, molybdenum
+      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3))));
+else
+    VmatrixElement = (V0func(Z,const.zOffset+2.1,25,1.2) ...
+       + V1func(Z,const.zOffset+3.7,0.5,1.6))... %blue
+       * Qhexfunc(X,Y) ...
+       + (V0func(Z,const.zOffset+2.15,20,1.2) + ...
+      + V1func(Z,const.zOffset+3,0,1.1)) ... % green
+      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
+      + (V0func(Z,const.zOffset+2.1,23,1.2) ...
+      + V1func(Z,const.zOffset+1,15,1.1)) ... %red
+      * Qhexfunc(X,Y - (const.c/sqrt(3)));
+end
+      %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
+end
+
+function [DV] = Dropoff(z,z0)
+  %Use this to attenuate the gaussian in z
+    DV = exp(2*const.alpha*(z0-z));
 end
 
 function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ysuper,Z)
@@ -729,62 +782,12 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
   end
 
   function [v] = val(x,y,z,centre)
-    function [V] = VSulph(z)
-      D = 19.9886;
-      a = 0.8122;
-      alpha = 1.4477;
-      b = 0.1958;
-      beta = 0.2029;
-      z0 = 3.3719;
-      z1 = 1.7316;
-      V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
-    end
-    function [V] = VHollow(z)
-      D = 24.9674;
-      a = 0.4641;
-      alpha = 1.1029;
-      b = 0.1993;
-      beta = 0.6477;
-      z0 = 3.1411;
-      z1 = 3.8323;
-      V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
-    end  
-    function [V] = VMolyb(z)
-      D = 20.1000;
-      a = 0.9996;
-      alpha = 1.1500;
-      b = 0.0026;
-      beta = 1.2439;
-      z0 = 3.2200;
-      z1 = 4.1864;
-      V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
-    end
-    usingFit = true;
-    if(~usingFit)
-      d = 8.4;
-      gamma = 1.1;
-      v = -d * exp(2*gamma*(4-z)) * ...
-      Gaussian2D(x,y, ...
-      centre,const.c*0.2);
-    else
       r = (x-centre(1))^2+(y-centre(2))^2;
       r = sqrt(r)/const.c;
       extent = 0.3;
       cutoff = 1;
       s = extent * const.c;
       v = 0;
-      %d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
-      %  67.6754;
-      %c  = 0.0928;
-      %d = 101.5070;
-      %e = 16.3770;
-      %gamma = 1.3607;
-      %lambda = 1.2462;
-      %z2 = 3.4655;
-      %z3 = 1.9998;
-      %v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-      %  -2*e*exp(2*lambda*(z3-z))) * ...
-      %(1/(s*sqrt(2*pi)))*exp(-(x - centre(1)).^2/(2*s^2))*exp(-(y - centre(2)).^2/(2*s^2));
       c = 0.2631;
       d = 32.7202;
       e = 8.3365;
@@ -792,59 +795,14 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       lambda = 1.0000;
       z2 = 3.4655;
       z3 = 2.0312;
-      VmatrixElement = VSulph(z) ... %blue, sulphur
-         * Qhexfunc(x,y) ...
-         + VHollow(z) ... %green, hollow site
-        * Qhexfunc(x,y - (const.c/sqrt(3))) ...
-        * Qhexfunc(x-const.c/2,y-(const.c*1/(2*sqrt(3))));
+      VmatrixElement = Vfunc(x,y,z);
+      angle = 0.;
+      if(x - centre(1) > 1e-40)
+        angle = atan((y-centre(2))/(x-centre(1)));
+      end
+      cutoffR = 0.5*cos(pi/6)/(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
         v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-          -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-0.45)*10) ));
-      %Gaussian2D(x,y, ...
-      %centre,const.c*extent);
-      %v = v + 1000 * exp((1-z)*10) * (1/(exp((r-cutoff)*4)+1));
-        %disp()
-      %else
-      %  v = 0;
-      %end
-      %disp("Gaussian2D(0,0) = ")
-      %disp(Gaussian2D(0,0,[0 0],const.c*extentFactor));
-      %disp("Well depth at sulphur = ")
-      %disp(d * Gaussian2D(0,0,[0 0],const.c*extentFactor));
-    end
-    %  67.6754;
-    %c  = 0.0928;
-    %d = 101.5070;
-    %e = 16.3770;
-    %gamma = 1.3607;
-    %lambda = 1.2462;
-    %z2 = 3.4655;
-    %z3 = 1.9998;
-    %v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-    %  -2*e*exp(2*lambda*(z3-z))) * ...
-    %(1/(s*sqrt(2*pi)))*exp(-(x - centre(1)).^2/(2*s^2))*exp(-(y - centre(2)).^2/(2*s^2));
-    c = 0.2631;
-    d = 32.7202;
-    e = 8.3365;
-    gamma	= 1.0065;
-    lambda = 1.0000;
-    z2 = 3.4655;
-    z3 = 2.0312;
-    VmatrixElement = Vfunc(x,y,z);
-    angle = atan((y-centre(2))/(x-centre(1)));
-    cutoffR = 0.5*cos(pi/6)/(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
-    v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-        -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-cutoffR)*10) ));
-    %Gaussian2D(x,y, ...
-    %centre,const.c*extent);
-    %v = v + 1000 * exp((1-z)*10) * (1/(exp((r-cutoff)*4)+1));
-      %disp()
-    %else
-    %  v = 0;
-    %end
-    %disp("Gaussian2D(0,0) = ")
-    %disp(Gaussian2D(0,0,[0 0],const.c*extentFactor));
-    %disp("Well depth at sulphur = ")
-    %disp(d * Gaussian2D(0,0,[0 0],const.c*extentFactor));
+          -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-0.5)*10) ));
   end
 end
 

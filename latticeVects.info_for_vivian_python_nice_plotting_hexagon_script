@@ -6,7 +6,7 @@ Reciprocal vectors:
 b1 = -1.9883       1.148
 b2 = 0      2.2959
 Defect data:
-Theta = 1
+Theta = 0.25
 Ensenble size = 1
-Positional entropy = 0
-Defect density in cm^-2 = 1.156366e+15
+Positional entropy = 0.71692
+Defect density in cm^-2 = 2.890914e+14

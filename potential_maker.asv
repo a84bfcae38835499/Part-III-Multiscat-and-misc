@@ -4,9 +4,9 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 100; Nsuper = 2;
-Theta = 1;
-%Theta = (1/(Nsuper*Nsuper));
+Nxy = 16; Nz = 50; Nsuper = 2;
+%Theta = 0.1;
+Theta = (1/(Nsuper*Nsuper))
 zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
@@ -783,47 +783,33 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
   end
 
   function [v] = val(x,y,z,centre)
-    r = (x-centre(1))^2+(y-centre(2))^2;
-    r = sqrt(r)/const.c;
-    extent = 0.3;
-    cutoff = 1;
-    s = extent * const.c;
-    v = 0;
-    %d = (0.6312/Gaussian2D(0,0,[0 0],const.c*extent))* ...
-    %  67.6754;
-    %c  = 0.0928;
-    %d = 101.5070;
-    %e = 16.3770;
-    %gamma = 1.3607;
-    %lambda = 1.2462;
-    %z2 = 3.4655;
-    %z3 = 1.9998;
-    %v = -d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ... 
-    %  -2*e*exp(2*lambda*(z3-z))) * ...
-    %(1/(s*sqrt(2*pi)))*exp(-(x - centre(1)).^2/(2*s^2))*exp(-(y - centre(2)).^2/(2*s^2));
-    c = 0.2631;
-    d = 32.7202*1000;
-    e = 8.3365;
-    gamma	= 1.0065;
-    lambda = 1.0000;
-    z2 = 3.4655;
-    z3 = 2.0312;
-    VmatrixElement = Vfunc(x,y,z);
-    angle = atan(y/x);
-    cutoffR = 0.5*cos(pi/6)/(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
-    v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-        -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-0.45)*1000) ));
-    %Gaussian2D(x,y, ...
-    %centre,const.c*extent);
-    %v = v + 1000 * exp((1-z)*10) * (1/(exp((r-cutoff)*4)+1));
-      %disp()
-    %else
-    %  v = 0;
-    %end
-    %disp("Gaussian2D(0,0) = ")
-    %disp(Gaussian2D(0,0,[0 0],const.c*extentFactor));
-    %disp("Well depth at sulphur = ")
-    %disp(d * Gaussian2D(0,0,[0 0],const.c*extentFactor));
+      r = (x-centre(1))^2+(y-centre(2))^2;
+      r = sqrt(r)/const.c;
+      extent = 0.3;
+      cutoff = 1;
+      s = extent * const.c;
+      v = 0;
+      c = 0.2631;
+      d = 32.7202;
+      e = 8.3365;
+      gamma	= 1.0065;
+      lambda = 1.0000;
+      z2 = 3.4655;
+      z3 = 2.0312;
+      VmatrixElement = Vfunc(x,y,z);
+        v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
+          -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-0.5)*10) ));
+      %Gaussian2D(x,y, ...
+      %centre,const.c*extent);
+      %v = v + 1000 * exp((1-z)*10) * (1/(exp((r-cutoff)*4)+1));
+        %disp()
+      %else
+      %  v = 0;
+      %end
+      %disp("Gaussian2D(0,0) = ")
+      %disp(Gaussian2D(0,0,[0 0],const.c*extentFactor));
+      %disp("Well depth at sulphur = ")
+      %disp(d * Gaussian2D(0,0,[0 0],const.c*extentFactor));
   end
 end
 
