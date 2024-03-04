@@ -680,25 +680,18 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     for m = -1:1
       for n = -1:1
         for k = 1:Nz
-          for i = 1:NxySuper
-            for j = 1:NxySuper
-              x = Xsuper(i,j);
-              y = Ysuper(i,j);
-              centre = [centre0(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
-                        centre0(2)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
-
-              %r = (x-centre(1))^2+(y-centre(2))^2;
-              %r = sqrt(r)/const.c;
-              %disp("r = " + num2str(r))
-              %disp("vmatrixelem = " + Vout(i,j,k))
-              %disp("defect val  = " + val(x,y,Z(k),centre))
-              %disp("sum         = " + num2str(Vout(i,j,k) + val(x,y,Z(k),centre)));
-              Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z(k),centre);
-              %disp("------------- ")
-              %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
-              %     ", Value = " + val(x,y,Z,k,centre));
-            end
-          end
+          centre = [centre0(1)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
+                    centre0(2)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
+          %r = (x-centre(1))^2+(y-centre(2))^2;
+          %r = sqrt(r)/const.c;
+          %disp("r = " + num2str(r))
+          %disp("vmatrixelem = " + Vout(i,j,k))
+          %disp("defect val  = " + val(x,y,Z(k),centre))
+          %disp("sum         = " + num2str(Vout(i,j,k) + val(x,y,Z(k),centre)));
+          Vout(:,:,k) = Vout(:,:,k)+val(Xsuper,Ysuper,Z(k),centre);
+          %disp("------------- ")
+          %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
+          %     ", Value = " + val(x,y,Z,k,centre));
         end
       %disp("m, n = " + m + ", " + n)
       %disp("Centre:")
@@ -716,40 +709,34 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
   else
     disp("Not repeating!")
     for k = 1:Nz
-      for i = 1:NxySuper
-        for j = 1:NxySuper
-          x = Xsuper(i,j);
-          y = Ysuper(i,j);
-          Vout(i,j,k) = Vout(i,j,k)+val(x,y,Z(k),centre0);
-          %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
-          %    ", Value = " + val);
-        end
-      end
+        Vout(:,:,k) = Vout(:,:,k)+val(Xsuper,Ysuper,Z(k),centre0);
+        %disp("x, y, z = " + x + ", " + y + ", " + Z(k) +...
+        %    ", Value = " + val);
     end
   end
 
   function [v] = val(x,y,z,centre)
-      r = (x-centre(1))^2+(y-centre(2))^2;
-      r = sqrt(r)/const.c;
-      extent = 0.3;
-      cutoff = 1;
-      s = extent * const.c;
-      v = 0;
-      c = 0.2631;
-      d = 32.7202;
-      e = 8.3365;
-      gamma	= 1.0065;
-      lambda = 1.0000;
-      z2 = 3.4655;
-      z3 = 2.0312;
-      VmatrixElement = Vfunc(x,y,z);
-      angle = 0.;
-      if(x - centre(1) > 1e-40)
-        angle = atan((y-centre(2))/(x-centre(1)));
-      end
-      cutoffR = 0.45*cos(pi/6)/(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
-        v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-          -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-cutoffR)*10) ));
+    r = x + y;
+    r = (x-centre(1)).^2+(y-centre(2)).^2;
+    r = sqrt(r)/const.c;
+    extent = 0.3;
+    cutoff = 1;
+    s = extent * const.c;
+    v = 0;
+    c = 0.2631;
+    d = 32.7202;
+    e = 8.3365;
+    gamma	= 1.0065;
+    lambda = 1.0000;
+    z2 = 3.4655;
+    z3 = 2.0312;
+    VmatrixElement = Vfunc(x,y,z);
+    args = (y-centre(2))./(x-centre(1));
+    angle = arrayfun(@(arg) atan(arg),args);
+    angle(isnan(angle))=0;
+    cutoffR = 0.45*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
+    v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
+      -2*e*exp(2*lambda*(z3-z)))).*(1./( 1+exp((r-0.5)*10) ));
   end
 end
 
