@@ -747,7 +747,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       if(x - centre(1) > 1e-40)
         angle = atan((y-centre(2))/(x-centre(1)));
       end
-      cutoffR = 0.5*cos(pi/6)/(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
+      cutoffR = 0.45*cos(pi/6)/(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
         v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
           -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-cutoffR)*10) ));
   end
