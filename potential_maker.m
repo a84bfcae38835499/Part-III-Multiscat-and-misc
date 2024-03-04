@@ -628,12 +628,6 @@ function [b1,b2,b3] = Reciprocal(a1,a2,a3)
 end
 
 function [VmatrixElement] = Vfunc(X,Y,Z)
-        V0 = backgroundDepth * exp(2*alpha*(z0-z))...
-            -2*backgroundDepth*exp(alpha*(z0-z));
-    end
-    function [V1] = V1func(z,z0,D,alpha)
-        V1 = 2*const.beta*D*exp(2*alpha*(z0-z));
-    end
   function [V] = VSulph(z)
     D = 19.9886;
     a = 0.8122;
@@ -666,36 +660,6 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
     z1 = 4.1864;
     V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
   end
-    function [Q] = Qfunc(x,y)
-        Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
-    end
-  function [Q] = QhexfuncSingle(x,y)
-    %disp("[][][][][]")
-    %disp(v1)
-    %disp(const.sheerMat)
-    %disp("[][][][][]")
-    %nu = y * 2/sqrt(3);
-    %mu = x - (y/(sqrt(3)));
-    x_n = x / (const.c);
-    y_n = y / (const.c/sqrt(3));
-    Q = 0;
-    
-    mu_n1 = x_n*2;
-    nu_n1 = y_n - x_n;
-    Q = Q + cos(2*pi*nu_n1) + cos(2*pi*mu_n1);
-
-    mu_n2 = x_n*2;
-    nu_n2 = -y_n - x_n;
-    Q = Q + cos(2*pi*nu_n2) + cos(2*pi*mu_n2);
-
-    nu_n3 = y_n - x_n;
-    mu_n3 = -y_n - x_n;
-    Q = Q + cos(2*pi*nu_n3) + cos(2*pi*mu_n3);
-    Q = Q/3;
-    %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
-  end
-fittingDFT = true;
-if(fittingDFT)
         %+ V1func(Z) * Qfunc(X,Y)...
     VmatrixElement = VSulph(Z) ... %blue, sulphur
        * Qhexfunc(X,Y) ...
@@ -703,23 +667,6 @@ if(fittingDFT)
       * Qhexfunc(X,Y - (const.c/sqrt(3))) ...
       + VMolyb(Z) ...%red, molybdenum
       * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3))));
-else
-    VmatrixElement = (V0func(Z,const.zOffset+2.1,25,1.2) ...
-       + V1func(Z,const.zOffset+3.7,0.5,1.6))... %blue
-       * Qhexfunc(X,Y) ...
-       + (V0func(Z,const.zOffset+2.15,20,1.2) + ...
-      + V1func(Z,const.zOffset+3,0,1.1)) ... % green
-      * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3)))) ...
-      + (V0func(Z,const.zOffset+2.1,23,1.2) ...
-      + V1func(Z,const.zOffset+1,15,1.1)) ... %red
-      * Qhexfunc(X,Y - (const.c/sqrt(3)));
-end
-      %VmatrixElement = Qhexfunc(X,Y) * Dropoff(Z) * const.D;
-end
-
-function [DV] = Dropoff(z,z0)
-  %Use this to attenuate the gaussian in z
-    DV = exp(2*const.alpha*(z0-z));
 end
 
 function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ysuper,Z)
@@ -802,7 +749,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
       end
       cutoffR = 0.5*cos(pi/6)/(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
         v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-          -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-0.5)*10) ));
+          -2*e*exp(2*lambda*(z3-z))))*(1/( 1+exp((r-cutoffR)*10) ));
   end
 end
 
