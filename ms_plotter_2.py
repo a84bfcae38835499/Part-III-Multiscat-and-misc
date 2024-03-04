@@ -59,7 +59,7 @@ B2 = [0,0]
 a1 = [0,0]
 a2 = [0,0]
 Nsuper = 1337
-while count < 5:
+while count < 9:
     # Get next line from file
     line = latticeFile.readline()
     if(line.startswith("Nsuper = ")):
@@ -101,6 +101,30 @@ while count < 5:
         split = line.split()
         B2[0] = float(split[0])
         B2[1] = float(split[1])
+        count += 1
+    if line.startswith("Theta = "):
+        line = line[len("Theta = "):]
+        split = line.split()
+        Theta = float(split[0])
+        print("Theta = " + split[0])
+        count += 1
+    if line.startswith("Ensenble size = "):
+        line = line[len("Ensenble size = "):]
+        split = line.split()
+        Nensemble = float(split[0])
+        print("Ensenble size = " + split[0])
+        count += 1
+    if line.startswith("Positional entropy = "):
+        line = line[len("Positional entropy = "):]
+        split = line.split()
+        entropyIn = float(split[0])
+        print("Positional entropy = " + split[0])
+        count += 1
+    if line.startswith("Defect density in cm^-2 = "):
+        line = line[len("Defect density in cm^-2 = "):]
+        split = line.split()
+        defectDensity = float(split[0])
+        print("Defect density in cm^-2 = " + split[0])
         count += 1
 
 Babs = np.sqrt(B1[0]**2+B1[1]**2)
@@ -168,8 +192,8 @@ print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
 print("===")
 
 print("Number of occupied channels = " + str(nOccCh))
-H = calculate_entropy(plotValues)
-print("Entropy = " + str(H))
+entropyOut = calculate_entropy(plotValues)
+print("Diffraction pattern entropy = " + str(entropyOut))
 
 #packages to import
 from scipy.spatial import Voronoi
@@ -319,10 +343,10 @@ plt.yticks([])
 ax2.set_ylim(min(pCYS)-1/2,max(pCYS)+1/2)
 ax2.set_xlim(min(pCXS)-1/2,max(pCXS)+1/2)
 
-captiontxt="Entropy = " + "{:.6f}".format(H)
-plt.figtext(0.5, -0.05, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + "{:.4f}".format(entropyIn) + "\n $H_{diffraction}$ = " +  "{:.6f}".format(entropyOut)
+plt.figtext(0.5, -0.07, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
-filenametxt="Saxon-Woods defect, exponent = 10, mu = 0.5"
+filenametxt=""
 plt.figtext(0.5, -0.1, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):
