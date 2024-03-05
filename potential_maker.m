@@ -508,6 +508,7 @@ for Ne = 1:Nensemble
     xlabel(hbar,'Energy / meV');
     %add indicators for where we're sampling the potential z
     fontsize(gcf,scale=1)
+
     plotPoints = true;
     if(plotPoints)
       hold on
@@ -539,6 +540,9 @@ for Ne = 1:Nensemble
         end
       end
        hold off
+
+      savestr = "Figures/Potentials.jpg"
+      saveas(gcf,savestr,'jpg')
     end
     
   end
