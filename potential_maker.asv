@@ -4,7 +4,7 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 4; Nz = 50; Nsuper = 4;
+Nxy = 16; Nz = 50; Nsuper = 2;
 %Theta = 0.1;
 Theta = (2/(Nsuper*Nsuper))
 zMax = 6; zMin = 0;%units Å
@@ -266,7 +266,7 @@ else
   Nensemble = 1;
 end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = 10;
+Nensemble_limit = 1;
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
@@ -408,9 +408,9 @@ else
         %ms_available = ms_available(ms_available~=m);
         %ns_available = ns_available(ns_available~=n);
       end
+      disp("Trial defects for ensemble " + Ne + " = ")
+      disp([ms;ns])
       testgrid = zeros(Nsuper,Nsuper,'logical');
-      disp("Trial defect arrangement for ensemble " + Ne + " = ")
-      disp(testgrid)
       for m = ms
         for n = ns
           testgrid(m+1,n+1) = true;

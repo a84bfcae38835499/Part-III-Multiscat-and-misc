@@ -51,6 +51,18 @@ def calculate_entropy(intensities):
     H /= -np.log(intensities.size)
     return(H)
 
+def find_mean_stdv(values):
+    mean = 0
+    meanSq = 0
+    n = len(values)
+    for v in np.nditer(values):
+        mean += v
+        meanSq += v**2
+    mean /= n
+    meanSq /= n
+    stdv = np.sqrt(meanSq - mean**2)
+    return mean, stdv
+
 latticeFile = open('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'r')
 count = 0 
 
@@ -145,8 +157,8 @@ plotCoordsX = np.zeros((nOccCh))
 plotCoordsY = np.zeros((nOccCh))
 entropiesOut = np.zeros((1,int(Nensemble)))
 
-for index in range(10001,10001+int(Nensemble)):
-    importname =  'diffrac' + str(index) + '.out'
+for index in range(0,int(Nensemble)):
+    importname =  'diffrac' + str(10001+index) + '.out'
     print(importname)
     plotValues = np.zeros((nOccCh))
     plotCoords = np.zeros((nOccCh))
@@ -349,7 +361,14 @@ plt.yticks([])
 ax2.set_ylim(min(pCYS)-1/2,max(pCYS)+1/2)
 ax2.set_xlim(min(pCXS)-1/2,max(pCXS)+1/2)
 
-captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + "{:.4f}".format(entropyIn) + "\n $H_{diffraction}$ = " +  "{:.6f}".format(entropyOut)
+emean, esdtv = find_mean_stdv(entropiesOut)
+captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + "{:.4f}".format(entropyIn)
+if(Nensemble == 1):
+    entropytxt = "\n $H_{diffraction}$ = " + "{:.6f}".format(emean)
+else:
+    entropytxt = "\n $H_{diffraction}$ = " + "{:.6f}".format(emean) + "$\pm$" +  "{:.6f}".format(esdtv)
+captiontxt += entropytxt
+
 plt.figtext(0.5, -0.07, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
 filenametxt=""
