@@ -419,7 +419,7 @@ else
       solved = true;
       for ne = 1:Ne
         samplegrid = boolgrid_ensemble(:,:,Ne);
-        if((samplegrid == testgrid) || (samplegrid == transpose(testgrid)))
+        if((samplegrid == testgrid) | (samplegrid == transpose(testgrid)))
           disp("This defect arrangement has already been stored!")
           solved = false;
         end
@@ -736,7 +736,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     angle(isnan(angle))=0;
     cutoffR = 0.45*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
     v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-      -2*e*exp(2*lambda*(z3-z)))).*(1./( 1+exp((r-cutoffR)*10) ));
+      -2*e*exp(2*lambda*(z3-z)))).*(1./( 1+exp((r-0.5)*10) ));
   end
 end
 
