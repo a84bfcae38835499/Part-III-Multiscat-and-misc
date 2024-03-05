@@ -143,10 +143,11 @@ nOccCh = len(import_multiscat('diffrac10001.out').index)
 plotValuesAvg = np.zeros((nOccCh))
 plotCoordsX = np.zeros((nOccCh))
 plotCoordsY = np.zeros((nOccCh))
-entropiesOut = np.zeros((1,Nensemble))
+entropiesOut = np.zeros((1,int(Nensemble)))
 
-for index in range(10000,10000+Nensemble):
+for index in range(10001,10001+int(Nensemble)):
     importname =  'diffrac' + str(index) + '.out'
+    print(importname)
     plotValues = np.zeros((nOccCh))
     plotCoords = np.zeros((nOccCh))
     plotCoords = np.zeros((nOccCh))
@@ -188,17 +189,18 @@ for index in range(10000,10000+Nensemble):
         if(I > valmax):
             valmax = I
         #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
-        plotValues[k] += I
-        plotCoordsX[k] += b1[0] * n1 + b2[0] * n2
-        plotCoordsY[k] += b1[1] * n1 + b2[1] * n2
+        plotValues[k] = I
+        plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
+        plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
         print(f"Valmin = {valmin}, valmax = {valmax}")
         print("===")
         print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
         print("===")
 
-        print("Number of occupied channels = " + str(nOccCh))
-        entropiesOut[index] = calculate_entropy(plotValues)
-        print("Diffraction pattern entropy = " + str(entropyOut))
+    print("Number of occupied channels = " + str(nOccCh))
+    entropiesOut[index] = calculate_entropy(plotValues)
+    print("Diffraction pattern entropy = " + str(entropiesOut[index]))
+    plotValuesAvg += plotValues / Nensemble
 
 #packages to import
 from scipy.spatial import Voronoi
@@ -249,10 +251,9 @@ for k in range(0,nOccCh):
     row = d.iloc[k]
     n1 = int(getattr(row,'n1'))
     n2 = int(getattr(row,'n2'))
-    I = getattr(row,'I')
     if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
         n1n2 = str(int(n1/Nsuper)) + ',' + str(int(n2/Nsuper))
-        if(I < (valmax-valmin)*0.9):
+        if(plotValuesAvg[k] < (valmax-valmin)*0.9):
             col = 'w'
         else:
             col = 'k'
