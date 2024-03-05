@@ -4,9 +4,9 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 50; Nsuper = 3;
+Nxy = 16; Nz = 50; Nsuper = 2;
 %Theta = 0.1;
-Theta = (3/(Nsuper*Nsuper));
+Theta = (2/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 zMax = 6; zMin = 0;%units Å
 
@@ -268,7 +268,7 @@ else
   Nensemble = 1;
 end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = Nsuper + 1; %This is a very very rough lower bound
+Nensemble_limit = Nsuper; %This is a very very rough lower bound
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
