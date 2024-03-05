@@ -6,7 +6,7 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 16; Nz = 50; Nsuper = 3;
 %Theta = 0.1;
-Theta = (2/(Nsuper*Nsuper));
+Theta = (3/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 zMax = 6; zMin = 0;%units Å
 
@@ -33,7 +33,7 @@ nPlotMo = 1/3;mPlotMo = 2/3;
 moCol = [1 0.2 0];
 
 %% Defect density calculations
-cellArea = abs(a1(1)*a2(2) - a1(2)*a1(2));
+cellArea = const.c^2 * sqrt(1-(dot(a1,a2)/(const.c^2))^2);
 disp("Unit cell area = " + cellArea + "Å^2")
 cellArea = cellArea * (Nsuper^2);
 disp("Supercell area = " + cellArea + "Å^2")
@@ -261,13 +261,14 @@ end
 %Assume that we always have a defect at the (0,0) position, to fix
 %translational invariance leadings to degeneracy
 if(Ndefect ~= 0 && Nsites-1 - Ndefect > 0)
-  Nensemble = (factorial(Nsites-1)) ...
-    /(factorial(Nsites-1 - Ndefect)*factorial(Ndefect-1)); %TODO Fix this ASAP it isn't working!
+%  Nensemble = (factorial(Nsites-1)) ...
+%    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
+  Nensemble = Nsuper*Nsuper*7;  %gansta maths
 else
   Nensemble = 1;
 end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = 4;
+Nensemble_limit = Nsuper + 1; %This is a very very rough lower bound
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
@@ -371,10 +372,19 @@ else
   %against every single coordinate we have so far. Either that or create
   %some kind of weird information-theoretic checksum style thing to
   %automatically determine if two arrays of coordinate pairs are the same
+  successful = 0;
   
   for Ne = 1:Nensemble
     solved = false;
+    pizza = 0;
     while(~solved)
+      pizza = pizza + 1;
+      if(pizza > 1000)
+        disp("Nsuper = " + Nsuper)
+        disp("Ndefect = " +Ndefect)
+        disp("successful = " + successful)
+        error("pizza = " + pizza)
+      end
       ms = squeeze(ones(Ndefect,1,1,1,'int8'))*69;
       ns = squeeze(ones(Ndefect,1,1,1,'int8'))*69;
       ms_available = 0:Nsuper-1;
@@ -421,7 +431,9 @@ else
       disp(testgrid)
       solved = true;
       for ne = 1:Ne
-        samplegrid = boolgrid_ensemble(:,:,Ne);
+        samplegrid = boolgrid_ensemble(:,:,ne);
+        disp("Samplegrid = ")
+        disp(samplegrid)
         if( AreCyclicBoundaryMatriciesEqual(samplegrid,testgrid))
           disp("This defect arrangement has already been stored!")
           solved = false;
@@ -430,6 +442,7 @@ else
       disp("Solved = " + solved)
     end
     disp("Solved!")
+    successful = successful + 1;
     boolgrid_ensemble(:,:,Ne) = testgrid;
   end
 for Ne = 1:Nensemble

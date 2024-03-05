@@ -4,7 +4,7 @@ function [result] = AreCyclicBoundaryMatriciesEqual(A,B)
     disp(size(B))
     error("Matricies not of equal size!")
   end
-  Nxy = length(A);
+  Nsuper = length(A);
   %operations to check:
   % - rot90 (and 180,270)
   % - fliplr and flipud
@@ -16,8 +16,8 @@ function [result] = AreCyclicBoundaryMatriciesEqual(A,B)
   %then undoing the transpose and rotating again, gives the right result.
   %Then I just do that for each possible collumn/row shift!
   result = false;
-  for mshift = 0:Nxy-1
-    for nshift = 0:Nxy-1
+  for mshift = 0:Nsuper-1
+    for nshift = 0:Nsuper-1
       %Keep a constant and compare to a shifted version of B
       Bs = [B(:,2+mshift:end)  B(:,1:1+mshift)];
       Bs = [Bs(2+nshift:end,:);Bs(1:1+nshift,:)];
@@ -28,6 +28,8 @@ function [result] = AreCyclicBoundaryMatriciesEqual(A,B)
           result = true;
           return;
         end
+        %N * N * 4 * 2
+        %shift*shift*rot*transpose
       end
     end
   end
