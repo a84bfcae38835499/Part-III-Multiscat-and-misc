@@ -4,9 +4,10 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 50; Nsuper = 2;
+Nxy = 4; Nz = 50; Nsuper = 4;
 %Theta = 0.1;
-Theta = (2/(Nsuper*Nsuper))
+Theta = (2/(Nsuper*Nsuper));
+disp('Theta = ' + Theta)
 zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
@@ -266,7 +267,7 @@ else
   Nensemble = 1;
 end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = 1;
+Nensemble_limit = 10;
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
@@ -408,22 +409,23 @@ else
         %ms_available = ms_available(ms_available~=m);
         %ns_available = ns_available(ns_available~=n);
       end
-      disp("Trial defects for ensemble " + Ne + " = ")
-      disp([ms;ns])
       testgrid = zeros(Nsuper,Nsuper,'logical');
       for m = ms
         for n = ns
           testgrid(m+1,n+1) = true;
         end
       end
+      disp("Trial defect arrangement for ensemble " + Ne + " = ")
+      disp(testgrid)
       solved = true;
       for ne = 1:Ne
         samplegrid = boolgrid_ensemble(:,:,Ne);
-        if((samplegrid == testgrid) | (samplegrid == transpose(testgrid)))
+        if((isequal(samplegrid,testgrid) || isequal(samplegrid,transpose(testgrid)))
           disp("This defect arrangement has already been stored!")
           solved = false;
         end
       end
+      disp("Solved = " + solved)
     end
     disp("Solved!")
     boolgrid_ensemble(:,:,Ne) = testgrid;

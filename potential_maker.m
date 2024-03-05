@@ -4,9 +4,10 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 4; Nz = 50; Nsuper = 4;
+Nxy = 16; Nz = 50; Nsuper = 2;
 %Theta = 0.1;
-Theta = (2/(Nsuper*Nsuper))
+Theta = (1/(Nsuper*Nsuper));
+disp('Theta = ' + Theta)
 zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
@@ -261,12 +262,12 @@ end
 %translational invariance leadings to degeneracy
 if(Ndefect ~= 0 && Nsites-1 - Ndefect > 0)
   Nensemble = (factorial(Nsites-1)) ...
-    /(factorial(Nsites-1 - Ndefect)*factorial(Ndefect-1));
+    /(factorial(Nsites-1 - Ndefect)*factorial(Ndefect-1)); %TODO Fix this ASAP it isn't working!
 else
   Nensemble = 1;
 end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = 10;
+Nensemble_limit = 1;
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
@@ -374,8 +375,8 @@ else
   for Ne = 1:Nensemble
     solved = false;
     while(~solved)
-      ms = squeeze(ones(1,Ndefect,1,1,'int8'))*69;
-      ns = squeeze(ones(1,Ndefect,1,1,'int8'))*69;
+      ms = squeeze(ones(Ndefect,1,1,1,'int8'))*69;
+      ns = squeeze(ones(Ndefect,1,1,1,'int8'))*69;
       ms_available = 0:Nsuper-1;
       ns_available = 0:Nsuper-1;
       %Another question is - How do we decide which sites to add defects on to?
@@ -399,6 +400,7 @@ else
           n = randi(Nsuper)-1;
           if(boolgrid(m+1,n+1) == false)
             foundValidSpot = true;
+            boolgrid(m+1,n+1) = true;
           end
         end
         disp("m, n = ")
@@ -408,22 +410,24 @@ else
         %ms_available = ms_available(ms_available~=m);
         %ns_available = ns_available(ns_available~=n);
       end
+      
       testgrid = zeros(Nsuper,Nsuper,'logical');
+      for index = 1:length(ms)
+        mt = ms(index)+1;
+        nt = ns(index)+1;
+        testgrid(mt,nt) = true;
+      end
       disp("Trial defect arrangement for ensemble " + Ne + " = ")
       disp(testgrid)
-      for m = ms
-        for n = ns
-          testgrid(m+1,n+1) = true;
-        end
-      end
       solved = true;
       for ne = 1:Ne
         samplegrid = boolgrid_ensemble(:,:,Ne);
-        if((samplegrid == testgrid) | (samplegrid == transpose(testgrid)))
+        if( AreCyclicBoundaryMatriciesEqual(samplegrid,testgrid))
           disp("This defect arrangement has already been stored!")
           solved = false;
         end
       end
+      disp("Solved = " + solved)
     end
     disp("Solved!")
     boolgrid_ensemble(:,:,Ne) = testgrid;
