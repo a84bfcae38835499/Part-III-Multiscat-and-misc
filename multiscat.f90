@@ -175,7 +175,7 @@ program multiscat
           
         !find number of z values required
         call findmz (emax,vmin,nsf,zmin,zmax,m)
-        if (itest.eq.1) write(21,*) 'Required number of z grid points, m = ',m
+        !if (itest.eq.1) write(21,*) 'Required number of z grid points, m = ',m !6.3.24 this was screwing with multicondition csv reading
         if (m.gt.mmax) stop 'ERROR: m too big!'
             
         call tshape (zmin,zmax,m,w,z,t)
@@ -185,7 +185,7 @@ program multiscat
     
         !get reciprocal lattice points    (also calculate how many channels are required for the calculation) 
         call basis(d,ix,iy,n,n00,dmax,imax)
-        if (itest.eq.1) write(21,*) 'Number of diffraction channels, n =',n
+        !if (itest.eq.1) write(21,*) 'Number of diffraction channels, n =',n !6.3.24 this was screwing with multicondition csv reading
         if (n.gt.nmax) stop 'ERROR: n too big!'
     
         !routines for actually doing the calculation

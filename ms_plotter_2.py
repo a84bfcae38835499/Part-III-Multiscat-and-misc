@@ -4,10 +4,10 @@ import matplotlib as mpl
 import numpy as np
 import pandas as pd
 import datetime
-# Default theme
-#mpl.rc('axes',edgecolor='white')
 import unicodedata
 import re
+import matplotlib.patheffects as pe
+import math
 
 def slugify(value, allow_unicode=False):
     """
@@ -26,11 +26,16 @@ def slugify(value, allow_unicode=False):
     return re.sub(r'[-\s]+', '-', value).strip('-_')
 
 
-def import_multiscat(fname):    
+def import_multiscat(fname):
     """Impot standrad multiscat output into a pandas data frame."""
-    d = pd.read_csv(fname, skiprows=7, delim_whitespace=True, 
+    d = pd.read_csv(fname, skiprows=1, delim_whitespace=True, 
                     header=None, names=['#','n1','n2','I'])
+    
+    
+    #filter_col = [col for col in d if not col.startswith('Required') or not col.startswith('Number')]
+    print(d)
     d.drop(columns=['#'], inplace=True)
+    #d = d[filter_col]
     return(d)
 
 
@@ -146,6 +151,13 @@ latticeFile.close()
 b1 = B1 / Babs
 b2 = B2 / Babs
 
+scatFile = open('scatCond.in', 'r')
+numScatConds = sum(1 for _ in scatFile)
+numScatConds -= 1
+
+print("[][][][][][][][]")
+print("Number of scattering conditions = " + str(numScatConds))
+print("[][][][][][][][]")
 
 nOccCh = len(import_multiscat('diffrac10001.out').index) #assume that number of occupied channels is the same over ensemble.
 #idk if it is but it'd be a pain otherwise
@@ -235,7 +247,6 @@ ax2 = plt.subplot2grid((16,20), (0,0), colspan=16, rowspan=16)
 
 
 
-import matplotlib.patheffects as pe
 pathefts1 = [pe.Stroke(linewidth=1, foreground='w'), pe.Normal()]
 pathefts2 = [pe.Stroke(linewidth=2, foreground='w'), pe.Normal()]
 b1col = [0.9, 0.1, 0]
@@ -283,7 +294,6 @@ titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, 
 print(titelstr)
 scatFile.close()
 
-import math
 heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
                     [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
 heliumDir = -heliumRot * np.reshape(np.array(a1),(2,1))/np.sqrt(np.dot(a1,a1))
@@ -367,7 +377,7 @@ else:
 plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
-filenametxt="Old defect form (No corrugation)"
+filenametxt="100% defects"
 plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):
