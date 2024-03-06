@@ -6,6 +6,7 @@
 ! Converted to f90 free format 9th May 2001
 ! Further modified by fay summer 2009
 ! Modified by F.Bello and E. Pierzchala summer 2020
+! Modified by Viv Perez in the spring of 2024
 
 program multiscat
   implicit double precision (a-h,o-z)
@@ -164,6 +165,10 @@ program multiscat
     print *, 'Calculating scattering for potential:',fourierfile
     print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
    
+    if(in.ne.startindex) then !6.3.24 We weren't rewinding the scattering conditions so it immediately went to End of File
+      rewind(81)
+      read (81, *)!Skip the first line of conditions file
+    end if
     do
       read (81, *, iostat=endOfFile,iomsg=ioErrorMessage) ei, theta, phi !iostat checks for the end of the file
       if (endOfFile==0) then !Normal input
@@ -172,7 +177,7 @@ program multiscat
         call findmz (emax,vmin,nsf,zmin,zmax,m)
         if (itest.eq.1) write(21,*) 'Required number of z grid points, m = ',m
         if (m.gt.mmax) stop 'ERROR: m too big!'
-           
+            
         call tshape (zmin,zmax,m,w,z,t)
       
         !interpolate vfcs to required z positions
@@ -203,14 +208,12 @@ program multiscat
     
       else if (endOfFile<0) then !End of file
         print *, '-- End of scattering conditions file --'
-        if (itest.eq.1) close (21)
-        close(81)
+        if (itest.eq.1) then
+          backspace(21)
+          close (21)
+        end if
         exit
       else !Unknown error
-        !To quote the Intel Fortran dev reference,
-        !"A negative integer = Indicating an end-of-file or end-of-record condition occurred.
-        !The negative integers differ depending on which condition occurred."
-        ! - Viv, 5.3.24
         print *, '#### ERROR: Invalid line found in input file  ####'
         print *, '#### (Make sure scatCond.in does not contain empty lines) ####'
         print *, 'IOSTAT interger = '
@@ -220,6 +223,7 @@ program multiscat
         stop
       end if
     end do
-  end do  
+  end do
+  print *, "-= Programme finished :D =-"
 end program multiscat
 

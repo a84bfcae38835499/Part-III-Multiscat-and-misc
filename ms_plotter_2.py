@@ -147,15 +147,16 @@ b1 = B1 / Babs
 b2 = B2 / Babs
 
 
-nOccCh = len(import_multiscat('diffrac10001.out').index)
+nOccCh = len(import_multiscat('diffrac10001.out').index) #assume that number of occupied channels is the same over ensemble.
+#idk if it is but it'd be a pain otherwise
 plotValuesAvg = np.zeros((nOccCh))
 plotCoordsX = np.zeros((nOccCh))
 plotCoordsY = np.zeros((nOccCh))
-entropiesOut = np.zeros((1,int(Nensemble)))
+entropiesOut = np.zeros((int(Nensemble),1))
 
 for index in range(0,int(Nensemble)):
     importname =  'diffrac' + str(10001+index) + '.out'
-    print(importname)
+    print("importing file : " + importname)
     plotValues = np.zeros((nOccCh))
     plotCoords = np.zeros((nOccCh))
     plotCoords = np.zeros((nOccCh))
@@ -200,10 +201,10 @@ for index in range(0,int(Nensemble)):
         plotValues[k] = I
         plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
         plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
-        print(f"Valmin = {valmin}, valmax = {valmax}")
-        print("===")
-        print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
-        print("===")
+    print(f"Valmin = {valmin}, valmax = {valmax}")
+    print("===")
+    print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
+    print("===")
 
     print("Number of occupied channels = " + str(nOccCh))
     entropiesOut[index] = calculate_entropy(plotValues)
@@ -216,7 +217,6 @@ from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib import gridspec
 
 #sets the colour scale
 useLog = False
@@ -297,7 +297,7 @@ print("heliumk_n =")
 print(heliumk_n)
 if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
     plt.arrow(0,0,Nsuper*heliumk_n[0,0],Nsuper*heliumk_n[1,0],width=0.03,color='b',zorder=7,head_width=0.1)
-    ax2.add_patch(plt.Circle((0, 0), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
+ax2.add_patch(plt.Circle((0, 0), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
 ax2.set_title(titelstr)
 
 #creates a colourbar on the first subplot
@@ -334,7 +334,7 @@ if(vanity):
             #else:
                 #print(f"no site at n1, n2 = {m}, {n}")
 
-print(additionalX)
+#print(additionalX)
 plotCoordsArray = np.array(np.column_stack((np.append(plotCoordsX,additionalX), np.append(plotCoordsY,additionalY))))
 order = np.append(plotValues,additionalVals)
 points = plotCoordsArray
@@ -357,18 +357,18 @@ plt.yticks([])
 ax2.set_ylim(min(pCYS)-1/2,max(pCYS)+1/2)
 ax2.set_xlim(min(pCXS)-1/2,max(pCXS)+1/2)
 
-emean, esdtv = find_mean_stdv(entropiesOut)
+eomean, eosdtv = find_mean_stdv(entropiesOut)
 captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + "{:.4f}".format(entropyIn)
 if(Nensemble == 1):
-    entropytxt = "\n $H_{diffraction}$ = " + "{:.6f}".format(emean)
+    entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean)
 else:
-    entropytxt = "\n $H_{diffraction}$ = " + "{:.6f}".format(emean) + "$\pm$" +  "{:.6f}".format(esdtv)
-captiontxt += entropytxt
+    entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean) + "$\pm$" +  "{:.6f}".format(eosdtv)
 
-plt.figtext(0.5, -0.07, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
 filenametxt=""
-filenametxt=""
-plt.figtext(0.5, -0.1, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
+filenametxt="Old defect form (No corrugation)"
+plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
 if(filenametxt == ""):
     savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + ".png"
