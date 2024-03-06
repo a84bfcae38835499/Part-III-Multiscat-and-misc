@@ -6,7 +6,7 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 32; Nz = 50; Nsuper = 2;
 %Theta = 0.1;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (4/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 zMax = 6; zMin = 0;%units Å
 
@@ -766,9 +766,9 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     args = (y-centre(2))./(x-centre(1));
     angle = arrayfun(@(arg) atan(arg),args);
     angle(isnan(angle))=0;
-    cutoffR = 0.45*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
+    cutoffR = 1/sqrt(3)*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
     v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-      -2*e*exp(2*lambda*(z3-z)))).*(1./( 1+exp((r-0.5)*10) ));
+      -2*e*exp(2*lambda*(z3-z)))).*(1./( 1+exp((r-cutoffR)*100) ));
   end
 end
 
