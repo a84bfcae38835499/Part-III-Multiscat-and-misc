@@ -204,7 +204,7 @@ program multiscat
       else if (endOfFile<0) then !End of file
         print *, '-- End of scattering conditions file --'
         if (itest.eq.1) close (21)
-        backspace 81
+        close(81)
         exit
       else !Unknown error
         !To quote the Intel Fortran dev reference,
