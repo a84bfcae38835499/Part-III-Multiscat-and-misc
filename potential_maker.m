@@ -25,10 +25,8 @@ a3=[0,0,const.c];
 
 nPlotDef = 0;mPlotDef = 0;
 aboveCol = [0.3 0. 1];
-
 nPlotHol = 2/3;mPlotHol = 1/3;
 holCol = [0.0 0.6 0.2];
-
 nPlotMo = 1/3;mPlotMo = 2/3;
 moCol = [1 0.2 0];
 
@@ -737,6 +735,18 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
   end
 
   function [v] = val(x,y,z,centre)
+    
+    function [V] = VSulph(z)
+      D = 19.9886;
+      a = 0.8122;
+      alpha = 1.4477;
+      b = 0.1958;
+      beta = 0.2029;
+      z0 = 3.3719;
+      z1 = 1.7316;
+      V = D*(exp(2*alpha*(z0-z))-2*a*exp(alpha*(z0-z))-2*b*exp(2*beta*(z1-z)));
+    end
+
     r = x + y;
     r = (x-centre(1)).^2+(y-centre(2)).^2;
     r = sqrt(r)/const.c;
@@ -751,7 +761,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     lambda = 1.0000;
     z2 = 3.4655;
     z3 = 2.0312;
-    VmatrixElement = Vfunc(x,y,z);
+    VmatrixElement = VSulph(z) * Qhexfunc(x,y);
     args = (y-centre(2))./(x-centre(1));
     angle = arrayfun(@(arg) atan(arg),args);
     angle(isnan(angle))=0;
