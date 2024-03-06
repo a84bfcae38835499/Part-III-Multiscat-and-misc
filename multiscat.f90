@@ -27,6 +27,7 @@ program multiscat
   parameter (hbarsq = 4.18020)
   integer startindex,endindex !start and ending indexes of the potential files to be used 
   integer endOfFile
+  character(len=128) :: ioErrorMessage
   !Variables for potential, represented as fourier data
   complex*16 vfcfixed(NZFIXED_MAX,NVFCFIXED_MAX)   !FC's at the fixed points
 
@@ -164,7 +165,7 @@ program multiscat
     print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
    
     do
-      read (81, *, iostat=endOfFile) ei, theta, phi !iostat checks for the end of the file
+      read (81, *, iostat=endOfFile,iomsg=ioErrorMessage) ei, theta, phi !iostat checks for the end of the file
       if (endOfFile==0) then !Normal input
           
         !find number of z values required
@@ -203,10 +204,19 @@ program multiscat
       else if (endOfFile<0) then !End of file
         print *, '-- End of scattering conditions file --'
         if (itest.eq.1) close (21)
+        backspace 81
         exit
       else !Unknown error
+        !To quote the Intel Fortran dev reference,
+        !"A negative integer = Indicating an end-of-file or end-of-record condition occurred.
+        !The negative integers differ depending on which condition occurred."
+        ! - Viv, 5.3.24
         print *, '#### ERROR: Invalid line found in input file  ####'
         print *, '#### (Make sure scatCond.in does not contain empty lines) ####'
+        print *, 'IOSTAT interger = '
+        print *, endOfFile
+        print *, 'Error message : '
+        print *, ioErrorMessage
         stop
       end if
     end do

@@ -33,6 +33,7 @@ subroutine loadfixedpot(nzfixed,nfc,vfcfixed,fourierfile)
   ! Initiates the fourier components as a matrix of zeros
   vfcfixed=0.0d0
   !open the data file and read in the fourier components (1 DC component + nvfcfixed fourier components)
+  !open(20,file=fourierfile, iostat = loadpotIOS)
   open(20,file=fourierfile)
   !discard the first 5 lines
   read(20,*)
@@ -49,6 +50,9 @@ subroutine loadfixedpot(nzfixed,nfc,vfcfixed,fourierfile)
 
   !Scale to the program units
   vfcfixed = vfcfixed * rmlmda
+  !print*,'Finished loadpot subroutine'
+  !print*,'IOS = '
+  !print*,loadpotIOS
 end subroutine loadfixedpot
 
 !************************************************************************

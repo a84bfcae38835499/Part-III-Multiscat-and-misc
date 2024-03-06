@@ -1,13 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.ticker as ticker
-import mpl_toolkits.axisartist as AA
-import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
 import datetime
-import skewaxes
 # Default theme
 #mpl.rc('axes',edgecolor='white')
 import unicodedata
@@ -120,11 +116,11 @@ while count < 9:
         Theta = float(split[0])
         print("Theta = " + split[0])
         count += 1
-    if line.startswith("Ensenble size = "):
-        line = line[len("Ensenble size = "):]
+    if line.startswith("Ensemble size = "):
+        line = line[len("Ensemble size = "):]
         split = line.split()
         Nensemble = float(split[0])
-        print("Ensenble size = " + split[0])
+        print("Ensemble size = " + split[0])
         count += 1
     if line.startswith("Positional entropy = "):
         line = line[len("Positional entropy = "):]
