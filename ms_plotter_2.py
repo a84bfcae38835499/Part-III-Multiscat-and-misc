@@ -48,10 +48,10 @@ def import_multiscat(fname):
             print("\nSeperation found! Splitting dataframe between " + str(topOfSeperation) + ", " + str(index))
             dslice = d.iloc[topOfSeperation:index+1,:]
             topOfSeperation = index+1
-            print(dslice)
+            #print(dslice)
             dfs.append(dslice)
     dslice = d.iloc[topOfSeperation:,:]
-    print(dslice)
+    #print(dslice)
     dfs.append(dslice)
     print("\nFinshed!\n")
     return(dfs)
@@ -201,7 +201,6 @@ for index_n in range(0,int(Nensemble)):
     #print("===")
     #print(dfs)
     dfss.append(dfs)
-print(dfss)
 
 for index_s in range(0,numScatConds):
     dfs = dfss[index_s][:]
@@ -221,6 +220,7 @@ for index_s in range(0,numScatConds):
         plotCoords = np.zeros((nOccCh))
         plotCoords = np.zeros((nOccCh))
         df = dfs[index_n]
+        nOccCh = len(df.index)
         pCXS = np.array([]) #These variables stand for something but icr what it is lmao
         pCYS = np.array([])
         n1min = 0
@@ -233,7 +233,9 @@ for index_s in range(0,numScatConds):
         vanityVal = 0
 
         paddingCells = 40
+        print("nOccCh = " + str(nOccCh))
         for k in range(0,nOccCh):
+            print("k = " + str(k))
             row = df.iloc[k]
             n1 = getattr(row,'n1')
             if(n1 < n1min):
@@ -324,8 +326,10 @@ for index_s in range(0,numScatConds):
     print(theta)
     phi = phis[index_s]
 
+    
     titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, $\\phi$ =" + str(phi) + "$\\degree$"
-    print(titelstr)
+    scatcondstr = str(E) + "_" + str(theta) + "_" + str(phi)
+    print(scatcondstr)
     scatFile.close()
 
     heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
@@ -415,9 +419,9 @@ for index_s in range(0,numScatConds):
     plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
     if(filenametxt == ""):
-        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + ".png"
+        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + "_" + scatcondstr +".png"
     else:
-        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') +slugify(filenametxt)+ ".png"
+        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') +slugify(filenametxt) + "_" + scatcondstr + ".png"
     print(savestr)
     plt.savefig(fname=savestr,dpi=300)
     plt.show()
