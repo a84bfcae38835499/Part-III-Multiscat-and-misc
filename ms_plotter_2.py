@@ -9,6 +9,11 @@ import re
 import matplotlib.patheffects as pe
 import math
 
+#packages to import
+from scipy.spatial import Voronoi
+from scipy.spatial import voronoi_plot_2d
+import matplotlib.cm as cm
+
 def slugify(value, allow_unicode=False):
     """
     Taken from https://github.com/django/django/blob/master/django/utils/text.py
@@ -41,8 +46,8 @@ def import_multiscat(fname):
         #print("val2 - val1 = "+ str(val2 - val1))
         if(difference < 0):
             print("\nSeperation found! Splitting dataframe between " + str(topOfSeperation) + ", " + str(index))
-            dslice = d.iloc[topOfSeperation:index,:]
-            topOfSeperation = index
+            dslice = d.iloc[topOfSeperation:index+1,:]
+            topOfSeperation = index+1
             print(dslice)
             dfs.append(dslice)
     dslice = d.iloc[topOfSeperation:,:]
@@ -164,38 +169,58 @@ b1 = B1 / Babs
 b2 = B2 / Babs
 
 scatFile = open('scatCond.in', 'r')
+
 numScatConds = sum(1 for _ in scatFile)
 numScatConds -= 1
+
+Es = []
+thetas = []
+phis = []
+
+scatFile.close()
+scatFile = open('scatCond.in', 'r')
+
+line = scatFile.readline()
+for index_n in range(0,numScatConds):
+    line = scatFile.readline()
+    print("Line = " + line)
+    vals = line.split(",")
+    Es.append( float(vals[0]) )
+    thetas.append( float(vals[1]) )
+    phis.append( float(vals[2]) )
 
 print("[][][][][][][][]")
 print("Number of scattering conditions = " + str(numScatConds))
 print("[][][][][][][][]\n\n")
 
 dfss = []
-for index in range(0,int(Nensemble)):
-    importname =  'diffrac' + str(10001+index) + '.out'
+for index_n in range(0,int(Nensemble)):
+    importname =  'diffrac' + str(10001+index_n) + '.out'
     print("importing file : " + importname)
     dfs = import_multiscat(importname)
-    print("===")
-    print(dfs)
+    #print("===")
+    #print(dfs)
     dfss.append(dfs)
 print(dfss)
 
-for sc in range(0,numScatConds):
-    dfs = dfss[:,sc]
-    print("---")
-    print(dfs)
+for index_s in range(0,numScatConds):
+    dfs = dfss[index_s][:]
+    print("\n\n---\nsc = " + str(index_s)+"\n")
+    #print(dfs)
+    df = dfs[0]
+    #print("\n£££££ df = ")
+    #print(df)
+    nOccCh = len(df.index)
     plotValuesAvg = np.zeros((nOccCh))
     plotCoordsX = np.zeros((nOccCh))
     plotCoordsY = np.zeros((nOccCh))
     entropiesOut = np.zeros((int(Nensemble),1))
 
-    for index in range(0,int(Nensemble)):
+    for index_n in range(0,int(Nensemble)):
         plotValues = np.zeros((nOccCh))
         plotCoords = np.zeros((nOccCh))
         plotCoords = np.zeros((nOccCh))
-        d = import_multiscat(importname)
-        print(d)
+        df = dfs[index_n]
         pCXS = np.array([]) #These variables stand for something but icr what it is lmao
         pCYS = np.array([])
         n1min = 0
@@ -209,7 +234,7 @@ for sc in range(0,numScatConds):
 
         paddingCells = 40
         for k in range(0,nOccCh):
-            row = d.iloc[k]
+            row = df.iloc[k]
             n1 = getattr(row,'n1')
             if(n1 < n1min):
                 n1min = n1
@@ -235,22 +260,15 @@ for sc in range(0,numScatConds):
             plotValues[k] = I
             plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
             plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
-        print(f"Valmin = {valmin}, valmax = {valmax}")
-        print("===")
-        print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
-        print("===")
+        #print(f"Valmin = {valmin}, valmax = {valmax}")
+        #print("===")
+        #print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
+        #print("===")
 
-        print("Number of occupied channels = " + str(nOccCh))
-        entropiesOut[index] = calculate_entropy(plotValues)
-        print("Diffraction pattern entropy = " + str(entropiesOut[index]))
+        #print("Number of occupied channels = " + str(nOccCh))
+        entropiesOut[index_n] = calculate_entropy(plotValues)
+        print("Diffraction pattern entropy = " + str(entropiesOut[index_n]))
         plotValuesAvg += plotValues / Nensemble
-
-    #packages to import
-    from scipy.spatial import Voronoi
-    from scipy.spatial import voronoi_plot_2d
-    import matplotlib.cm as cm
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
 
     #sets the colour scale
     useLog = False
@@ -289,7 +307,7 @@ for sc in range(0,numScatConds):
 
 
     for k in range(0,nOccCh):
-        row = d.iloc[k]
+        row = df.iloc[k]
         n1 = int(getattr(row,'n1'))
         n2 = int(getattr(row,'n2'))
         if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
@@ -299,19 +317,13 @@ for sc in range(0,numScatConds):
             else:
                 col = 'k'
             plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2),(b1[1]*n1+b2[1]*n2)),fontsize=8,zorder=10,ha='center',va='center',c=col)
-                
+    print("index = " + str(index_s))    
+    print(thetas)
+    E = Es[index_s]
+    theta = thetas[index_s]
+    print(theta)
+    phi = phis[index_s]
 
-
-    scatFile = open('scatCond.in', 'r')
-    E = -69
-    theta = -69
-    phi = -69
-    line = scatFile.readline()
-    line = scatFile.readline()
-    vals = line.split(",")
-    E = float(vals[0])
-    theta = float(vals[1])
-    phi = float(vals[2])
     titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, $\\phi$ =" + str(phi) + "$\\degree$"
     print(titelstr)
     scatFile.close()
@@ -351,7 +363,7 @@ for sc in range(0,numScatConds):
             for m in range(-paddingCells,paddingCells):
                 canPlaceSiteHere = True
                 for k in range(0,nOccCh):
-                    row = d.iloc[k]
+                    row = df.iloc[k]
                     n1 = int(getattr(row,'n1'))
                     n2 = int(getattr(row,'n2'))
                     if(m == n1 and n == n2):
@@ -399,13 +411,13 @@ for sc in range(0,numScatConds):
     plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     filenametxt=""
-    filenametxt="100% defects"
+    filenametxt="the multiform technique!"
     plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
     if(filenametxt == ""):
-        savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + ".png"
+        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + ".png"
     else:
-        savestr = "Figures/Diffraction/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') +slugify(filenametxt)+ ".png"
+        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') +slugify(filenametxt)+ ".png"
     print(savestr)
     plt.savefig(fname=savestr,dpi=300)
     plt.show()
