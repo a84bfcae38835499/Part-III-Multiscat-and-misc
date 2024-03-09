@@ -272,7 +272,7 @@ for index_s in range(0,numScatConds):
         plotValuesAvg += intensities / Nensemble
 
     #sets the colour scale
-    useLog = False
+    useLog = True
     if(useLog):
         mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valmin,valmax))
     else:
