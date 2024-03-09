@@ -8,7 +8,7 @@ Nxy = 32; Nz = 100; Nsuper = 1;
 Theta = 0.0;
 %Theta = (/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-zMax = 4; zMin = 0;%units Å
+zMax = 20; zMin = 4;%units Å
 
 %a1=[const.a,0];
 %a2=[0,const.a]; 
@@ -282,7 +282,7 @@ if(Ndefect == 0)
   potStructArray(1).zmax=Z(end);
   potStructArray(1).zPoints=length(Z);
 
-  plotPot = true;
+  plotPot = false;
   if(plotPot)
     Vplotted = Vsuper;
     comparePots = true;
