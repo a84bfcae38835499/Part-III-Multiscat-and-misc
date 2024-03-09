@@ -8,7 +8,7 @@ Nxy = 32; Nz = 100; Nsuper = 1;
 Theta = 0.0;
 %Theta = (/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-zMax = 20; zMin = 3;%units Å
+zMax = 20; zMin = 2;%units Å
 
 %a1=[const.a,0];
 %a2=[0,const.a]; 
