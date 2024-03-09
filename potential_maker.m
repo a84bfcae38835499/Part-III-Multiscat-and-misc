@@ -4,11 +4,11 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 1;
-Theta = 0.0;
-%Theta = (/(Nsuper*Nsuper));
+Nxy = 32; Nz = 60; Nsuper = 3;
+%Theta = 0.0;
+Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-zMax = 20; zMin = 2.5;%units Å
+zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
 %a2=[0,const.a]; 
@@ -464,7 +464,7 @@ for Ne = 1:Nensemble
   potStructArray(Ne).zmin=Z(1);
   potStructArray(Ne).zmax=Z(end);
   potStructArray(Ne).zPoints=length(Z);
-  plotPot = true;
+  plotPot = false;
   if(plotPot)
     Vplotted = Vout;
     %nPlot = 2/3;mPlot = 1/2;
