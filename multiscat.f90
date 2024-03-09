@@ -39,7 +39,7 @@ program multiscat
 
   !===========================================================================
 
-
+  
   !Begin the main program
   print *, ''
   print *, 'Multiscat: Close Coupled Scattering Program'
@@ -165,7 +165,7 @@ program multiscat
     print *, 'Calculating scattering for potential:',fourierfile
     print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
    
-    if(in.ne.startindex) then !6.3.24 We weren't rewinding the scattering conditions so it immediately went to End of File
+    if(in.ne.startindex) then !6.3.24 Added this since otherwise weren't rewinding the scattering conditions so it immediately went to End of File
       rewind(81)
       read (81, *)!Skip the first line of conditions file
     end if
@@ -189,14 +189,18 @@ program multiscat
         if (n.gt.nmax) stop 'ERROR: n too big!'
     
         !routines for actually doing the calculation
+        print *, 'Starting waves...'
         do i = 1,n
           call waves (d(i),a(i),b(i),c(i),zmax)
           b(i) = b(i)/w(m)
           c(i) = c(i)/(w(m)**2)
         end do
+        print *, 'Waves finished! Starting precon...'
         call precon (m,n,vfc,nfc,nfc00,d,e,f,t)
+        print *, 'Precon finished! Starting Gmres...'
         ifail=0
         call gmres  (x,xx,y,m,ix,iy,n,n00,vfc,ivx,ivy,nfc,a,b,c,d,e,f,p,s,t,eps,ipc,ifail)
+        print *, 'Gmres finished! Outputting results...'
     
         !if failure, then put all intensity to -1
         if (ifail.eq.1) then

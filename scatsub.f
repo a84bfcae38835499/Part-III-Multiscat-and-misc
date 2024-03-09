@@ -374,7 +374,9 @@ c	   if ierr != 0 program terminates printing out precon 2, meaning rs failed
  
       subroutine gmres (x,xx,y,m,ix,iy,n,n00,vfc,ivx,ivy,nfc,
      +                  a,b,c,d,e,f,p,s,t,eps,ipc,ifail)
+      use, intrinsic :: iso_fortran_env, only: OUTPUT_UNIT
       implicit double precision (a-h,o-z)
+      
 c
 c     ----------------------------------------------------------------- 
 c     Complex Generalised Minimal Residual Algorithm (GMRES)
@@ -403,6 +405,8 @@ c
 c
 c     Setup for GMRES(l):
 c
+      write(*,69) ' Convg. threshold = ',eps
+69    format(A,E16.8)
       mn = m*n
       do i = 1,mn
          x(i) = (0.0d0,0.0d0) 
@@ -530,6 +534,10 @@ c
             p(j) = pj
          enddo
          diff = max(diff,abs(unit-1.0d0))
+137      format(A1,A,E17.8)
+         !start with carriage return to stay on the same line.
+         write(*,137, advance='NO') achar(13),'Convergance diff = ',diff
+         flush(OUTPUT_UNIT)
          if (diff .lt. eps) then
             kconv = kconv+1
          else

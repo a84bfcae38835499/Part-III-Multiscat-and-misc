@@ -216,7 +216,7 @@ for index_s in range(0,numScatConds):
     entropiesOut = np.zeros((int(Nensemble),1))
 
     for index_n in range(0,int(Nensemble)):
-        plotValues = np.zeros((nOccCh))
+        intensities = np.zeros((nOccCh))
         plotCoords = np.zeros((nOccCh))
         plotCoords = np.zeros((nOccCh))
         df = dfs[index_n]
@@ -232,10 +232,9 @@ for index_s in range(0,numScatConds):
         smolVal = 1e-100
         vanityVal = 0
 
-        paddingCells = 40
         print("nOccCh = " + str(nOccCh))
         for k in range(0,nOccCh):
-            print("k = " + str(k))
+            #print("k = " + str(k))
             row = df.iloc[k]
             n1 = getattr(row,'n1')
             if(n1 < n1min):
@@ -259,7 +258,7 @@ for index_s in range(0,numScatConds):
             if(I > valmax):
                 valmax = I
             #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
-            plotValues[k] = I
+            intensities[k] = I
             plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
             plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
         #print(f"Valmin = {valmin}, valmax = {valmax}")
@@ -268,9 +267,9 @@ for index_s in range(0,numScatConds):
         #print("===")
 
         #print("Number of occupied channels = " + str(nOccCh))
-        entropiesOut[index_n] = calculate_entropy(plotValues)
+        entropiesOut[index_n] = calculate_entropy(intensities)
         print("Diffraction pattern entropy = " + str(entropiesOut[index_n]))
-        plotValuesAvg += plotValues / Nensemble
+        plotValuesAvg += intensities / Nensemble
 
     #sets the colour scale
     useLog = False
@@ -282,12 +281,9 @@ for index_s in range(0,numScatConds):
     #create the figure with set figure size
     fig = plt.figure(figsize=(10,8))
 
-
     #creates two subplots
     ax = plt.subplot2grid((16,20), (0,17), colspan=1, rowspan=16)
     ax2 = plt.subplot2grid((16,20), (0,0), colspan=16, rowspan=16)
-
-
 
     pathefts1 = [pe.Stroke(linewidth=1, foreground='w'), pe.Normal()]
     pathefts2 = [pe.Stroke(linewidth=2, foreground='w'), pe.Normal()]
@@ -320,10 +316,10 @@ for index_s in range(0,numScatConds):
                 col = 'k'
             plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2),(b1[1]*n1+b2[1]*n2)),fontsize=8,zorder=10,ha='center',va='center',c=col)
     print("index = " + str(index_s))    
-    print(thetas)
+    #print(thetas)
     E = Es[index_s]
     theta = thetas[index_s]
-    print(theta)
+    #print(theta)
     phi = phis[index_s]
 
     
@@ -362,7 +358,7 @@ for index_s in range(0,numScatConds):
 
     vanity = True
     if(vanity):
-        paddingCells = 20
+        paddingCells = 30
         for n in range(-paddingCells,paddingCells):
             for m in range(-paddingCells,paddingCells):
                 canPlaceSiteHere = True
@@ -384,7 +380,7 @@ for index_s in range(0,numScatConds):
 
     #print(additionalX)
     plotCoordsArray = np.array(np.column_stack((np.append(plotCoordsX,additionalX), np.append(plotCoordsY,additionalY))))
-    order = np.append(plotValues,additionalVals)
+    order = np.append(intensities,additionalVals)
     points = plotCoordsArray
     vor = Voronoi(points=points,furthest_site=False)
 
@@ -415,7 +411,7 @@ for index_s in range(0,numScatConds):
     plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     filenametxt=""
-    filenametxt="the multiform technique!"
+    filenametxt="Circular defect - flat"
     plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
     if(filenametxt == ""):
