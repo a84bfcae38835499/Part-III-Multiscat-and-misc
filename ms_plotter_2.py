@@ -53,7 +53,7 @@ def import_multiscat(fname):
     dslice = d.iloc[topOfSeperation:,:]
     #print(dslice)
     dfs.append(dslice)
-    print("\nFinshed!\n")
+    print("\nFinshed!")
     return(dfs)
 
 def calculate_entropy(intensities):
@@ -272,7 +272,7 @@ for index_s in range(0,numScatConds):
         plotValuesAvg += intensities / Nensemble
 
     #sets the colour scale
-    useLog = True
+    useLog = False
     if(useLog):
         mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valmin,valmax))
     else:
@@ -411,7 +411,7 @@ for index_s in range(0,numScatConds):
     plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     filenametxt=""
-    filenametxt="Hexagonal defect - flat"
+    filenametxt="Circular defect - flat"
     plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
     if(filenametxt == ""):
