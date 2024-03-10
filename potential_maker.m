@@ -6,7 +6,7 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 32; Nz = 60; Nsuper = 3;
 %Theta = 0.0;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (3/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 zMax = 6; zMin = 0;%units Å
 
@@ -320,7 +320,7 @@ if(Ndefect == 0)
       ylim([-0.5 3]*Nsuper);
       daspect([1 1 1])
       hold off
-      savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg"
+      savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg";
       fileindx = fileindx + 1;
       saveas(gcf,savestr,'jpg')
     end
@@ -464,7 +464,7 @@ for Ne = 1:Nensemble
   potStructArray(Ne).zmin=Z(1);
   potStructArray(Ne).zmax=Z(end);
   potStructArray(Ne).zPoints=length(Z);
-  plotPot = false;
+  plotPot = true;
   if(plotPot)
     Vplotted = Vout;
     %nPlot = 2/3;mPlot = 1/2;
@@ -503,7 +503,7 @@ for Ne = 1:Nensemble
       ylim([-0.5 3]*Nsuper);
       daspect([1 1 1])
       hold off
-      savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg"
+      savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg";
       fileindx = fileindx + 1;
       saveas(gcf,savestr,'jpg')
       
@@ -556,7 +556,7 @@ for Ne = 1:Nensemble
       end
        hold off
 
-      savestr = "Figures/Potentials.jpg"
+      savestr = "Figures/Potentials.jpg";
       saveas(gcf,savestr,'jpg')
     end
     
@@ -760,14 +760,14 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     lambda = 1.0000;
     z2 = 3.4655;
     z3 = 2.0312;
-    %VmatrixElement = VSulph(z) * Qhexfunc(x,y);
-    VmatrixElement = Vfunc(x,y,z);
+    VmatrixElement = VSulph(z) * Qhexfunc(x,y);
+    %VmatrixElement = Vfunc(x,y,z);
     args = (y-centre(2))./(x-centre(1));
     angle = arrayfun(@(arg) atan(arg),args);
     angle(isnan(angle))=0;
     cutoffR = 1/sqrt(3)*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
     v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-      -2*e*exp(2*lambda*(z3-z)))).*(1./( 1+exp((r-0.45)*10) ));
+      -2*e*exp(2*lambda*(z3-z)))).*(1./( 1+exp((r-cutoffR)*10) ));
   end
 end
 
