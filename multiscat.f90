@@ -189,18 +189,14 @@ program multiscat
         if (n.gt.nmax) stop 'ERROR: n too big!'
     
         !routines for actually doing the calculation
-        print *, 'Starting waves...'
         do i = 1,n
           call waves (d(i),a(i),b(i),c(i),zmax)
           b(i) = b(i)/w(m)
           c(i) = c(i)/(w(m)**2)
         end do
-        print *, 'Waves finished! Starting precon...'
         call precon (m,n,vfc,nfc,nfc00,d,e,f,t)
-        print *, 'Precon finished! Starting Gmres...'
         ifail=0
         call gmres  (x,xx,y,m,ix,iy,n,n00,vfc,ivx,ivy,nfc,a,b,c,d,e,f,p,s,t,eps,ipc,ifail)
-        print *, 'Gmres finished! Outputting results...'
     
         !if failure, then put all intensity to -1
         if (ifail.eq.1) then

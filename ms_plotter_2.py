@@ -38,7 +38,7 @@ def import_multiscat(fname):
     d.drop(columns=['#'], inplace=True)
     nlines = sum(1 for line in open(fname))
     topOfSeperation = 0
-    dfs = []
+    dfs = np.array([])
     for index in range(0,nlines-2):
         val1 = d.loc[index,'n1']
         val2 = d.loc[index+1,'n1']
@@ -46,13 +46,19 @@ def import_multiscat(fname):
         #print("val2 - val1 = "+ str(val2 - val1))
         if(difference < 0):
             print("\nSeperation found! Splitting dataframe between " + str(topOfSeperation) + ", " + str(index))
-            dslice = d.iloc[topOfSeperation:index+1,:]
+            dslice = np.array(d.iloc[topOfSeperation:index+1,:])
             topOfSeperation = index+1
-            #print(dslice)
-            dfs.append(dslice)
-    dslice = d.iloc[topOfSeperation:,:]
+            print(np.shape(dslice))
+
+            if(index == 0):
+                dfs = np.array(dslice)
+                dfs = np.expand_dims(dfs,axis=2)
+                print("dfs shape = " + str(np.shape(dfs)))
+            else:
+                dfs = np.append(dfs,np.expand_dims(dslice,axis=2),axis=2)
+    dslice = np.array(d.iloc[topOfSeperation:,:])
     #print(dslice)
-    dfs.append(dslice)
+    dfs = np.append(dfs,dslice,axis=2)
     print("\nFinshed!")
     return(dfs)
 
@@ -193,19 +199,23 @@ print("[][][][][][][][]")
 print("Number of scattering conditions = " + str(numScatConds))
 print("[][][][][][][][]\n\n")
 
-dfss = []
 for index_n in range(0,int(Nensemble)):
     importname =  'diffrac' + str(10001+index_n) + '.out'
     print("importing file : " + importname)
     dfs = import_multiscat(importname)
     #print("===")
     #print(dfs)
-    dfss.append(dfs)
+    if(index_n == 0):
+        dfss = dfs
+    else:
+        dfss = np.append(dfss,dfs)
 
 for index_s in range(0,numScatConds):
     dfs = dfss[index_s][:]
-    print("\n\n---\nsc = " + str(index_s)+"\n")
-    #print(dfs)
+    print("\n---\nscattering condition = " + str(index_s))
+    print("\n#####")
+    print(dfs)
+    print("\n#####")
     df = dfs[0]
     #print("\n£££££ df = ")
     #print(df)
@@ -216,6 +226,7 @@ for index_s in range(0,numScatConds):
     entropiesOut = np.zeros((int(Nensemble),1))
 
     for index_n in range(0,int(Nensemble)):
+        print(index_n)
         intensities = np.zeros((nOccCh))
         plotCoords = np.zeros((nOccCh))
         plotCoords = np.zeros((nOccCh))

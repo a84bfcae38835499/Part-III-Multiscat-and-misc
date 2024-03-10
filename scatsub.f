@@ -455,6 +455,7 @@ c
          p(j) = 0.0d0
       enddo
       do k = 1,l
+
          kount = kount+1
          do i = 1,mn
             x(i) = x(i)/xnorm
@@ -537,13 +538,16 @@ c
          enddo
          diff = max(diff,abs(unit-1.0d0))
 137      format(A1,A,F14.8)
-         !start with carriage return to stay on the same line.
-         write(*,137, advance='NO') achar(13),' Convergance diff =',diff
+138      format(A1,A,A1,A,F14.8,A1,A)
          flush(OUTPUT_UNIT)
          if (diff .lt. eps) then
             kconv = kconv+1
+            write(*,138, advance='NO') achar(13),' Convergance diff ='
+     +      , achar(27),'[96m',diff,achar(27),'[0m'
          else
             kconv = 0
+            write(*,137, advance='NO') achar(13),' Convergance diff ='
+     +      ,diff
          endif
          kk = k
          if (kconv.eq.3 .or. xnorm.eq.0.0d0) go to 2
