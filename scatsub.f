@@ -376,7 +376,9 @@ c	   if ierr != 0 program terminates printing out precon 2, meaning rs failed
      +                  a,b,c,d,e,f,p,s,t,eps,ipc,ifail)
       use, intrinsic :: iso_fortran_env, only: OUTPUT_UNIT
       implicit double precision (a-h,o-z)
-      
+
+      integer modk
+      character sprite
 c
 c     ----------------------------------------------------------------- 
 c     Complex Generalised Minimal Residual Algorithm (GMRES)
@@ -406,7 +408,7 @@ c
 c     Setup for GMRES(l):
 c
       write(*,69) ' Convg. threshold = ',eps
-69    format(A,E16.8)
+69    format(A,F13.8)
       mn = m*n
       do i = 1,mn
          x(i) = (0.0d0,0.0d0) 
@@ -462,6 +464,20 @@ c
             y(i) = x(i)
          enddo
          call upper (x,m,ix,iy,n,vfc,ivx,ivy,nfc)
+
+         modk = modulo(k,4)
+         if(modk == 0) then
+            sprite = "|"
+         elseif(modk == 1) then
+            sprite = "/"
+         elseif(modk == 2) then
+            sprite = "-"
+         else
+            sprite = "\"
+         endif
+420      format(A1,A,A,A)
+         write(*,420, advance='NO') achar(13),'[',sprite,']'
+         flush(OUTPUT_UNIT)
          call lower (x,m,ix,iy,n,vfc,ivx,ivy,nfc,c,d,e,f,t)
          do i = 1,mn
             x(i) = y(i)+x(i)
@@ -534,9 +550,9 @@ c
             p(j) = pj
          enddo
          diff = max(diff,abs(unit-1.0d0))
-137      format(A1,A,E17.8)
+137      format(A1,A,F14.8)
          !start with carriage return to stay on the same line.
-         write(*,137, advance='NO') achar(13),'Convergance diff = ',diff
+         write(*,137, advance='NO') achar(13),' Convergance diff =',diff
          flush(OUTPUT_UNIT)
          if (diff .lt. eps) then
             kconv = kconv+1
