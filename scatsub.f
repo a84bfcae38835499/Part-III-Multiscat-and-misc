@@ -464,20 +464,6 @@ c
             y(i) = x(i)
          enddo
          call upper (x,m,ix,iy,n,vfc,ivx,ivy,nfc)
-
-         modk = modulo(k,4)
-         if(modk == 0) then
-            sprite = "|"
-         elseif(modk == 1) then
-            sprite = "/"
-         elseif(modk == 2) then
-            sprite = "-"
-         else
-            sprite = "\"
-         endif
-420      format(A1,A,A,A)
-         write(*,420, advance='NO') achar(13),'[',sprite,']'
-         flush(OUTPUT_UNIT)
          call lower (x,m,ix,iy,n,vfc,ivx,ivy,nfc,c,d,e,f,t)
          do i = 1,mn
             x(i) = y(i)+x(i)
