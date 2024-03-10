@@ -2,7 +2,7 @@ classdef const
   properties(Constant)
     a = 2.84; %lattice parameter for LiF
     b = 5.48/3; %projected distance between Mo and S atoms
-    c = 3.16; %sulphur-sulphur distance
+    c = 1.16; %sulphur-sulphur distance
     d = 5.48; %length of Min's unit cell
 
     D = 7.63;

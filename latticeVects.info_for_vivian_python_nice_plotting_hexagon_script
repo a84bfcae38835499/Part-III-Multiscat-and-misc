@@ -1,12 +1,12 @@
 Real space vectors:
-a1 = -3.16           0
-a2 = 1.58      2.7366
+a1 = -1.16           0
+a2 = 0.58      1.0046
 Nsuper = 3
 Reciprocal vectors:
-b1 = -1.9883       1.148
-b2 = 0      2.2959
+b1 = -5.4165      3.1272
+b2 = 0      6.2545
 Defect data:
 Theta = 0.33333
 Ensemble size = 3
 Positional entropy = 0.87218
-Defect density in cm^-2 = 3.854552e+14
+Defect density in cm^-2 = 2.860435e+15

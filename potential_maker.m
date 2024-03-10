@@ -804,8 +804,8 @@ function ComparePotentials(V1,V2,V1name,V2name,a1,a2,m,n,Z1,Z2,zMin,plotColor)
   ylabel('Energy/meV')
   hold on
   legend()
-  disp(size(Z2))
-  disp(size(V2piece))
+  %disp(size(Z2))
+  %disp(size(V2piece))
   d = plot(Z2(k2:end),V2piece(k2:end),'DisplayName',V2name);
   d.LineStyle = "-";
   d.Color = [0 0.4470 0.7410];
