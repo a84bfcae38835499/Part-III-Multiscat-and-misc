@@ -72,6 +72,7 @@ def calculate_entropy(intensities):
 def find_mean_stdv(values):
     mean = 0
     meanSq = 0
+    print("type of input = " + str(type(values)))
     n = len(values)
     for v in np.nditer(values):
         mean += v
@@ -170,8 +171,8 @@ b2 = B2 / Babs
 
 scatFile = open('scatCond.in', 'r')
 
-numScatConds = sum(1 for _ in scatFile)
-numScatConds -= 1
+Nscat = sum(1 for _ in scatFile)
+Nscat -= 1
 
 Es = []
 thetas = []
@@ -181,7 +182,7 @@ scatFile.close()
 scatFile = open('scatCond.in', 'r')
 
 line = scatFile.readline()
-for index_n in range(0,numScatConds):
+for index_s in range(Nscat):
     line = scatFile.readline()
     print("Line = " + line)
     vals = line.split(",")
@@ -189,8 +190,10 @@ for index_n in range(0,numScatConds):
     thetas.append( float(vals[1]) )
     phis.append( float(vals[2]) )
 
+scatFile.close()
+
 print("[][][][][][][][]")
-print("Number of scattering conditions = " + str(numScatConds))
+print("Number of scattering conditions = " + str(Nscat))
 print("[][][][][][][][]\n\n")
 
 dfss = []
@@ -204,109 +207,128 @@ for index_n in range(int(Nensemble)):
     #print(dfs)
     dfss.append(dfs)
 
-dfs = dfss[0]
+nOccChArr = [0]*Nscat
 
-entropiesOut = np.zeros((int(Nensemble),numScatConds))
-intensityArr = []
-coordXArr = []
-coordYArr = []
-brightSpotXArr = []
-brightSpotYArr = []
-nOccChArr = []
-
-for index_s in range(numScatConds):
-    print("Now processing numscatcond = " + str(numScatConds))
-    trialdf = dfss[0][index_s]
+for index_s in range(Nscat):
+    print("index_s = " + str(index_s))
+    rubbis = dfss[0]
+    trialdf = rubbis[index_s]
     nOccChArr[index_s] = len(trialdf.index)
+    #Assume that all ensemble members for a particular scatering cond
+    #have the same nubmer of channels because otherwise I will actually go insane
+
+entropiesOut = [0.]*Nscat
+entropiesOutUnc = [0.]*Nscat
+intensityArr = [None]*Nscat
+coordXArr = [None]*Nscat
+coordYArr = [None]*Nscat
+brightSpotXArr = [None]*Nscat
+brightSpotYArr = [None]*Nscat
+
+n1Arr = [None]*Nscat
+n2Arr = [None]*Nscat
+n1minArr = [0.]*Nscat
+n1maxArr = [0.]*Nscat
+n2minArr = [0.]*Nscat
+n2maxArr = [0.]*Nscat
+
+valminArr = [1.]*Nscat
+valmaxArr = [0.]*Nscat
+smolVal = 1e-100
+vanityVal = 0
+
+for index_s in range(Nscat):
+    print("Now processing numscatcond = " + str(index_s))
     print("Trail df length = " + str(nOccChArr[index_s]))
-    intensityArr[index_s] = np.zeros((nOccChArr[index_s]))
-    coordXArr[index_s] = np.zeros((nOccChArr[index_s],nOccChArr[index_s])) #this is what paranoia looks like
-    coordYArr[index_s] = np.zeros((nOccChArr[index_s],nOccChArr[index_s]))
+    intensityArr[index_s] =(np.zeros((nOccChArr[index_s])))
+    coordXArr[index_s] =(np.zeros((nOccChArr[index_s]))) #this is what paranoia looks like
+    coordYArr[index_s] =(np.zeros((nOccChArr[index_s])))
+    cX = []
+    cY = []
+    iI = []
+    n1minArr[index_s] =(0)
+    n1maxArr[index_s] =(0)
+    n2minArr[index_s] =(0)
+    n2maxArr[index_s] =(0)
+
+    n1Arr[index_s] =(np.zeros((nOccChArr[index_s]),dtype='int'))
+    n2Arr[index_s] =(np.zeros((nOccChArr[index_s]),dtype='int'))
+
+    brightSpotXArr[index_s] =(np.zeros((nOccChArr[index_s])))
+    brightSpotYArr[index_s] =(np.zeros((nOccChArr[index_s])))
+
+
     for index_n in range(int(Nensemble)):
         df = dfss[index_n][index_s]
-        
-    
-
-
-for index_n in range(int(Nensemble)):
-    dfs = dfss[index_n]
-    for index_s in range(0,int(numScatConds)):
-        df = dfs[index_n]
-        print("\n---\nensemble number = " + str(index_n) + ", scattering index = " + str(index_s))
-        print("\n#####")
-        print(df)
-        print("\n#####")
-        #print("\n£££££ df = ")
-        #print(df)
-
-        n1min = 0
-        n1max = 0
-        n2min = 0
-        n2max = 0
-        dfs = dfss[index_n]
-        df = dfs[index_s]
-
-        #print("df = ")
-        #print(df)
-        nOccCh = len(df.index)
-        intensities = np.zeros((nOccCh))
-        plotCoordsX = np.zeros((nOccCh))
-        plotCoordsY = np.zeros((nOccCh))
-        pCXS = np.array([]) #These variables stand for something but icr what it is lmao
-        pCYS = np.array([])
-        valmin = 1
-        valmax = 0
-        smolVal = 1e-100
-        vanityVal = 0
-
-        print("nOccCh = " + str(nOccCh))
-        print("for df = ")
-        print(df)
-        for k in range(nOccCh):
+        intensities = np.zeros((nOccChArr[index_s]))
+        plotCoordsX = np.zeros((nOccChArr[index_s]))
+        plotCoordsY = np.zeros((nOccChArr[index_s]))
+        for k in range(nOccChArr[index_s]):
             #print("k = " + str(k))
             row = df.iloc[k]
             n1 = getattr(row,'n1')
-            if(n1 < n1min):
-                n1min = n1
-            if(n1 > n1max):
-                n1max = n1
+            n1Arr[index_s][k] = int(n1)
+            if(n1 < n1minArr[index_s]):
+                n1minArr[index_s] = n1
+            if(n1 > n1maxArr[index_s]):
+                n1maxArr[index_s] = n1
             n2 = getattr(row,'n2')
-            if(n2 < n2min):
-                n2min = n2
-            if(n2 > n2max):
-                n2max = n2
+            n2Arr[index_s][k] = int(n2)
+            if(n2 < n2minArr[index_s]):
+                n2minArr[index_s] = n2
+            if(n2 > n2maxArr[index_s]):
+                n2maxArr[index_s] = n2
             I = float(getattr(row,'I'))
+            #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
+            intensities[k] = I
+            plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
+            plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
+        cX.append(plotCoordsX)
+        cY.append(plotCoordsY)
+        iI.append(intensities)
+    #Now do ensemble averageing
+    
+    iAverage = np.zeros((nOccChArr[index_s]))
+    pCXS = np.array([]) #These variables stand for something but icr what it is lmao
+    pCYS = np.array([])
+    entropiesDisposable = np.zeros((int(Nensemble)))
+    for index_n in range(int(Nensemble)):
+        for ch in range(nOccChArr[index_s]):
+            I = iI[index_n][ch]
             if(I == 0):
                 print(f"Zero found, setting to {smolVal}")
                 I = smolVal
             elif(I > vanityVal):
                 pCXS = np.append(pCXS,b1[0] * n1 + b2[0] * n2)
                 pCYS = np.append(pCYS,b1[1] * n1 + b2[1] * n2)
-            if(I < valmin):
-                valmin = I
-            if(I > valmax):
-                valmax = I
-            #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
-            intensities[k] = I
-            plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
-            plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
-        #print(f"Valmin = {valmin}, valmax = {valmax}")
-        #print("===")
-        #print(f"n1min = {n1min}, n1max = {n1max}, n2min = {n2min}, n2max = {n2max}")
-        #print("===")
+            if(I < valminArr[index_s]):
+                valminArr[index_s] = I
+            if(I > valmaxArr[index_s]):
+                valmaxArr[index_s] = I
+            iAverage[ch] += I
+        entropiesDisposable[index_n] = calculate_entropy(iI[index_n])
+    iAverage /= Nensemble
+    intensityArr[index_s] = iAverage
+    coordXArr[index_s] = cX[0] #this is what paranoia looks like
+    coordYArr[index_s] = cY[0]
+    brightSpotXArr[index_s] = pCXS
+    brightSpotYArr[index_s] = pCYS
+    entropiesOut[index_s], entropiesOutUnc[index_s] = find_mean_stdv(entropiesDisposable)
 
-        #print("Number of occupied channels = " + str(nOccCh))
-        
-        entropiesOut[index_n,index_s] = calculate_entropy(intensities)
-        print("Diffraction pattern entropy = " + str(entropiesOut[index_n]))
-        intensityArr.append(intensities)
+#We now have our varrious arrays whose index ranges over the number of scattering conditions
+#(these arrays are labelled xxxArr)
+#Ensemble averaging has been done so we now don't have to worry about it
 
+for index_s in range(Nscat):
+    plotValuesAvg = intensityArr[index_s]
+    plotCoordsX = coordXArr[index_s]
+    plotCoordsY = coordYArr[index_s]
     #sets the colour scale
     useLog = True
     if(useLog):
-        mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valmin,valmax))
+        mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]))
     else:
-        mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.Normalize(valmin,valmax))
+        mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]))
 
     #create the figure with set figure size
     fig = plt.figure(figsize=(10,8))
@@ -333,18 +355,18 @@ for index_n in range(int(Nensemble)):
     plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
     plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
 
-
-    for k in range(0,nOccCh):
-        row = df.iloc[k]
-        n1 = int(getattr(row,'n1'))
-        n2 = int(getattr(row,'n2'))
+    for ch in range(nOccChArr[index_s]):
+        n1 = n1Arr[index_s][ch]
+        n2 = n1Arr[index_s][ch]
         if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
             n1n2 = str(int(n1/Nsuper)) + ',' + str(int(n2/Nsuper))
-            if(plotValuesAvg[k] < (valmax-valmin)*0.9):
+            if(plotValuesAvg[ch] < (valmaxArr[index_s]-valminArr[index_s])*0.75):
                 col = 'w'
             else:
                 col = 'k'
-            plt.annotate(n1n2,((b1[0]*n1+b2[0]*n2),(b1[1]*n1+b2[1]*n2)),fontsize=8,zorder=10,ha='center',va='center',c=col)
+            plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
+                               (b1[1]*float(n1)+b2[1]*float(n2))),
+                         fontsize=8,zorder=10,ha='center',va='center',c=col)
     print("index = " + str(index_s))    
     #print(thetas)
     E = Es[index_s]
@@ -356,7 +378,6 @@ for index_n in range(int(Nensemble)):
     titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, $\\phi$ =" + str(phi) + "$\\degree$"
     scatcondstr = str(E) + "_" + str(theta) + "_" + str(phi)
     print(scatcondstr)
-    scatFile.close()
 
     heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
                         [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
@@ -375,10 +396,11 @@ for index_n in range(int(Nensemble)):
     ax2.set_title(titelstr)
 
     #creates a colourbar on the first subplot
+    print("valminArr[index_s],valmaxArr[index_s = " + str(valminArr[index_s]) + "," + str(valmaxArr[index_s]))
     if(useLog):
-        cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valmin,valmax), orientation='vertical')
+        cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
     else:
-        cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valmin,valmax), orientation='vertical')
+        cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
     cb1.set_label('P($n_1$,$n_2$)')
 
 
@@ -392,10 +414,9 @@ for index_n in range(int(Nensemble)):
         for n in range(-paddingCells,paddingCells):
             for m in range(-paddingCells,paddingCells):
                 canPlaceSiteHere = True
-                for k in range(0,nOccCh):
-                    row = df.iloc[k]
-                    n1 = int(getattr(row,'n1'))
-                    n2 = int(getattr(row,'n2'))
+                for ch in range(nOccChArr[index_s]):
+                    n1 = n1Arr[index_s][ch]
+                    n2 = n1Arr[index_s][ch]
                     if(m == n1 and n == n2):
                         canPlaceSiteHere = False
                         
@@ -428,10 +449,11 @@ for index_n in range(int(Nensemble)):
     ax2.set_aspect('equal')
     plt.xticks([])  
     plt.yticks([])
-    ax2.set_ylim(min(pCYS)-1/2,max(pCYS)+1/2)
-    ax2.set_xlim(min(pCXS)-1/2,max(pCXS)+1/2)
+    ax2.set_ylim(min(brightSpotYArr[index_s])-1/2,max(brightSpotYArr[index_s])+1/2)
+    ax2.set_xlim(min(brightSpotXArr[index_s])-1/2,max(brightSpotXArr[index_s])+1/2)
 
-    eomean, eosdtv = find_mean_stdv(entropiesOut)
+    eomean = entropiesOut[index_s]
+    eosdtv = entropiesOutUnc[index_s]
     captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + "{:.4f}".format(entropyIn)
     if(Nensemble == 1):
         entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean)
@@ -441,7 +463,7 @@ for index_n in range(int(Nensemble)):
     plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     filenametxt=""
-    filenametxt="Circular defect - flat"
+    filenametxt="testing proper ensemble processing"
     plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
     if(filenametxt == ""):
