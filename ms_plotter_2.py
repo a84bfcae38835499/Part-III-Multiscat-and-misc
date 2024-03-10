@@ -39,7 +39,9 @@ def import_multiscat(fname):
     nlines = sum(1 for line in open(fname))
     topOfSeperation = 0
     dfs = np.array([])
+    print("nlines = " + str(nlines))
     for index in range(0,nlines-2):
+        print(index)
         val1 = d.loc[index,'n1']
         val2 = d.loc[index+1,'n1']
         difference = val2 - val1
@@ -47,17 +49,19 @@ def import_multiscat(fname):
         if(difference < 0):
             print("\nSeperation found! Splitting dataframe between " + str(topOfSeperation) + ", " + str(index))
             dslice = np.array(d.iloc[topOfSeperation:index+1,:])
+            dslice = np.expand_dims(dslice,axis=2)
+            print("dslice shape = " + str(np.shape(dslice)))
             topOfSeperation = index+1
-            print(np.shape(dslice))
-
             if(index == 0):
                 dfs = np.array(dslice)
                 dfs = np.expand_dims(dfs,axis=2)
                 print("dfs shape = " + str(np.shape(dfs)))
             else:
-                dfs = np.append(dfs,np.expand_dims(dslice,axis=2),axis=2)
+                dfs = np.append(dfs,dslice,axis=2)
     dslice = np.array(d.iloc[topOfSeperation:,:])
-    #print(dslice)
+    dslice = np.expand_dims(dslice,axis=2)
+    print("dfs shape = " + str(np.shape(dfs)))
+    print("dslice shape = " + str(np.shape(dslice)))
     dfs = np.append(dfs,dslice,axis=2)
     print("\nFinshed!")
     return(dfs)
