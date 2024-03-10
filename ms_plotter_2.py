@@ -38,31 +38,21 @@ def import_multiscat(fname):
     d.drop(columns=['#'], inplace=True)
     nlines = sum(1 for line in open(fname))
     topOfSeperation = 0
-    dfs = np.array([])
+    dfs = []
     print("nlines = " + str(nlines))
     for index in range(0,nlines-2):
-        print(index)
         val1 = d.loc[index,'n1']
         val2 = d.loc[index+1,'n1']
         difference = val2 - val1
         #print("val2 - val1 = "+ str(val2 - val1))
         if(difference < 0):
             print("\nSeperation found! Splitting dataframe between " + str(topOfSeperation) + ", " + str(index))
-            dslice = np.array(d.iloc[topOfSeperation:index+1,:])
-            dslice = np.expand_dims(dslice,axis=2)
-            print("dslice shape = " + str(np.shape(dslice)))
+            dslice = d.iloc[topOfSeperation:index+1,:]
             topOfSeperation = index+1
-            if(index == 0):
-                dfs = np.array(dslice)
-                dfs = np.expand_dims(dfs,axis=2)
-                print("dfs shape = " + str(np.shape(dfs)))
-            else:
-                dfs = np.append(dfs,dslice,axis=2)
-    dslice = np.array(d.iloc[topOfSeperation:,:])
-    dslice = np.expand_dims(dslice,axis=2)
-    print("dfs shape = " + str(np.shape(dfs)))
-    print("dslice shape = " + str(np.shape(dslice)))
-    dfs = np.append(dfs,dslice,axis=2)
+            dfs.append(dslice)
+    print("===")
+    dslice = d.iloc[topOfSeperation:,:]
+    dfs.append(dslice)
     print("\nFinshed!")
     return(dfs)
 
@@ -203,52 +193,76 @@ print("[][][][][][][][]")
 print("Number of scattering conditions = " + str(numScatConds))
 print("[][][][][][][][]\n\n")
 
-for index_n in range(0,int(Nensemble)):
+dfss = []
+
+for index_n in range(int(Nensemble)):
     importname =  'diffrac' + str(10001+index_n) + '.out'
     print("importing file : " + importname)
     dfs = import_multiscat(importname)
+    #dfs has scattering varying scattering conditions for one potential
     #print("===")
     #print(dfs)
-    if(index_n == 0):
-        dfss = dfs
-    else:
-        dfss = np.append(dfss,dfs)
+    dfss.append(dfs)
 
-for index_s in range(0,numScatConds):
-    dfs = dfss[index_s][:]
-    print("\n---\nscattering condition = " + str(index_s))
-    print("\n#####")
-    print(dfs)
-    print("\n#####")
-    df = dfs[0]
-    #print("\n£££££ df = ")
-    #print(df)
-    nOccCh = len(df.index)
-    plotValuesAvg = np.zeros((nOccCh))
-    plotCoordsX = np.zeros((nOccCh))
-    plotCoordsY = np.zeros((nOccCh))
-    entropiesOut = np.zeros((int(Nensemble),1))
+dfs = dfss[0]
 
-    for index_n in range(0,int(Nensemble)):
-        print(index_n)
-        intensities = np.zeros((nOccCh))
-        plotCoords = np.zeros((nOccCh))
-        plotCoords = np.zeros((nOccCh))
+entropiesOut = np.zeros((int(Nensemble),numScatConds))
+intensityArr = []
+coordXArr = []
+coordYArr = []
+brightSpotXArr = []
+brightSpotYArr = []
+nOccChArr = []
+
+for index_s in range(numScatConds):
+    print("Now processing numscatcond = " + str(numScatConds))
+    trialdf = dfss[0][index_s]
+    nOccChArr[index_s] = len(trialdf.index)
+    print("Trail df length = " + str(nOccChArr[index_s]))
+    intensityArr[index_s] = np.zeros((nOccChArr[index_s]))
+    coordXArr[index_s] = np.zeros((nOccChArr[index_s],nOccChArr[index_s])) #this is what paranoia looks like
+    coordYArr[index_s] = np.zeros((nOccChArr[index_s],nOccChArr[index_s]))
+    for index_n in range(int(Nensemble)):
+        df = dfss[index_n][index_s]
+        
+    
+
+
+for index_n in range(int(Nensemble)):
+    dfs = dfss[index_n]
+    for index_s in range(0,int(numScatConds)):
         df = dfs[index_n]
-        nOccCh = len(df.index)
-        pCXS = np.array([]) #These variables stand for something but icr what it is lmao
-        pCYS = np.array([])
+        print("\n---\nensemble number = " + str(index_n) + ", scattering index = " + str(index_s))
+        print("\n#####")
+        print(df)
+        print("\n#####")
+        #print("\n£££££ df = ")
+        #print(df)
+
         n1min = 0
         n1max = 0
         n2min = 0
         n2max = 0
+        dfs = dfss[index_n]
+        df = dfs[index_s]
+
+        #print("df = ")
+        #print(df)
+        nOccCh = len(df.index)
+        intensities = np.zeros((nOccCh))
+        plotCoordsX = np.zeros((nOccCh))
+        plotCoordsY = np.zeros((nOccCh))
+        pCXS = np.array([]) #These variables stand for something but icr what it is lmao
+        pCYS = np.array([])
         valmin = 1
         valmax = 0
         smolVal = 1e-100
         vanityVal = 0
 
         print("nOccCh = " + str(nOccCh))
-        for k in range(0,nOccCh):
+        print("for df = ")
+        print(df)
+        for k in range(nOccCh):
             #print("k = " + str(k))
             row = df.iloc[k]
             n1 = getattr(row,'n1')
@@ -282,9 +296,10 @@ for index_s in range(0,numScatConds):
         #print("===")
 
         #print("Number of occupied channels = " + str(nOccCh))
-        entropiesOut[index_n] = calculate_entropy(intensities)
+        
+        entropiesOut[index_n,index_s] = calculate_entropy(intensities)
         print("Diffraction pattern entropy = " + str(entropiesOut[index_n]))
-        plotValuesAvg += intensities / Nensemble
+        intensityArr.append(intensities)
 
     #sets the colour scale
     useLog = True
