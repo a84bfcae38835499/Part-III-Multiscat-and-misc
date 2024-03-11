@@ -171,6 +171,7 @@ program multiscat
     do
       read (81, *, iostat=endOfFile,iomsg=ioErrorMessage) ei, theta, phi !iostat checks for the end of the file
       if (endOfFile==0) then !Normal input
+        print *, '--                                   --'
           
         !find number of z values required
         call findmz (emax,vmin,nsf,zmin,zmax,m)
@@ -205,7 +206,6 @@ program multiscat
         ! write outputs 
         print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
         call output(ei,theta,phi,ix,iy,n,n00,d,p,itest)
-        print *, '--                                   --'
     
       else if (endOfFile<0) then !End of file
         print *, '-- End of scattering conditions file --'
@@ -225,6 +225,6 @@ program multiscat
       end if
     end do
   end do
-  print *, "-= Programme finished :D =-"
+  print *, "## Programme finished :D ##"
 end program multiscat
 
