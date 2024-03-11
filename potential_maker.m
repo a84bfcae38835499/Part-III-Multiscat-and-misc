@@ -4,9 +4,9 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 60; Nsuper = 3;
+Nxy = 32; Nz = 60; Nsuper = 2;
 %Theta = 0.0;
-Theta = (3/(Nsuper*Nsuper));
+Theta = (2/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 zMax = 6; zMin = 0;%units Å
 
