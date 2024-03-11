@@ -1,6 +1,6 @@
 #FFLAGS       = -real_size 128
 #FFLAGS      = -check_bounds -real_size 128
-FFLAGS       = -O3 -mcmodel=large -fno-PIC#viv woz ere
+FFLAGS       = -O3 -mcmodel=large #viv woz ere
 #FFLAGS       = -O
 #FFLAGS      = -check_bounds
 #Used for debugging
