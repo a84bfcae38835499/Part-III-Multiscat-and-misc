@@ -163,7 +163,6 @@ program multiscat
     !Calculate scattering over the incident conditions required
     print *, ''
     print *, 'Calculating scattering for potential:',fourierfile
-    print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
    
     if(in.ne.startindex) then !6.3.24 Added this since otherwise weren't rewinding the scattering conditions so it immediately went to End of File
       rewind(81)
@@ -202,10 +201,11 @@ program multiscat
         if (ifail.eq.1) then
           p=-1
         end if
-        p = 0.5 !testing ensembl. pls delet
         
         ! write outputs 
+        print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
         call output(ei,theta,phi,ix,iy,n,n00,d,p,itest)
+        print *, '--                                   --'
     
       else if (endOfFile<0) then !End of file
         print *, '-- End of scattering conditions file --'

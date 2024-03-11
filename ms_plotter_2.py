@@ -283,10 +283,6 @@ for index_s in range(Nscat):
             if(I == 0):
                 print(f"Zero found, setting to {smolVal}")
                 I = smolVal
-            if(I < valminArr[index_s]):
-                valminArr[index_s] = I
-            if(I > valmaxArr[index_s]):
-                valmaxArr[index_s] = I
             iAverage[ch] += I
         entropiesDisposable[index_n] = calculate_entropy(iI[index_n])
     iAverage /= Nensemble
@@ -309,11 +305,21 @@ for index_s in range(Nscat):
             if(I == 0):
                 print(f"Zero found, setting to {smolVal}")
                 I = smolVal
-            elif(I > vanityVal):
+
+            if(I < valminArr[index_s]):
+                valminArr[index_s] = I
+            if(I > valmaxArr[index_s]):
+                valmaxArr[index_s] = I
+            if(I > vanityVal):
                 pCXS = np.append(pCXS,b1[0] * float(n1) + b2[0] * float(n2))
                 pCYS = np.append(pCYS,b1[1] * float(n1) + b2[1] * float(n2))
     brightSpotXArr[index_s] = pCXS
     brightSpotYArr[index_s] = pCYS
+
+#This time is used for file naming, set it now so if you spend ages looking
+#at a plot and the timer ticks over, the files after still have the same
+#name as the ones before
+execTime = datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M')
 
 for index_s in range(Nscat):
     plotValuesAvg = intensityArr[index_s]
@@ -468,13 +474,13 @@ for index_s in range(Nscat):
     plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     filenametxt=""
-    filenametxt="testing proper ensemble processing"
+    filenametxt="average of two"
     plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
     if(filenametxt == ""):
-        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + "_" + scatcondstr +".png"
+        savestr = "Figures/Diffraction_multi/" + execTime + "_" + scatcondstr +".png"
     else:
-        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') +slugify(filenametxt) + "_" + scatcondstr + ".png"
+        savestr = "Figures/Diffraction_multi/" + execTime + "_" + slugify(filenametxt) + "_" + scatcondstr + ".png"
     print(savestr)
     plt.savefig(fname=savestr,dpi=300)
     plt.show()
