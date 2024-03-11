@@ -315,6 +315,11 @@ for index_s in range(Nscat):
     brightSpotXArr[index_s] = pCXS
     brightSpotYArr[index_s] = pCYS
 
+#This time is used for file naming, set it now so if you spend ages looking
+#at a plot and the timer ticks over, the files after still have the same
+#name as the ones before
+execTime = datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M')
+
 for index_s in range(Nscat):
     plotValuesAvg = intensityArr[index_s]
     plotCoordsX = coordXArr[index_s]
@@ -472,9 +477,9 @@ for index_s in range(Nscat):
     plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
     if(filenametxt == ""):
-        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') + "_" + scatcondstr +".png"
+        savestr = "Figures/Diffraction_multi/" + execTime + "_" + scatcondstr +".png"
     else:
-        savestr = "Figures/Diffraction_multi/" + datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M') +slugify(filenametxt) + "_" + scatcondstr + ".png"
+        savestr = "Figures/Diffraction_multi/" + execTime + "_" + slugify(filenametxt) + "_" + scatcondstr + ".png"
     print(savestr)
     plt.savefig(fname=savestr,dpi=300)
     plt.show()

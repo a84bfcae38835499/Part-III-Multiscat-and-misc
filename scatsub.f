@@ -376,9 +376,6 @@ c	   if ierr != 0 program terminates printing out precon 2, meaning rs failed
      +                  a,b,c,d,e,f,p,s,t,eps,ipc,ifail)
       use, intrinsic :: iso_fortran_env, only: OUTPUT_UNIT
       implicit double precision (a-h,o-z)
-
-      integer modk
-      character sprite
 c
 c     ----------------------------------------------------------------- 
 c     Complex Generalised Minimal Residual Algorithm (GMRES)
