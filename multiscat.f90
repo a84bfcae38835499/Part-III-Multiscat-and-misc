@@ -201,7 +201,6 @@ program multiscat
         if (ifail.eq.1) then
           p=-1
         end if
-        p = 0.5 !testing ensembl. pls delet
         
         ! write outputs 
         print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 

@@ -283,10 +283,6 @@ for index_s in range(Nscat):
             if(I == 0):
                 print(f"Zero found, setting to {smolVal}")
                 I = smolVal
-            if(I < valminArr[index_s]):
-                valminArr[index_s] = I
-            if(I > valmaxArr[index_s]):
-                valmaxArr[index_s] = I
             iAverage[ch] += I
         entropiesDisposable[index_n] = calculate_entropy(iI[index_n])
     iAverage /= Nensemble
@@ -309,7 +305,12 @@ for index_s in range(Nscat):
             if(I == 0):
                 print(f"Zero found, setting to {smolVal}")
                 I = smolVal
-            elif(I > vanityVal):
+
+            if(I < valminArr[index_s]):
+                valminArr[index_s] = I
+            if(I > valmaxArr[index_s]):
+                valmaxArr[index_s] = I
+            if(I > vanityVal):
                 pCXS = np.append(pCXS,b1[0] * float(n1) + b2[0] * float(n2))
                 pCYS = np.append(pCYS,b1[1] * float(n1) + b2[1] * float(n2))
     brightSpotXArr[index_s] = pCXS
@@ -473,7 +474,7 @@ for index_s in range(Nscat):
     plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     filenametxt=""
-    filenametxt="testing proper ensemble processing"
+    filenametxt="average of two"
     plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
     if(filenametxt == ""):
