@@ -202,6 +202,7 @@ program multiscat
         if (ifail.eq.1) then
           p=-1
         end if
+        p = 0.5 !testing ensembl. pls delet
         
         ! write outputs 
         call output(ei,theta,phi,ix,iy,n,n00,d,p,itest)
