@@ -60,7 +60,7 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     title(['Equipotential V=' num2str(V0,'%.2f') ' meV, used in simulation'])
     %fontsize(gcf,scale=2)
     %daspect([1 1 1])
-    colormap(plasma)
+    %colormap(plasma)
     if(potMin - potMax > 1e-6)
       clim([potMin potMax])
     end
