@@ -32,7 +32,7 @@ program multiscat
   !Variables for potential, represented as fourier data
   complex*16 vfcfixed(NZFIXED_MAX,NVFCFIXED_MAX)   !FC's at the fixed points
   
-  real :: startTime, currTime
+  real :: startTime, startTotalTime, currTime
 
   common /const/ hemass, rmlmda
   !common /const/ rmlmda !commented by Boyao on 6 Dec 2020
@@ -153,8 +153,9 @@ program multiscat
 
 ! ============================================================================
 !do loop for using different potential files
-  call cpu_time(startTime)
+  call cpu_time(startTotalTime)
   do in=startindex,endindex
+    call cpu_time(startTime)
         write(fourierfile,599) in
   599 format('pot',i5,'.in')
       if (itest.eq.1) write(outfile,598) in
@@ -216,7 +217,7 @@ program multiscat
         print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
         call output(ei,theta,phi,ix,iy,n,n00,d,p,itest)
         call cpu_time(currTime)
-        print'("Time taken = ",I5," seconds")',currTime-startTime
+        print'("Time taken = "F5.0" seconds")',currTime-startTime
     
       else if (endOfFile<0) then !End of file
         print *, '-- End of scattering conditions file --'
@@ -238,5 +239,7 @@ program multiscat
   end do
   
   print *, '==       Programme finished :D       =='
+  call cpu_time(currTime)
+  print'("Total time = "F5.0" seconds")',currTime-startTotalTime
 end program multiscat
 
