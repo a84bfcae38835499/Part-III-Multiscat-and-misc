@@ -381,8 +381,8 @@ for index_s in range(Nscat):
             normDiffI += plotValuesAvg[ch]
             nDiffCh += 1
 
-    normSpecI *= (nSpecCh+nDiffCh)/nSpecCh
-    normDiffI *= (nSpecCh+nDiffCh)/nDiffCh
+    #normSpecI *= float(nSpecCh+nDiffCh)/float(nSpecCh)
+    #normDiffI *= float(nSpecCh+nDiffCh)/float(nDiffCh)
     print("Number of specular channels : " + str(nSpecCh))
     print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
     print("Normalised specular intensity : " + str(normSpecI))
