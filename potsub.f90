@@ -50,7 +50,7 @@ subroutine loadfixedpot(nzfixed,nfc,vfcfixed,fourierfile)
 
   !Scale to the program units
   vfcfixed = vfcfixed * rmlmda
-  !print*,'Finished loadpot subroutine' !un-comment these if something goes wrong lol
+  !print*,'Finished loadpot subroutine' !un-comment these if something goes wrong
   !print*,'IOS = '
   !print*,loadpotIOS
 end subroutine loadfixedpot

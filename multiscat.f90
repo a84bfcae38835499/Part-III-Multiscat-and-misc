@@ -31,6 +31,8 @@ program multiscat
   character(len=128) :: ioErrorMessage
   !Variables for potential, represented as fourier data
   complex*16 vfcfixed(NZFIXED_MAX,NVFCFIXED_MAX)   !FC's at the fixed points
+  
+  real :: startTime, currTime
 
   common /const/ hemass, rmlmda
   !common /const/ rmlmda !commented by Boyao on 6 Dec 2020
@@ -122,14 +124,20 @@ program multiscat
   if (nfc .gt. nfcx) then 
     print *, 'ERROR: the .conf file needs more fourier components', &
     ' than allowed by the .inc file (nfc>nfcx)'
+    print *, 'nfc = ', nfc
+    print *, 'nfcx = ', nfcx
     stop
   else if (nzfixed .gt. NZFIXED_MAX) then !not sure what something is!
     print *, 'ERROR: the .conf file needs more (something) than', &
     ' allowed by the .inc file (nzfixed>NZFIXED_MAX)'
+    print *, 'nzfixed = ', nzfixed
+    print *, 'NZFIXED_MAX = ', NZFIXED_MAX
     stop
   else if (nfc .gt. NVFCFIXED_MAX) then !not sure what something is!
     print *, 'ERROR: the .conf file needs more (something) than', &
     ' allowed by the .inc file (nfc>NVFCFIXED_MAX)'
+    print *, 'nfc = ', nfc
+    print *, 'NVFCFIXED_MAX = ', NVFCFIXED_MAX
     stop
   end if
 
@@ -145,6 +153,7 @@ program multiscat
 
 ! ============================================================================
 !do loop for using different potential files
+  call cpu_time(startTime)
   do in=startindex,endindex
         write(fourierfile,599) in
   599 format('pot',i5,'.in')
@@ -206,6 +215,8 @@ program multiscat
         ! write outputs 
         print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
         call output(ei,theta,phi,ix,iy,n,n00,d,p,itest)
+        call cpu_time(currTime)
+        print'("Time taken = ",I5," seconds")',currTime-startTime
     
       else if (endOfFile<0) then !End of file
         print *, '-- End of scattering conditions file --'
@@ -225,6 +236,7 @@ program multiscat
       end if
     end do
   end do
-  print *, "## Programme finished :D ##"
+  
+  print *, '==       Programme finished :D       =='
 end program multiscat
 
