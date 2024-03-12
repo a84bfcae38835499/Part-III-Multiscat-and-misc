@@ -347,6 +347,11 @@ for index_s in range(Nscat):
     a2col = [0.5, 0.8, 0.6]
     hecol = [0, 0.3, 0.8]
 
+    normDiffI = 0.
+    normSpecI = 0.
+    nDiffCh = 0
+    nSpecCh = 0
+
     plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
     plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
     plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.1),color=b1col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
@@ -370,6 +375,18 @@ for index_s in range(Nscat):
             plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
                                (b1[1]*float(n1)+b2[1]*float(n2))),
                          fontsize=8,zorder=10,ha='center',va='center',c=col)
+            normSpecI += plotValuesAvg[ch]
+            nSpecCh += 1
+        else:
+            normDiffI += plotValuesAvg[ch]
+            nDiffCh += 1
+
+    normSpecI *= (nSpecCh+nDiffCh)/nSpecCh
+    normDiffI *= (nSpecCh+nDiffCh)/nDiffCh
+    print("Number of specular channels : " + str(nSpecCh))
+    print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
+    print("Normalised specular intensity : " + str(normSpecI))
+    print("Normalised diffuse intensity : " + str(normDiffI))
     #print(thetas)
     E = Es[index_s]
     theta = thetas[index_s]
