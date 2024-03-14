@@ -4,14 +4,14 @@ rng("shuffle");
 
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 60; Nsuper = 6;
+Nxy = 32; Nz = 60; Nsuper = 2;
 %Theta = 0.0;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
-%a2=[0,const.a]; 
+%a2=[0,const.a];
 %a1=[const.c,0];
 %a2=[const.c/2,const.c * sqrt(3)/2];
 a1=[-const.c,0];
@@ -25,9 +25,9 @@ a3=[0,0,const.c];
 
 nPlotDef = 0;mPlotDef = 0;
 aboveCol = [0.3 0. 1];
-nPlotHol = 2/3;mPlotHol = 1/3;
+nPlotHol = 2/6;mPlotHol = 1/6;
 holCol = [0.0 0.6 0.2];
-nPlotMo = 1/3;mPlotMo = 2/3;
+nPlotMo = 1/6;mPlotMo = 2/6;
 moCol = [1 0.2 0];
 
 %% Defect density calculations
@@ -282,7 +282,7 @@ if(Ndefect == 0)
   potStructArray(1).zmax=Z(end);
   potStructArray(1).zPoints=length(Z);
 
-  plotPot = true;
+  plotPot = false;
   if(plotPot)
     Vplotted = Vsuper;
     comparePots = true;
@@ -471,8 +471,8 @@ for Ne = 1:Nensemble
     comparePots = true;
     if(comparePots)
       ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol)
-      ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol)
-      ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol)
+      ComparePotentials(Vplotted,dft.midHo,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxisHiRes,0,holCol)
+      ComparePotentials(Vplotted,dft.midMo,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxisHiRes,0,moCol)
     end
     % Plot of a slice of the potential in the nth row, that is for constant x
       row = floor(Nxy/2);
@@ -754,7 +754,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     s = extent * const.c;
     v = 0;
     c = 0.2631;
-    d = 32.7202;
+    d = 34.7202;
     e = 8.3365;
     gamma	= 1.0065;
     lambda = 1.0000;
@@ -767,7 +767,9 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     angle(isnan(angle))=0;
     cutoffR = 1/sqrt(3)*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
     v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
-      -2*e*exp(2*lambda*(z3-z)))).*(1./( 1+exp((r-cutoffR)*10) ));
+      -2*e*exp(2*lambda*(z3-z)))).*(1./( 1+exp((r-0.45)*10) ));
+    %disp("1./( 1+exp((-0.45)*10) = ")
+    %disp(1./( 1+exp(-0.45*10) ))
   end
 end
 
