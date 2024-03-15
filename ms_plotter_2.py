@@ -236,6 +236,7 @@ valminArr = [1.]*Nscat
 valmaxArr = [0.]*Nscat
 smolVal = 1e-100
 vanityVal = 0
+vanity = True
 
 for index_s in range(Nscat):
     print("Now processing numscatcond = " + str(index_s))
@@ -352,15 +353,16 @@ for index_s in range(Nscat):
     nDiffCh = 0
     nSpecCh = 0
 
-    plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
-    plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
-    plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.1),color=b1col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
-    plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
+    if(not vanity):
+        plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
+        plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
+        plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.1),color=b1col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
+        plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
 
-    plt.arrow(0,0,a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2),width=0.05,color=a1col,zorder=6,length_includes_head=True,alpha=0.5)
-    plt.arrow(0,0,a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2),width=0.05,color=a2col,zorder=6,length_includes_head=True,alpha=0.5)
-    plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
-    plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
+        plt.arrow(0,0,a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2),width=0.05,color=a1col,zorder=6,length_includes_head=True,alpha=0.5)
+        plt.arrow(0,0,a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2),width=0.05,color=a2col,zorder=6,length_includes_head=True,alpha=0.5)
+        plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
+        plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
     mean1 = 0.
     mean2 = 0.
     for ch in range(nOccChArr[index_s]):
@@ -375,9 +377,10 @@ for index_s in range(Nscat):
                 col = 'w'
             else:
                 col = 'k'
-            plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
-                               (b1[1]*float(n1)+b2[1]*float(n2))),
-                         fontsize=4,zorder=10,ha='center',va='center',c=col)
+                if(not vanity):
+                    plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
+                                       (b1[1]*float(n1)+b2[1]*float(n2))),
+                                 fontsize=4,zorder=10,ha='center',va='center',c=col)
             normSpecI += plotValuesAvg[ch]
             nSpecCh += 1
         else:
@@ -415,11 +418,12 @@ for index_s in range(Nscat):
     #heliumk = np.sin(np.deg2rad(theta))*heliumDir * np.sqrt(2*m*e*E/1000)/hbar
     heliumk = heliumDir * np.sqrt(2*m*e*E/1000)/hbar
     heliumk_n = heliumk/(Babs*1e10)
-    #print("heliumk_n =")
-    #print(heliumk_n)
-    if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
-        plt.arrow(meanX,meanY,Nsuper*heliumk_n[0,0],Nsuper*heliumk_n[1,0],width=0.03,color='b',zorder=7,head_width=0.1)
-    ax2.add_patch(plt.Circle((meanX,meanY), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
+    if(not vanity):
+        print("heliumk_n =")
+        print(heliumk_n)
+        if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
+            plt.arrow(meanX,meanY,Nsuper*heliumk_n[0,0],Nsuper*heliumk_n[1,0],width=0.03,color='b',zorder=7,head_width=0.1)
+        ax2.add_patch(plt.Circle((meanX,meanY), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
     ax2.set_title(titelstr)
 
     #creates a colourbar on the first subplot
@@ -434,8 +438,8 @@ for index_s in range(Nscat):
     additionalY = []
     additionalVals = []
 
-    vanity = True
-    if(vanity):
+    padCells = True
+    if(padCells):
         paddingCells = 100
         for n in range(-paddingCells,paddingCells):
             for m in range(-paddingCells,paddingCells):
@@ -462,7 +466,11 @@ for index_s in range(Nscat):
     vor = Voronoi(points=points,furthest_site=False)
 
     #plots the voronoi diagram on the second subplot
-    voronoi_plot_2d(vor, show_vertices =False, show_points =False, ax=ax2,line_width=0.5,line_colors=[0.5, 0.5, 0.5])
+    if(vanity):
+        lw = 0.
+    else:
+        lw = 0.5
+    voronoi_plot_2d(vor, show_vertices =False, show_points =False, ax=ax2,line_width=lw,line_colors=[0.5, 0.5, 0.5])
         
 
     #colours the voronoi cells    
@@ -507,5 +515,5 @@ for index_s in range(Nscat):
     else:
         savestr = "Figures/Diffraction_multi/" + execTime + "_" + slugify(filenametxt) + "_" + scatcondstr + ".png"
     print(savestr)
-    plt.savefig(fname=savestr,dpi=600)
+    plt.savefig(fname=savestr,dpi=300)
     plt.show()

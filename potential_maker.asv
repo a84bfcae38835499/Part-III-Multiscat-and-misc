@@ -1,10 +1,9 @@
 clear; close all; clc;
 rng default;
 rng("shuffle");
-disp(1.46753069978e+16+3.35e13)
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 50; Nsuper = 2;
+Nxy = 32; Nz = 100; Nsuper = 2;
 %Theta = 0.0;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
@@ -690,12 +689,12 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
       * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3))));
 end
 
-function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ysuper,Z)
+function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,Ysuper,Z)
 %Adds a defect at sulphur site (m,n)
   Vout = Vin;
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
-  centre0 = double(min)*a1+double(nin)*a2;
+  centre0 = double(m_in)*a1+double(n_in)*a2;
   if doWeRepeat
     disp("Repeating!")
     for m = -1:1
@@ -764,9 +763,17 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     mu = 0.5;
     z2 = 5.6012;
     z3 = 3.7072;
-    factor  = (1./( 1+exp((r-mu)*ikbT) ))/(1./( 1+exp((-mu)*ikbT) ))
+    %r = max(0.1,r);
+    factor = (1./( 1+exp((r-mu)*ikbT) ))/(1./( 1+exp((-mu)*ikbT) ));
+    maxf = max(factor,[],"all");
+    minf = min(factor,[],"all");
+    if(maxf > 1. )
+      error("Max more than 1!")
+    elseif(minf < 0.)
+        error("Min less than 0!")
+    end
     if(isnan(factor))
-      err
+      error("Nans found!")
     end
     %VmatrixElement = VSulph(z) * Qhexfunc(x,y);
     VmatrixElement = Vfunc(x,y,z);
@@ -776,6 +783,8 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     cutoffR = 1/sqrt(3)*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
     v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
       -2*e*exp(2*lambda*(z3-z)))).*factor;
+    %disp("Maxv = " + max(v,[],"all"))
+    %disp("Minv = " + min(v,[],"all"))
     %disp("1./( 1+exp((-0.45)*10) = ")
     %disp(1./( 1+exp(-0.45*10) ))
   end

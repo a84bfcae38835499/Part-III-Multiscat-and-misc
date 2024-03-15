@@ -3,9 +3,9 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 1;
+Nxy = 32; Nz = 100; Nsuper = 2;
 %Theta = 0.0;
-Theta = (0/(Nsuper*Nsuper));
+Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 zMax = 6; zMin = 0;%units Å
 
@@ -24,10 +24,14 @@ a3=[0,0,const.c];
 
 nPlotDef = 0;mPlotDef = 0;
 aboveCol = [0.3 0. 1];
-nPlotHol = 2/6;mPlotHol = 1/6;
+nPlotHol = 2/3;mPlotHol = 1/3;
 holCol = [0.0 0.6 0.2];
-nPlotMo = 1/6;mPlotMo = 2/6;
+nPlotMo = 1/3;mPlotMo = 2/3;
 moCol = [1 0.2 0];
+nMidHol = 2/6;mMidHol = 1/6;
+holMCol = [0.0 1 0.9];
+nMidMo = 1/6;mMidMo = 2/6;
+moMCol = [0.8 0.5 0];
 
 %% Defect density calculations
 cellArea = const.c^2 * sqrt(1-(dot(a1,a2)/(const.c^2))^2);
@@ -471,8 +475,10 @@ for Ne = 1:Nensemble
     if(comparePots)
       disp("BBBBBBBBBBB")
       ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol)
-      ComparePotentials(Vplotted,dft.midHo,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxisHiRes,0,holCol)
-      ComparePotentials(Vplotted,dft.midMo,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxisHiRes,0,moCol)
+      ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol)
+      ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol)
+      ComparePotentials(Vplotted,dft.midHo,'Analytical potential','DFT - Mid Hollow site',a1,a2,mMidHol,nMidHol,Z,dft.zAxisHiRes,0,holMCol)
+      ComparePotentials(Vplotted,dft.midMo,'Analytical potential','DFT - Mid Molybdenum',a1,a2,mMidMo,nMidMo,Z,dft.zAxisHiRes,0,moMCol)
     end
     % Plot of a slice of the potential in the nth row, that is for constant x
       row = floor(Nxy/2);
@@ -541,6 +547,16 @@ for Ne = 1:Nensemble
       yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
       plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
       plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
+
+      xPlot = mMidHol*a1(1)+nMidHol*a2(1);
+      yPlot = mMidHol*a1(2)+nMidHol*a2(2);
+      plot(xPlot,yPlot,'*',MarkerSize=24,Color=holMCol);
+      plot(xPlot,yPlot,'.',MarkerSize=24,Color=holMCol);
+
+      xPlot = mMidMo*a1(1)+nMidMo*a2(1);
+      yPlot = mMidMo*a1(2)+nMidMo*a2(2);
+      plot(xPlot,yPlot,'*',MarkerSize=24,Color=moMCol);
+      plot(xPlot,yPlot,'.',MarkerSize=24,Color=moMCol);
 
       defCol = [0.3 0.7 1];
       for ne = 1:Nensemble
@@ -689,12 +705,12 @@ function [VmatrixElement] = Vfunc(X,Y,Z)
       * Qhexfunc(X-const.c/2,Y-(const.c*1/(2*sqrt(3))));
 end
 
-function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ysuper,Z)
+function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,Ysuper,Z)
 %Adds a defect at sulphur site (m,n)
   Vout = Vin;
   NxySuper = size(Vout,1);
   Nz = size(Vout,3);
-  centre0 = double(min)*a1+double(nin)*a2;
+  centre0 = double(m_in)*a1+double(n_in)*a2;
   if doWeRepeat
     disp("Repeating!")
     for m = -1:1
@@ -758,13 +774,20 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     d = 32.8260;
     e = 16.3770;
     gamma	= 0.9209;
-    ikbT = 4;
+    ikbT = 25;
     lambda = 0.9204;
-    mu = 0.5;
+    mu = 0.65;
     z2 = 5.6012;
     z3 = 3.7072;
-    r = max(0.035,r);
-    factor = (1./( 1+exp((r-mu)*ikbT) ))/(1./( 1+exp((-mu)*ikbT) ));
+    %r = max(0.1,r);
+    factor = (1./( 1+exp((r-mu)*ikbT) ));
+    maxf = max(factor,[],"all");
+    minf = min(factor,[],"all");
+    if(maxf > 1. )
+      error("Max more than 1!")
+    elseif(minf < 0.)
+        error("Min less than 0!")
+    end
     if(isnan(factor))
       error("Nans found!")
     end
@@ -776,6 +799,8 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,min,nin,a1,a2,Nsuper,Xsuper,Ys
     cutoffR = 1/sqrt(3)*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
     v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
       -2*e*exp(2*lambda*(z3-z)))).*factor;
+    %disp("Maxv = " + max(v,[],"all"))
+    %disp("Minv = " + min(v,[],"all"))
     %disp("1./( 1+exp((-0.45)*10) = ")
     %disp(1./( 1+exp(-0.45*10) ))
   end
