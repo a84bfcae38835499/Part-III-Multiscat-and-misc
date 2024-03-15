@@ -217,7 +217,7 @@ program multiscat
         print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
         call output(ei,theta,phi,ix,iy,n,n00,d,p,itest)
         call cpu_time(currTime)
-        print'("Time taken = "F5.0" seconds")',currTime-startTime
+        print'("Time taken = "F8.0" seconds")',(currTime-startTime)*1000
     
       else if (endOfFile<0) then !End of file
         print *, '-- End of scattering conditions file --'
