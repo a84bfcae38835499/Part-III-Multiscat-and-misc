@@ -326,7 +326,7 @@ for index_s in range(Nscat):
     plotCoordsX = coordXArr[index_s]
     plotCoordsY = coordYArr[index_s]
     #sets the colour scale
-    useLog = False
+    useLog = True
     if(useLog):
         mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]))
     else:
@@ -371,7 +371,7 @@ for index_s in range(Nscat):
         if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
             n1n2 = str(int(n1/Nsuper)) + ',' + str(int(n2/Nsuper))
             #print("Annotating point " + n1n2)
-            if(plotValuesAvg[ch] < (valmaxArr[index_s]-valminArr[index_s])*0.9):
+            if(plotValuesAvg[ch] < (valmaxArr[index_s]-valminArr[index_s])*0.75):
                 col = 'w'
             else:
                 col = 'k'
@@ -385,8 +385,8 @@ for index_s in range(Nscat):
             nDiffCh += 1
     mean1 /= nOccChArr[index_s]
     mean2 /= nOccChArr[index_s]
-    meanX = mean1*a1[0]+mean2*a2[0]
-    meanY = mean1*a1[1]+mean2*a2[1]
+    meanX = mean1*b1[0]+mean2*b2[0]
+    meanY = mean1*b1[1]+mean2*b2[1]
     print("mean x, y = ")
     print(meanX, meanY)
     #normSpecI *= float(nSpecCh+nDiffCh)/float(nSpecCh)
@@ -436,7 +436,7 @@ for index_s in range(Nscat):
 
     vanity = True
     if(vanity):
-        paddingCells = 20
+        paddingCells = 100
         for n in range(-paddingCells,paddingCells):
             for m in range(-paddingCells,paddingCells):
                 canPlaceSiteHere = True
@@ -499,7 +499,7 @@ for index_s in range(Nscat):
     plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     filenametxt=""
-    filenametxt=""
+    filenametxt="6x6 supercell with a single (not DFT fitted) defect"
     plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
 
     if(filenametxt == ""):
@@ -507,5 +507,5 @@ for index_s in range(Nscat):
     else:
         savestr = "Figures/Diffraction_multi/" + execTime + "_" + slugify(filenametxt) + "_" + scatcondstr + ".png"
     print(savestr)
-    plt.savefig(fname=savestr,dpi=300)
+    plt.savefig(fname=savestr,dpi=600)
     plt.show()
