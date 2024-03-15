@@ -361,10 +361,13 @@ for index_s in range(Nscat):
     plt.arrow(0,0,a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2),width=0.05,color=a2col,zorder=6,length_includes_head=True,alpha=0.5)
     plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
     plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
-
+    mean1 = 0.
+    mean2 = 0.
     for ch in range(nOccChArr[index_s]):
         n1 = n1Arr[index_s][ch]
         n2 = n2Arr[index_s][ch]
+        mean1 += n1
+        mean2 += n2
         if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
             n1n2 = str(int(n1/Nsuper)) + ',' + str(int(n2/Nsuper))
             #print("Annotating point " + n1n2)
@@ -374,13 +377,18 @@ for index_s in range(Nscat):
                 col = 'k'
             plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
                                (b1[1]*float(n1)+b2[1]*float(n2))),
-                         fontsize=8,zorder=10,ha='center',va='center',c=col)
+                         fontsize=4,zorder=10,ha='center',va='center',c=col)
             normSpecI += plotValuesAvg[ch]
             nSpecCh += 1
         else:
             normDiffI += plotValuesAvg[ch]
             nDiffCh += 1
-
+    mean1 /= nOccChArr[index_s]
+    mean2 /= nOccChArr[index_s]
+    meanX = mean1*a1[0]+mean2*a2[0]
+    meanY = mean1*a1[1]+mean2*a2[1]
+    print("mean x, y = ")
+    print(meanX, meanY)
     #normSpecI *= float(nSpecCh+nDiffCh)/float(nSpecCh)
     #normDiffI *= float(nSpecCh+nDiffCh)/float(nDiffCh)
     print("Number of specular channels : " + str(nSpecCh))
@@ -410,8 +418,8 @@ for index_s in range(Nscat):
     #print("heliumk_n =")
     #print(heliumk_n)
     if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
-        plt.arrow(0,0,Nsuper*heliumk_n[0,0],Nsuper*heliumk_n[1,0],width=0.03,color='b',zorder=7,head_width=0.1)
-    ax2.add_patch(plt.Circle((0, 0), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
+        plt.arrow(meanX,meanY,Nsuper*heliumk_n[0,0],Nsuper*heliumk_n[1,0],width=0.03,color='b',zorder=7,head_width=0.1)
+    ax2.add_patch(plt.Circle((meanX,meanY), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
     ax2.set_title(titelstr)
 
     #creates a colourbar on the first subplot
@@ -428,7 +436,7 @@ for index_s in range(Nscat):
 
     vanity = True
     if(vanity):
-        paddingCells = 30
+        paddingCells = 20
         for n in range(-paddingCells,paddingCells):
             for m in range(-paddingCells,paddingCells):
                 canPlaceSiteHere = True
