@@ -3,7 +3,7 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 6;
+Nxy = 32; Nz = 100; Nsuper = 1;
 %Theta = 0.0;
 Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
@@ -471,8 +471,8 @@ for Ne = 1:Nensemble
     if(comparePots)
       disp("BBBBBBBBBBB")
       ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol)
-      ComparePotentials(Vplotted,dft.midHo,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol)
-      ComparePotentials(Vplotted,dft.midMo,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol)
+      ComparePotentials(Vplotted,dft.midHo,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxisHiRes,0,holCol)
+      ComparePotentials(Vplotted,dft.midMo,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxisHiRes,0,moCol)
     end
     % Plot of a slice of the potential in the nth row, that is for constant x
       row = floor(Nxy/2);

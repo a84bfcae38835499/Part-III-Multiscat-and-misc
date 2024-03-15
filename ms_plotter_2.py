@@ -393,8 +393,8 @@ for index_s in range(Nscat):
     #normDiffI *= float(nSpecCh+nDiffCh)/float(nDiffCh)
     print("Number of specular channels : " + str(nSpecCh))
     print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
-    print("Normalised specular intensity : " + str(normSpecI))
-    print("Normalised diffuse intensity : " + str(normDiffI))
+    print("Specular intensity proportion : " + str(normSpecI))
+    print("Diffuse intensity proportion  : " + str(normDiffI))
     #print(thetas)
     E = Es[index_s]
     theta = thetas[index_s]
