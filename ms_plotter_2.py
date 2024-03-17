@@ -327,7 +327,7 @@ for index_s in range(Nscat):
     plotCoordsX = coordXArr[index_s]
     plotCoordsY = coordYArr[index_s]
     #sets the colour scale
-    useLog = True
+    useLog = False
     if(useLog):
         mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]))
     else:
@@ -508,7 +508,7 @@ for index_s in range(Nscat):
     if(not vanity):
         plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
         plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-        filenametxt="6x6 supercell with a single (not DFT fitted) defect"
+        filenametxt="3x3 supercell pristine"
         plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
     else:
         filenametxt = "vanity"
