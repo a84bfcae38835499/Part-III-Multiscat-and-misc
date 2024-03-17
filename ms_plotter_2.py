@@ -236,7 +236,7 @@ valminArr = [1.]*Nscat
 valmaxArr = [0.]*Nscat
 smolVal = 1e-100
 vanityVal = 0
-vanity = True
+vanity = False
 
 for index_s in range(Nscat):
     print("Now processing numscatcond = " + str(index_s))
