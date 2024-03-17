@@ -3,7 +3,7 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 50; Nsuper = 4;
+Nxy = 16; Nz = 50; Nsuper = 3;
 %Theta = 0.0;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
@@ -757,14 +757,34 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
     %r = max(0.1,r);
 
     flatDefect = true;
+    hexDefect = false;
     if(flatDefect)
-      ikbT = 15.9;
-      mu = 0.49;
+      if(hexDefect)
+        ikbT = 12.9;
+        mu = 0.92;
+      else
+        ikbT = 15.9;
+        mu = 0.49;
+      end
       VmatrixElement = Vfunc(x,y,z);
     else
-      error("This fit is terrible, don't use it")
+      error("This is impossible to fit, don't use this")
+      if(hexDefect)
+        ikbT = 17.9;
+        mu = 1.6;
+      else
+        ikbT = 15.9;
+        mu = 0.6;
+      end
+      VmatrixElement = VSulph(z) * Qhexfunc(x,y);
     end
-    hardCut = 2;
+    
+    %args = (y-centre(2))./(x-centre(1));
+    %angle = arrayfun(@(arg) atan(arg),args);
+    %angle(isnan(angle))=0;
+    %cutoffR = 1/sqrt(3)*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
+    %cutoffR = mu .* cutoffR;
+
     factor = (1./( 1+exp((r-mu)*ikbT) ));
     factor = (factor.*( 1+exp((-mu)*ikbT) ));
     %factor = factor./( 1+exp((r-hardCut)*10000));
@@ -779,10 +799,6 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
       error("Nans found!")
     end
 
-    %args = (y-centre(2))./(x-centre(1));
-    %angle = arrayfun(@(arg) atan(arg),args);
-    %angle(isnan(angle))=0;
-    %cutoffR = 1/sqrt(3)*cos(pi/6)./(cos(angle-(2*pi*floor((6*angle+pi)/(2*pi)))/6));
     v = (-VmatrixElement + d*(exp(2*gamma*(z2-z))-2*c*exp(gamma*(z2-z)) ...
       -2*e*exp(2*lambda*(z3-z)))).*factor;
     %disp("Maxv = " + max(v,[],"all"))
