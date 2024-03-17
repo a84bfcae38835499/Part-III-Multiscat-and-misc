@@ -3,7 +3,7 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 50; Nsuper = 2;
+Nxy = 16; Nz = 50; Nsuper = 3;
 %Theta = 0.0;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
@@ -619,7 +619,7 @@ WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity);
 %colormap(plasma)
 %daspect([1 1 1])
 %% We supply the lattice to the mulitscat script so it can do its thing
-doingMSshit = false;
+doingMSshit = true;
 if(doingMSshit)
     %potStructArray.V = Vsuper;
     Multiscat.PreparePotentialFiles(potStructArray);
