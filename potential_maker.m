@@ -5,9 +5,9 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 32; Nz = 50; Nsuper = 3;
 %Theta = 0.0;
-Theta = (0/(Nsuper*Nsuper));
+Theta = (3/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-usingDisplacementDefects = true;
+usingDisplacementDefects = false;
 zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
@@ -549,9 +549,8 @@ for Ne = 1:Nensemble
   if(plotPot)
     Vplotted = Vout;
     %nPlot = 2/3;mPlot = 1/2;
-    comparePots = false;
+    comparePots = true;
     if(comparePots)
-      disp("BBBBBBBBBBB")
       [xS, yS] = ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol,Nxy);
       [xH, yH] = ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol,Nxy);
       [xM, yM] = ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol,Nxy);
