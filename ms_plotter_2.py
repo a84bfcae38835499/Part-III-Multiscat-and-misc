@@ -199,7 +199,7 @@ print("[][][][][][][][]\n\n")
 dfss = []
 
 for index_n in range(int(Nensemble)):
-    importname =  'diffrac' + str(10001+index_n) + '.out'
+    importname =  'gauss' + str(10001+index_n) + '.out'
     print("importing file : " + importname)
     dfs = import_multiscat(importname)
     #dfs has scattering varying scattering conditions for one potential
@@ -508,7 +508,7 @@ for index_s in range(Nscat):
     if(not vanity):
         plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
         plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-        filenametxt="3x3 supercell pristine"
+        filenametxt="3x3 - DFT fitted"
         plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
     else:
         filenametxt = "vanity"
