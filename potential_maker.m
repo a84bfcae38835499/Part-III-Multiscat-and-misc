@@ -3,9 +3,9 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 50; Nsuper = 3;
+Nxy = 32; Nz = 50; Nsuper = 3;
 %Theta = 0.0;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (4/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = true;
 zMax = 6; zMin = 0;%units Å
@@ -132,6 +132,7 @@ X = zeros(Nxy,Nxy);
 Y = zeros(Nxy,Nxy);
 Xsuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
 Ysuper = zeros(Nxy*Nsuper,Nxy*Nsuper);
+Vsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
 Z = linspace(zMin,zMax,Nz);
 
 for i = 0:Nxy-1
@@ -147,15 +148,101 @@ for i = 0:Nxy*Nsuper-1
         Ysuper(i+1,j+1) = (a1(2)*i+a2(2)*j)./Nxy;
     end
 end
-if(usingDisplacementDefects):
-  Ndefect = 
+
+if(usingDisplacementDefects)
+  minDist = const.c*1;
   defectH = 0.5;
   defectW = 0.5;
-  addZ = defectH * Gaussian2D(X,Y,,defectW);
-  V(:,:,:) = Vfunc(X,Y,Z + addZ);
+  randomX = 1337*ones(1,Ndefect);
+  randomY = 1337*ones(1,Ndefect);
+  repeat = zeros(1,Ndefect,'logical');
+  for d = 1:Ndefect
+    solved = false;
+    while(~solved)
+      r1 = rand*Nsuper;
+      r2 = rand*Nsuper;
+      if(r1 < defectW || r1-defectW > Nsuper*const.c || r2 < defectW || r2-defectW > Nsuper*const.c)
+        repeat(d) = true;
+      end
+      R1 = r1 * a1;
+      R2 = r2 * a2; 
+      x = R1(1) + R2(1);
+      y = R1(2) + R2(2);
+      solved = true;
+      for b = 1:d-1
+        if(repeat(d))
+            disp("Repeating!")
+            for m = -1:1
+              for n = -1:1
+                centre = [randomX(b)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
+                        randomY(b)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
+                xt = centre(1);
+                yt = centre(2);
+                dist = (xt-x)^2+(yt-y)^2;
+                dist = sqrt(dist);
+                disp("dist = " + dist)
+                if(dist < minDist)
+                  solved = false;
+                end
+              end
+            end
+          else
+          xt = randomX(b);
+          yt = randomY(b);
+          dist = (xt-x)^2+(yt-y)^2;
+          dist = sqrt(dist);
+          disp("dist = " + dist)
+          if(dist < minDist)
+            solved = false;
+          end
+        end
+      end
+    disp("solved = " + solved);
+    end
+    disp("Solved!");
+    randomX(d) = x;
+    randomY(d) = y;
+  end
+  addZ = zeros(Nxy*Nsuper,Nxy*Nsuper);
+  for d = 1:Ndefect
+    if(repeat(d))
+      disp("Repeating!")
+      for m = -1:1
+        for n = -1:1
+          centre = [randomX(d)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
+                  randomY(d)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
+          addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectW);
+        end
+      end
+    else
+      addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,[randomX(d),randomY(d)],defectW);
+    end
+  end
+  for i = 1:Nxy*Nsuper
+      for j = 1:Nxy*Nsuper
+        for k = 1:Nz
+          Vsuper(i,j,k) = Vfunc(Xsuper(i,j),Ysuper(i,j),Z(k) + addZ(i,j));
+        end
+      end
+  end
 else
   for k = 1:Nz
         V(:,:,k) = Vfunc(X,Y,Z(k));
+  end
+  for z = 1:Nz
+      for nx = 1:Nxy:Nsuper*Nxy
+          for ny = 1:Nxy:Nsuper*Nxy
+              Vsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = V(:,:,z);
+          end
+      end
+  end
+  Vinterpsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
+  for z = 1:Nz
+      for nx = 1:Nxy:Nsuper*Nxy
+          for ny = 1:Nxy:Nsuper*Nxy
+              Vinterpsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = Vinterp(:,:,z);
+          end
+      end
   end
 end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
@@ -237,24 +324,7 @@ if(interpolateDFTdata)
     shading interp
   end
 end
-%% Now we duplicate the lattice to get a superlattice
 
-Vsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
-for z = 1:Nz
-    for nx = 1:Nxy:Nsuper*Nxy
-        for ny = 1:Nxy:Nsuper*Nxy
-            Vsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = V(:,:,z);
-        end
-    end
-end
-Vinterpsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
-for z = 1:Nz
-    for nx = 1:Nxy:Nsuper*Nxy
-        for ny = 1:Nxy:Nsuper*Nxy
-            Vinterpsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = Vinterp(:,:,z);
-        end
-    end
-end
 %writematrix(Vsuper,"V.csv")
 
 %Vsuper = readmatrix("V_boyao.csv");
@@ -285,19 +355,19 @@ if(Nensemble > Nensemble_limit)
 end
 potStructArray = struct([]);
 boolgrid_ensemble = zeros(Nsuper,Nsuper,Nensemble,'logical');
-if(Ndefect == 0)
+if(Ndefect == 0 || usingDisplacementDefects)
   %% 0 defects
-  disp("No defects!!!")
+  disp("No defects or using disp defects!!!")
   potStructArray(1).V = Vsuper;
   potStructArray(1).a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
   potStructArray(1).zmin=Z(1);
   potStructArray(1).zmax=Z(end);
   potStructArray(1).zPoints=length(Z);
 
-  plotPot = false;
+  plotPot = true;
   if(plotPot)
     Vplotted = Vsuper;
-    comparePots = true;
+    comparePots = false;
     if(comparePots)
       ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,1.5,aboveCol)
       ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,1.5,holCol)
@@ -337,7 +407,7 @@ if(Ndefect == 0)
       saveas(gcf,savestr,'jpg')
     end
     fontsize(gcf,scale=1)
-    zSample = 1.6;
+    zSample = 3;
     zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
     figure
     contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),10)
@@ -383,7 +453,6 @@ else
   %some kind of weird information-theoretic checksum style thing to
   %automatically determine if two arrays of coordinate pairs are the same
   successful = 0;
-  
   for Ne = 1:Nensemble
     solved = false;
     pizza = 0;
@@ -480,7 +549,7 @@ for Ne = 1:Nensemble
   if(plotPot)
     Vplotted = Vout;
     %nPlot = 2/3;mPlot = 1/2;
-    comparePots = true;
+    comparePots = false;
     if(comparePots)
       disp("BBBBBBBBBBB")
       [xS, yS] = ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol,Nxy);
@@ -488,6 +557,39 @@ for Ne = 1:Nensemble
       [xM, yM] = ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol,Nxy);
       [xHm, yHm] = ComparePotentials(Vplotted,dft.midHo,'Analytical potential','DFT - Mid Hollow site',a1,a2,mMidHol,nMidHol,Z,dft.zAxisHiRes,0,holMCol,Nxy);
       [xMm, yMm] = ComparePotentials(Vplotted,dft.midMo,'Analytical potential','DFT - Mid Molybdenum',a1,a2,mMidMo,nMidMo,Z,dft.zAxisHiRes,0,moMCol,Nxy);
+    end
+    % Plot of a slice of the potential in the nth row, that is for constant x
+      row = floor(Nxy/2);
+    figure
+    contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
+        reshape(Vplotted(row,:,:), [Nxy*Nsuper,Nz]), linspace(-30,100,24))
+    
+        fontsize(gcf,scale=1)
+    xlabel('z/Å')
+    ylabel('y/Å') %is this x or y? I think y but idrk;
+    colorbar
+    xlim([1.5,6])
+    title('Potential in z, used in simulation')
+    hbar = colorbar;
+    ylabel(hbar,'Energy / meV');
+    figure
+    fileindx = 1;
+    for i = 1e-5
+      Vsoup = single(i);
+      figure
+      equipotential_plot('V', Vplotted, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+      shading interp
+      hold on
+      view([15 45])
+      %equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
+      shading interp
+      xlim([-3.5 2]*Nsuper);
+      ylim([-0.5 3]*Nsuper);
+      daspect([1 1 1])
+      hold off
+      savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg";
+      fileindx = fileindx + 1;
+      saveas(gcf,savestr,'jpg')
     end
     fontsize(gcf,scale=1)
     zSample = 2.5;

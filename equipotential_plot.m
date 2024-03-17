@@ -37,8 +37,8 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
                 %if V(ia1,ia2,indz+1) < V0
                     m = (V(ia1,ia2,indz) - V(ia1, ia2, indz+1))/(indz - (indz+1));
                     c = V(ia1, ia2,indz) - m*indz;
-                    %inds0(ia1,ia2) = -c/m;
-                    inds0(ia1,ia2) = indz;
+                    inds0(ia1,ia2) = -c/m;
+                    %inds0(ia1,ia2) = indz;
                     break;
                 end
             end
@@ -60,7 +60,7 @@ function [xx, yy, pot_height] = equipotential_plot(varargin)
     title(['Equipotential V=' num2str(V0,'%.2f') ' meV, used in simulation'])
     %fontsize(gcf,scale=2)
     %daspect([1 1 1])
-    %colormap(plasma)
+    colormap(plasma)
     if(potMin - potMax > 1e-6)
       clim([potMin potMax])
     end
