@@ -7,6 +7,7 @@ Nxy = 16; Nz = 50; Nsuper = 3;
 %Theta = 0.0;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
+usingDisplacementDefects = true;
 zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
@@ -146,8 +147,16 @@ for i = 0:Nxy*Nsuper-1
         Ysuper(i+1,j+1) = (a1(2)*i+a2(2)*j)./Nxy;
     end
 end
-for k = 1:Nz
-      V(:,:,k) = Vfunc(X,Y,Z(k));
+if(usingDisplacementDefects):
+  Ndefect = 
+  defectH = 0.5;
+  defectW = 0.5;
+  addZ = defectH * Gaussian2D(X,Y,,defectW);
+  V(:,:,:) = Vfunc(X,Y,Z + addZ);
+else
+  for k = 1:Nz
+        V(:,:,k) = Vfunc(X,Y,Z(k));
+  end
 end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
 %actually check them lol

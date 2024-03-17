@@ -503,12 +503,16 @@ for index_s in range(Nscat):
         entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean)
     else:
         entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean) + "$\pm$" +  "{:.6f}".format(eosdtv)
-
-    plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-    plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+    
     filenametxt=""
-    filenametxt="6x6 supercell with a single (not DFT fitted) defect"
-    plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
+    if(not vanity):
+        plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+        plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+        filenametxt="6x6 supercell with a single (not DFT fitted) defect"
+        plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
+    else:
+        filenametxt = "vanity"
+        plt.tight_layout(pad=0)
 
     if(filenametxt == ""):
         savestr = "Figures/Diffraction_multi/" + execTime + "_" + scatcondstr +".png"
