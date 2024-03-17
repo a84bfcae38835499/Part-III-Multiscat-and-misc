@@ -7,7 +7,7 @@ Nxy = 32; Nz = 50; Nsuper = 3;
 %Theta = 0.0;
 Theta = (3/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-usingDisplacementDefects = false;
+usingDisplacementDefects = true;
 zMax = 6; zMin = 0;%units Å
 
 %a1=[const.a,0];
@@ -151,7 +151,7 @@ end
 
 if(usingDisplacementDefects)
   minDist = const.c*1;
-  defectH = 0.5;
+  defectH = -0.5;
   defectW = 0.5;
   randomX = 1337*ones(1,Ndefect);
   randomY = 1337*ones(1,Ndefect);
