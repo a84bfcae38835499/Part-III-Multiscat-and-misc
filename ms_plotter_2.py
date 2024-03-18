@@ -199,7 +199,7 @@ print("[][][][][][][][]\n\n")
 dfss = []
 
 for index_n in range(int(Nensemble)):
-    importname =  'diffrac' + str(10001+index_n) + '.out'
+    importname =  '2x2MoS2' + str(10001+index_n) + '.out'
     print("importing file : " + importname)
     dfs = import_multiscat(importname)
     #dfs has scattering varying scattering conditions for one potential
@@ -377,10 +377,10 @@ for index_s in range(Nscat):
                 col = 'w'
             else:
                 col = 'k'
-                if(not vanity):
-                    plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
-                                       (b1[1]*float(n1)+b2[1]*float(n2))),
-                                 fontsize=4,zorder=10,ha='center',va='center',c=col)
+            if(not vanity):
+                plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
+                                    (b1[1]*float(n1)+b2[1]*float(n2))),
+                            fontsize=10,zorder=12,ha='center',va='center',c=col)
             normSpecI += plotValuesAvg[ch]
             nSpecCh += 1
         else:
@@ -508,7 +508,7 @@ for index_s in range(Nscat):
     if(not vanity):
         plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
         plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-        filenametxt="Lithium Fluoride"
+        filenametxt="2x2MoS2"
         plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
     else:
         filenametxt = "vanity"

@@ -3,20 +3,20 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 2;
+Nxy = 32; Nz = 50; Nsuper = 2;
 %Theta = 0.0;
-Theta = (0/(Nsuper*Nsuper));
+Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
-zMax = 6; zMin = -2;%units Å
-fileprefix = "2x2li";
+zMax = 6; zMin = 0;%units Å
+fileprefix = "2x2MoS2";
 
-a1=[const.a,0];
-a2=[0,const.a];
+%a1=[const.a,0];
+%a2=[0,const.a];
 %a1=[const.c,0];
 %a2=[const.c/2,const.c * sqrt(3)/2];
-%a1=[-const.c,0];
-%a2=[const.c/2,const.c*sqrt(3)/2];
+a1=[-const.c,0];
+a2=[const.c/2,const.c*sqrt(3)/2];
 a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
@@ -227,7 +227,7 @@ if(usingDisplacementDefects)
   end
 else
   for k = 1:Nz
-        V(:,:,k) = Vfunc_LiF(X,Y,Z(k));
+        V(:,:,k) = Vfunc_MoS2(X,Y,Z(k));
   end
   for z = 1:Nz
       for nx = 1:Nxy:Nsuper*Nxy
@@ -555,6 +555,7 @@ for Ne = 1:Nensemble
   potStructArray(Ne).Nxy=Nxy;
   potStructArray(Ne).Nsuper=Nsuper;
   potStructArray(Ne).Ndefect=Ndefect;
+  potStructArray(Ne).fileprefix=fileprefix;
   plotPot = true;
   if(plotPot)
     Vplotted = Vout;
