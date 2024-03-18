@@ -3,9 +3,9 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 50; Nsuper = 2;
+Nxy = 32; Nz = 50; Nsuper = 1;
 %Theta = 0.0;
-Theta = (3/(Nsuper*Nsuper));
+Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = true;
 zMax = 6; zMin = 0;%units Å
@@ -345,6 +345,9 @@ if(Ndefect ~= 0 && Nsites-1 - Ndefect > 0)
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
   Nensemble = Ndefect;  %gansta maths
 else
+  Nensemble = 1;
+end
+if(usingDisplacementDefects)
   Nensemble = 1;
 end
 disp("Total ensemble size = " + Nensemble)
