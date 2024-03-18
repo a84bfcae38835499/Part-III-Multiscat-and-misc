@@ -33,6 +33,7 @@ program multiscat
   complex*16 vfcfixed(NZFIXED_MAX,NVFCFIXED_MAX)   !FC's at the fixed points
   
   real :: startTime, startTotalTime, currTime
+  character(len=40) :: fileprefix
 
   common /const/ hemass, rmlmda
   !common /const/ rmlmda !commented by Boyao on 6 Dec 2020
@@ -108,6 +109,8 @@ program multiscat
   read(80,*) endindex
   print *, 'Calculating for potential input files between ',startindex,'.in and ',endindex,'.in'
   read(80,*) hemass
+  read(80,*) fileprefix
+  print *, 'Calculating for files named ',fileprefix,'xxxxx.in only'
   
 !===============preliminary calculation and setting up ===========================
   rmlmda = 2.0d0*hemass/hbarsq
@@ -156,10 +159,12 @@ program multiscat
   call cpu_time(startTotalTime)
   do in=startindex,endindex
     call cpu_time(startTime)
-        write(fourierfile,599) in
-  599 format('pot',i5,'.in')
-      if (itest.eq.1) write(outfile,598) in
-  598 format('diffrac',i5,'.out')
+        write(fourierfile,599) fileprefix, in
+  !599 format('pot',i5,'.in')
+  599 format(a40,i5,'.in')
+      if (itest.eq.1) write(outfile,598) fileprefix, in
+  !598 format('diffrac',i5,'.out')
+  598 format(a40,i5,'.out')
      ! diffrac will be the output file containing diffraction calculations;
     if (itest.eq.1) open(21,file=outfile,status='unknown')
     if (itest.eq.1) write(21,*) 'Diffraction intensities for potential:',fourierfile 
