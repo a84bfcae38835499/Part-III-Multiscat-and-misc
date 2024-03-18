@@ -160,9 +160,8 @@ program multiscat
   call cpu_time(startTotalTime)
   do in=startindex,endindex
     call cpu_time(startTime)
-        write(fourierfile,599) in
-  599 format('pot',i5,'.in')
-  !599 format(a,i5,'.in') !I tried to extend the whole name prefix thing to include both .in and .out but gave up
+        write(fourierfile,"(a,i5,'.in')") trim(fileprefix), in
+  !599 format('pot',i5,'.in')
       if (itest.eq.1) write(outfile,"(a,i5,'.out')") trim(fileprefix), in
   !598 format('diffrac',i5,'.out')
   !598 format(a,i5,'.out')
