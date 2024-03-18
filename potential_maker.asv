@@ -3,13 +3,13 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 1;
+Nxy = 32; Nz = 100; Nsuper = 2;
 %Theta = 0.0;
 Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = -2;%units Å
-dummyFilename = "pristine";
+fileprefix = "2x2li";
 
 a1=[const.a,0];
 a2=[0,const.a];
@@ -366,7 +366,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
   potStructArray(1).zmin=Z(1);
   potStructArray(1).zmax=Z(end);
   potStructArray(1).zPoints=length(Z);
-  potStructArray(1).fil=dummyFilename;
+  potStructArray(1).fileprefix=fileprefix;
   potStructArray(1).Nxy=Nxy;
   potStructArray(1).Nsuper=Nsuper;
   potStructArray(1).Ndefect=Ndefect;

@@ -9,7 +9,7 @@ Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = -2;%units Å
-fileprefix = "2x2lif";
+fileprefix = "2x2li";
 
 a1=[const.a,0];
 a2=[0,const.a];
