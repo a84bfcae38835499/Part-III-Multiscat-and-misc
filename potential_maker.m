@@ -3,19 +3,19 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 50; Nsuper = 2;
+Nxy = 32; Nz = 50; Nsuper = 1;
 %Theta = 0.0;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = 0;%units Å
 
-%a1=[const.a,0];
-%a2=[0,const.a];
+a1=[const.a,0];
+a2=[0,const.a];
 %a1=[const.c,0];
 %a2=[const.c/2,const.c * sqrt(3)/2];
-a1=[-const.c,0];
-a2=[const.c/2,const.c*sqrt(3)/2];
+%a1=[-const.c,0];
+%a2=[const.c/2,const.c*sqrt(3)/2];
 a3=[0,0,const.c];
 %A1 = a1;
 %A2 = a2;
@@ -125,7 +125,7 @@ VDFTsuper_a(end          ,end            ,:) = VDFTsuper(end,end,:);
 
 [y1,y2,y3] = Reciprocal([x1,0],[x2,0],a3);
 
-%%
+%% Now create pristine potentials
 V = zeros(Nxy,Nxy,Nz);
 Vinterp = zeros(Nxy,Nxy,Nz);
 X = zeros(Nxy,Nxy);
@@ -221,13 +221,13 @@ if(usingDisplacementDefects)
   for i = 1:Nxy*Nsuper
       for j = 1:Nxy*Nsuper
         for k = 1:Nz
-          Vsuper(i,j,k) = Vfunc(Xsuper(i,j),Ysuper(i,j),Z(k) + addZ(i,j));
+          Vsuper(i,j,k) = Vfunc_MoS2(Xsuper(i,j),Ysuper(i,j),Z(k) + addZ(i,j));
         end
       end
   end
 else
   for k = 1:Nz
-        V(:,:,k) = Vfunc(X,Y,Z(k));
+        V(:,:,k) = Vfunc_LiF(X,Y,Z(k));
   end
   for z = 1:Nz
       for nx = 1:Nxy:Nsuper*Nxy
@@ -751,7 +751,22 @@ function [b1,b2,b3] = Reciprocal(a1,a2,a3)
     b3 = factor*cross(a1,a2);
 end
 
-function [VmatrixElement] = Vfunc(X,Y,Z)
+function [VmatrixElement] = Vfunc_LiF(x,y,z)
+    function [V0] = V0func(z)
+        V0 = const.D * exp(2*const.alpha*(const.z0-z))...
+            - 2*const.D*exp(const.alpha*(const.z0-z));
+    end
+    function [V1] = V1func(z)
+        V1 = -2*const.beta*const.D*exp(2*const.alpha*(const.z0-z));
+    end
+    function [Q] = Qfunc(x,y)
+        Q = cos(2*pi*x/const.a) + cos(2*pi*y/const.a);
+    end
+    VmatrixElement = V0func(z) + V1func(z)...
+        * Qfunc(x,y);
+end
+
+function [VmatrixElement] = Vfunc_MoS2(X,Y,Z)
   function [V] = VSulph(z)
     D = 19.9886;
     a = 0.8122;
@@ -879,7 +894,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
         ikbT = 15.9;
         mu = 0.49;
       end
-      VmatrixElement = Vfunc(x,y,z);
+      VmatrixElement = Vfunc_MoS2(x,y,z);
     else
       error("This is impossible to fit, don't use this")
       if(hexDefect)

@@ -5,7 +5,7 @@ classdef const
     c = 3.16; %sulphur-sulphur distance
     d = 5.48; %length of Min's unit cell
 
-    D = 7.63;
+    D = 7.63; %Data for LiF
     alpha = 1.1;
     z0 = 1.0;
     beta = 0.1;
