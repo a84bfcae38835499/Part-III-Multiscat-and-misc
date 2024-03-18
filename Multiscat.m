@@ -18,8 +18,8 @@ classdef Multiscat
                 [Nx,Ny,Nz] = size(potStructArray(i).V);
                 V_FT = fft2(potStructArray(i).V)/(Nx*Ny); % Assuming V(:,:,i) is the potential on the XY plane at Z(:,:,i)
                 shifted_V_FT = fftshift(fftshift(V_FT,1),2);
-                
-                filePot = fopen(['./pot' num2str(10000+i) '.in'],'w');
+                fstr = './' + potStructArray(i).fileprefix+num2str(10000+i)+'.in';
+                filePot = fopen(fstr,'w');
                 % Multiscat is written to treat first 5 lines as description lines
                 dLine1 = ['file prefix = ',num2str(potStructArray(i).fileprefix)];
                 dLine2 = ['Nxy = ',num2str(potStructArray(i).Nxy)];
