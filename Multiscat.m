@@ -21,7 +21,12 @@ classdef Multiscat
                 
                 filePot = fopen(['./pot' num2str(10000+i) '.in'],'w');
                 % Multiscat is written to treat first 5 lines as description lines
-                fprintf(filePot,'Dummy line1\nDummy line2\nDummy line3\nDummy line4\nDummy line5\n');
+                dLine1 = ['file prefix = ',num2str(potStructArray(i).fileprefix)];
+                dLine2 = ['Nxy = ',num2str(potStructArray(i).Nxy)];
+                dLine3 = ['Nsuper = ',num2str(potStructArray(i).Nsuper)];
+                dLine4 = ['Ndefect = ',num2str(potStructArray(i).Ndefect)];
+                finalstr = [dLine1,newline,dLine2,newline,dLine3,newline,dLine4,newline,'Dummy line5',newline];
+                fprintf(filePot,finalstr);
                 
                 for n_i=1:Nx
                     for m_i=1:Ny
@@ -62,8 +67,9 @@ classdef Multiscat
             
 
             [Nx,Ny,Nz] = size(potStructArray(1).V); % Assuming V(:,:,i) is the potential on the XY plane at Z(:,:,i)
+            tmp_minV = zeros(length(potStructArray),1);
             for i=1:length(potStructArray)
-                tmp_minV(i) = min(min(min(potStructArray(i).V)));
+                tmp_minV(i) = min(potStructArray(i).V,[],'all');
             end
             minV = min(tmp_minV);
             
@@ -104,6 +110,8 @@ classdef Multiscat
             confStruct.incidentParticleMassComment = 'helium mass';
             confStruct.incidentParticleMass = 4;
             disp('Mass set to 4')
+            confStruct.fileprefix = potStructArray(1).fileprefix;
+            confStruct.fileprefixComment = 'File prefix to filter for';
         end
        
 
@@ -141,6 +149,7 @@ classdef Multiscat
             fprintf(fileConf,'%d       !%s\n', confStruct.startIndex, confStruct.startIndexComment);
             fprintf(fileConf,'%d       !%s\n', confStruct.endIndex, confStruct.endIndexComment);
             fprintf(fileConf,'%d       !%s\n', confStruct.incidentParticleMass, confStruct.incidentParticleMassComment);
+            fprintf(fileConf,'%s       !%s\n', confStruct.fileprefix, confStruct.fileprefixComment);
             
             fclose(fileConf);
         end

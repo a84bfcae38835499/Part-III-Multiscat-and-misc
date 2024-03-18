@@ -9,6 +9,7 @@ Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = -2;%units Å
+fileprefix = "3x3mos2";
 
 a1=[const.a,0];
 a2=[0,const.a];
@@ -40,9 +41,8 @@ disp("Unit cell area = " + cellArea + "Å^2")
 cellArea = cellArea * (Nsuper^2);
 disp("Supercell area = " + cellArea + "Å^2")
 
-Nsites = Nsuper*Nsuper;
-disp("Target number of sites = " + (Nsites * Theta))
-Ndefect = int8(round(Nsites * Theta));
+disp("Target number of sites = " + (Nsuper*Nsuper * Theta))
+Ndefect = int8(round(Nsuper*Nsuper * Theta));
 disp("Actual number of sites = " + Ndefect)
 defectDensity = double(Ndefect)/cellArea;
 disp("defectDensity = " + defectDensity + "/Å^2")
@@ -340,7 +340,7 @@ end
 %% Now add imperfections to the lattice
 %Assume that we always have a defect at the (0,0) position, to fix
 %translational invariance leadings to degeneracy
-if(Ndefect ~= 0 && Nsites-1 - Ndefect > 0)
+if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
 %  Nensemble = (factorial(Nsites-1)) ...
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
   Nensemble = Ndefect;  %gansta maths
@@ -366,6 +366,10 @@ if(Ndefect == 0 || usingDisplacementDefects)
   potStructArray(1).zmin=Z(1);
   potStructArray(1).zmax=Z(end);
   potStructArray(1).zPoints=length(Z);
+  potStructArray(1).fileprefix=fileprefix;
+  potStructArray(1).Nxy=Nxy;
+  potStructArray(1).Nsuper=Nsuper;
+  potStructArray(1).Ndefect=Ndefect;
 
   plotPot = true;
   if(plotPot)
@@ -548,6 +552,9 @@ for Ne = 1:Nensemble
   potStructArray(Ne).zmin=Z(1);
   potStructArray(Ne).zmax=Z(end);
   potStructArray(Ne).zPoints=length(Z);
+  potStructArray(Ne).Nxy=Nxy;
+  potStructArray(Ne).Nsuper=Nsuper;
+  potStructArray(Ne).Ndefect=Ndefect;
   plotPot = true;
   if(plotPot)
     Vplotted = Vout;
@@ -720,7 +727,7 @@ if copyDFT
   b1 = y1; b2 = y2;
 end
 %% data for python hex plotter
-WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity);
+WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity,Ndefect);
 
 %% Plot corrugation
 %[newx,newy] = meshgrid(-const.c:0.01:const.c,-const.c:0.01:const.c);

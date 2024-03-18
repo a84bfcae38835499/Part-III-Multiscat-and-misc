@@ -1,7 +1,7 @@
-Dummy line1
-Dummy line2
-Dummy line3
-Dummy line4
+file prefix = 3x3mos2
+Nxy = 32
+Nsuper = 1
+Ndefect = 0
 Dummy line5
 (-2.131628e-14, +0.000000e+00)
 (-1.421085e-14, +0.000000e+00)
