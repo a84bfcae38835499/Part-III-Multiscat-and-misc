@@ -508,7 +508,7 @@ for index_s in range(Nscat):
     if(not vanity):
         plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
         plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-        filenametxt="MS test output -Ofast"
+        filenametxt="Lithium Fluoride"
         plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
     else:
         filenametxt = "vanity"
