@@ -3,13 +3,13 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 1;
+Nxy = 32; Nz = 100; Nsuper = 2;
 %Theta = 0.0;
 Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = -2;%units Å
-fileprefix = "3x3mos2";
+fileprefix = "2x2lif";
 
 a1=[const.a,0];
 a2=[0,const.a];
