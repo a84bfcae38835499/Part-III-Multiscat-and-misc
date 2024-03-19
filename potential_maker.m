@@ -3,13 +3,13 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 25; Nsuper = 6;
+Nxy = 32; Nz = 50; Nsuper = 6;
 %Theta = 0.0;
-Theta = (2/(Nsuper*Nsuper));
+Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "1x1MoS2_pristine";
+fileprefix = "6x6_wideDefect";
 onlyWriteLatticeFile = false;
 
 %a1=[const.a,0];
@@ -916,8 +916,11 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
         ikbT = 12.9;
         mu = 0.92;
       else
-        ikbT = 15.9;
-        mu = 0.49;
+        %ikbT = 15.9;
+        %mu = 0.49;
+
+        ikbT = 4;
+        mu = 0.5;
       end
       VmatrixElement = Vfunc_MoS2(x,y,z);
     else
