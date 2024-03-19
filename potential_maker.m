@@ -9,7 +9,8 @@ Theta = (2/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "2x2MoS2";
+fileprefix = "1x1MoS2_pristine";
+onlyWriteLatticeFile = false;
 
 %a1=[const.a,0];
 %a2=[0,const.a];
@@ -38,13 +39,13 @@ moMCol = [0.8 0.5 0];
 %% Defect density calculations
 cellArea = const.c^2 * sqrt(1-(dot(a1,a2)/(const.c^2))^2);
 disp("Unit cell area = " + cellArea + "Å^2")
-cellArea = cellArea * (Nsuper^2);
-disp("Supercell area = " + cellArea + "Å^2")
+cellAreaS = cellArea * (Nsuper^2);
+disp("Supercell area = " + cellAreaS + "Å^2")
 
 disp("Target number of sites = " + (Nsuper*Nsuper * Theta))
 Ndefect = int8(round(Nsuper*Nsuper * Theta));
 disp("Actual number of sites = " + Ndefect)
-defectDensity = double(Ndefect)/cellArea;
+defectDensity = double(Ndefect)/cellAreaS;
 disp("defectDensity = " + defectDensity + "/Å^2")
 defectDensity = defectDensity * ((1e10/1e2)^2);
 disp("              = " + num2str(defectDensity,'%e') + "/cm^2")
@@ -356,6 +357,14 @@ if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
 end
+
+%% data for python hex plotter
+WritePythonInfo(a1,a2,cellArea,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity,Ndefect);
+if(onlyWriteLatticeFile)
+    error("Done!")
+end
+
+
 potStructArray = struct([]);
 boolgrid_ensemble = zeros(Nsuper,Nsuper,Nensemble,'logical');
 if(Ndefect == 0 || usingDisplacementDefects)
@@ -738,9 +747,6 @@ if copyDFT
   a1 = x1;a2=x2;
   b1 = y1; b2 = y2;
 end
-%% data for python hex plotter
-WritePythonInfo(a1,a2,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity,Ndefect);
-
 %% Plot corrugation
 %[newx,newy] = meshgrid(-const.c:0.01:const.c,-const.c:0.01:const.c);
 %newz = Qhexfunc(newx,newy);

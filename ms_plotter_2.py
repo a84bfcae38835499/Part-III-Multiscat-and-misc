@@ -14,6 +14,9 @@ from scipy.spatial import Voronoi
 from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
 
+fileprefix = '5x5MoS2'
+useLog = False
+
 def slugify(value, allow_unicode=False):
     """
     Taken from https://github.com/django/django/blob/master/django/utils/text.py
@@ -90,13 +93,20 @@ B2 = [0,0]
 a1 = [0,0]
 a2 = [0,0]
 Nsuper = 1337
-while count < 9:
+while count < 10:
     # Get next line from file
     line = latticeFile.readline()
     if(line.startswith("Nsuper = ")):
         line = line[len("Nsuper = "):]
         split = line.split()
         Nsuper = float(split[0])
+        #print("Nsuper = " + split[0])
+        count += 1
+    
+    if(line.startswith("Unit cell area = ")):
+        line = line[len("Unit cell area = "):]
+        split = line.split()
+        cellArea = float(split[0])
         #print("Nsuper = " + split[0])
         count += 1
 
@@ -148,8 +158,8 @@ while count < 9:
     if line.startswith("Positional entropy = "):
         line = line[len("Positional entropy = "):]
         split = line.split()
-        entropyIn = float(split[0])
-        #print("Positional entropy = " + split[0])
+        entropyInstr = split[0]
+        print("Positional entropy = " + split[0])
         count += 1
     if line.startswith("Defect density in cm^-2 = "):
         line = line[len("Defect density in cm^-2 = "):]
@@ -199,7 +209,7 @@ print("[][][][][][][][]\n\n")
 dfss = []
 
 for index_n in range(int(Nensemble)):
-    importname =  '2x2MoS2' + str(10001+index_n) + '.out'
+    importname =  fileprefix + str(10001+index_n) + '.out'
     print("importing file : " + importname)
     dfs = import_multiscat(importname)
     #dfs has scattering varying scattering conditions for one potential
@@ -327,7 +337,6 @@ for index_s in range(Nscat):
     plotCoordsX = coordXArr[index_s]
     plotCoordsY = coordYArr[index_s]
     #sets the colour scale
-    useLog = False
     if(useLog):
         mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]))
     else:
@@ -380,7 +389,7 @@ for index_s in range(Nscat):
             if(not vanity):
                 plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
                                     (b1[1]*float(n1)+b2[1]*float(n2))),
-                            fontsize=10,zorder=12,ha='center',va='center',c=col)
+                            fontsize=4,zorder=12,ha='center',va='center',c=col)
             normSpecI += plotValuesAvg[ch]
             nSpecCh += 1
         else:
@@ -422,7 +431,7 @@ for index_s in range(Nscat):
         print("heliumk_n =")
         print(heliumk_n)
         if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
-            plt.arrow(meanX,meanY,Nsuper*heliumk_n[0,0],Nsuper*heliumk_n[1,0],width=0.03,color='b',zorder=7,head_width=0.1)
+            plt.arrow(meanX,meanY,Nsuper*heliumk_n[0,0],Nsuper*heliumk_n[1,0],width=0.03,color='b',zorder=7,head_width=0.1,length_includes_head=True)
         ax2.add_patch(plt.Circle((meanX,meanY), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
     ax2.set_title(titelstr)
 
@@ -440,7 +449,7 @@ for index_s in range(Nscat):
 
     padCells = True
     if(padCells):
-        paddingCells = 20
+        paddingCells = 50
         for n in range(-paddingCells,paddingCells):
             for m in range(-paddingCells,paddingCells):
                 canPlaceSiteHere = True
@@ -498,26 +507,32 @@ for index_s in range(Nscat):
 
     eomean = entropiesOut[index_s]
     eosdtv = entropiesOutUnc[index_s]
-    captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + "{:.4f}".format(entropyIn)
+    captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + entropyInstr
     if(Nensemble == 1):
         entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean)
     else:
         entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean) + "$\pm$" +  "{:.6f}".format(eosdtv)
     
+    crossSectionWhole = cellArea * np.log(normSpecI)/np.log(1-Theta)
+    simgastr = "$\Sigma_T = $" + "{:.2f}".format(crossSectionWhole) + "Å$^2$"
+    intenstr = "Proportion of specular intensity = " + str(int(normSpecI*100))+ "%"
     filenametxt=""
     if(not vanity):
-        plt.figtext(0.5, -0.035, captiontxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-        plt.figtext(0.5, -0.07, entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-        filenametxt="2x2MoS2"
-        plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
+        plt.figtext(0.5, -0.035, captiontxt+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+        plt.figtext(0.5, -0.07, intenstr + ", " + simgastr, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     else:
         filenametxt = "vanity"
         plt.tight_layout(pad=0)
 
     if(filenametxt == ""):
-        savestr = "Figures/Diffraction_multi/" + execTime + "_" + scatcondstr +".png"
+        plt.figtext(0.5, -0.11, fileprefix, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
+        savestr = "Figures/Diffraction_multi/" + execTime + "_" + slugify(fileprefix) + "_" + scatcondstr +".png"
     else:
+        plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
         savestr = "Figures/Diffraction_multi/" + execTime + "_" + slugify(filenametxt) + "_" + scatcondstr + ".png"
     print(savestr)
-    plt.savefig(fname=savestr,dpi=300)
+    if(vanity):
+        plt.savefig(fname=savestr,dpi=1000)
+    else:
+        plt.savefig(fname=savestr,dpi=300)
     plt.show()
