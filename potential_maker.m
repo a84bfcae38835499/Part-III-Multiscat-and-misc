@@ -3,9 +3,9 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 50; Nsuper = 2;
+Nxy = 16; Nz = 25; Nsuper = 6;
 %Theta = 0.0;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (2/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = 0;%units Å
@@ -477,10 +477,6 @@ else
       ns_available = 0:Nsuper-1;
       %Another question is - How do we decide which sites to add defects on to?
       %Do we directly implement avoidance of nearest-neighbors?
-      avoidNearestNeighbors = false;
-      if(avoidNearestNeighbors)
-        error("Nearest neighbour avoidance not yet implemented!")
-      end
       
       boolgrid = zeros(Nsuper,Nsuper,'logical');
       
@@ -494,9 +490,24 @@ else
         while(~foundValidSpot)
           m = randi(Nsuper)-1;
           n = randi(Nsuper)-1;
-          if(boolgrid(m+1,n+1) == false)
-            foundValidSpot = true;
-            boolgrid(m+1,n+1) = true;
+          avoidNearestNeighbors = true;
+          if(avoidNearestNeighbors)
+            if(boolgrid(m+1,n+1) == false ...
+                && boolgrid(mod(m+1,Nsuper)+1,n+1) == false ...
+                && boolgrid(mod(m-1,Nsuper)+1,n+1) == false ...
+                && boolgrid(mod(m,Nsuper)+1,n+1) == false ...
+                && boolgrid(m+1,mod(n+1,Nsuper)+1) == false ...
+                && boolgrid(m+1,mod(n-1,Nsuper)+1) == false ...
+                && boolgrid(mod(m+1,Nsuper)+1,mod(n+1,Nsuper)+1) == false ...
+                && boolgrid(mod(m-1,Nsuper)+1,mod(n-1,Nsuper)+1) == false)
+              foundValidSpot = true;
+              boolgrid(m+1,n+1) = true;
+            end
+          else
+            if(boolgrid(m+1,n+1) == false)
+              foundValidSpot = true;
+              boolgrid(m+1,n+1) = true;
+            end
           end
         end
         disp("m, n = ")
