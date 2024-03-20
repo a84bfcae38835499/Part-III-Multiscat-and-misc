@@ -10,7 +10,7 @@ disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = 0;%units Å
 fileprefix = "6x6ikbt_04";
-onlyWriteLatticeFile = false;
+onlyWriteLatticeFile = true;
 
 %a1=[const.a,0];
 %a2=[0,const.a];

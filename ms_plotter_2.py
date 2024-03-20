@@ -17,7 +17,8 @@ import matplotlib.cm as cm
 fileprefix = '3x3ikbt_10'
 fileprefix = '6x6MoS2'
 fileprefix = '3x3ikbt_04'
-useLog = False
+fileprefix = '3x3MoS2'
+useLog = True
 
 def slugify(value, allow_unicode=False):
     """
@@ -463,7 +464,7 @@ for index_s in range(Nscat):
     additionalY = []
     additionalVals = []
 
-    padCells = False
+    padCells = True
     if(padCells):
         paddingCells = 50
         for n in range(-paddingCells,paddingCells):
