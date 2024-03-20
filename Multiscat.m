@@ -41,10 +41,10 @@ classdef Multiscat
             end            
         end
         
-        function prepareFourierLabels(V)
+        function prepareFourierLabels(V,fileprefix)
             
             [Nx,Ny,Nz] = size(V); % Assuming V(:,:,i) is the potential on the XY plane at Z(:,:,i)
-            fileFourierLabels = fopen('FourierLabels.in','w');
+            fileFourierLabels = fopen(fileprefix+'.in_flables','w');
             for n_i=1:Nx
                 n=-Nx/2+n_i-1;
                 for m_i=1:Ny
@@ -116,11 +116,10 @@ classdef Multiscat
        
 
         function prepareConfigFile(confStruct)
-            fstr = confStruct.fileprefix + '.conf';
-            fileConf = fopen(fstr,'w');
+            fileConf = fopen(confStruct.fileprefix+'.conf','w');
             
             % Print conf file
-            fprintf(fileConf,'% s \n', 'FourierLabels.in 	!The fourier labels input file');
+            fprintf(fileConf,'% s \n', confStruct.fileprefix+'.in_flables 	!The fourier labels input file');
             fprintf(fileConf,'% s \n', 'scatCond.in	! The scattering conditions input file');
  % the above two lines are written by Boyao on 17 Nov 2020 to make it
  % compatible with the latest version of multiscat

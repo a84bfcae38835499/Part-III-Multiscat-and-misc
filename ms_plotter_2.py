@@ -15,8 +15,8 @@ from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
 
 fileprefix = '3x3ikbt_10'
-fileprefix = '3x3ikbt_10'
 fileprefix = '6x6MoS2'
+fileprefix = '3x3ikbt_04'
 useLog = False
 
 def slugify(value, allow_unicode=False):
