@@ -116,8 +116,8 @@ classdef Multiscat
        
 
         function prepareConfigFile(confStruct)
-            
-            fileConf = fopen('Multiscat.conf','w');
+            fstr = confStruct.fileprefix + '.conf';
+            fileConf = fopen(fstr,'w');
             
             % Print conf file
             fprintf(fileConf,'% s \n', 'FourierLabels.in 	!The fourier labels input file');

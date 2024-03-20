@@ -9,7 +9,7 @@ Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "6x6_wideDefect";
+fileprefix = "6x6MoS2";
 onlyWriteLatticeFile = false;
 
 %a1=[const.a,0];
@@ -359,7 +359,7 @@ if(Nensemble > Nensemble_limit)
 end
 
 %% data for python hex plotter
-WritePythonInfo(a1,a2,cellArea,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity,Ndefect);
+WritePythonInfo(fileprefix,a1,a2,cellArea,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity,Ndefect);
 if(onlyWriteLatticeFile)
     error("Done!")
 end
@@ -760,11 +760,11 @@ end
 doingMSshit = true;
 if(doingMSshit)
     %potStructArray.V = Vsuper;
+    confStruct=Multiscat.createConfigStruct(potStructArray);
+    Multiscat.prepareConfigFile(confStruct);
     Multiscat.PreparePotentialFiles(potStructArray);
     
     Multiscat.prepareFourierLabels(Vsuper);
-    confStruct=Multiscat.createConfigStruct(potStructArray);
-    Multiscat.prepareConfigFile(confStruct);
 end
 %===
 %% Function definitions
@@ -916,11 +916,11 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
         ikbT = 12.9;
         mu = 0.92;
       else
-        %ikbT = 15.9;
-        %mu = 0.49;
+        ikbT = 15.9;
+        mu = 0.49;
 
-        ikbT = 4;
-        mu = 0.5;
+        %ikbT = 10;
+        %mu = 0.5;
       end
       VmatrixElement = Vfunc_MoS2(x,y,z);
     else

@@ -1,5 +1,5 @@
-function [] = WritePythonInfo(a1,a2,area,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity,Ndefect)
-  writematrix([],'latticeVects.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
+function [] = WritePythonInfo(fileprefix,a1,a2,area,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity,Ndefect)
+  writematrix([],fileprefix+'.info_for_vivian_python_nice_plotting_hexagon_script',FileType='text')
   a1str = [char(num2str(a1))];
   a2str = [char(num2str(a2))];
   b1str = [char(num2str(b1(1:2)))];
@@ -18,7 +18,7 @@ function [] = WritePythonInfo(a1,a2,area,b1,b2,Nsuper,Theta,Nensemble,inputEntro
     nens,newline,'Positional entropy = ',entropstr,newline, ...
     'Defect density in cm^-2 = ',denstr,newline,'Total number of defects = ',defstr];
   S = [realStr,newline,recpStr,newline,defectStr,S];
-  FID = fopen('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'w');
+  FID = fopen(fileprefix + '.info_for_vivian_python_nice_plotting_hexagon_script', 'w');
   if FID == -1, error('Cannot open file %s', FileName); end
   fwrite(FID, S, 'char');
   fclose(FID);

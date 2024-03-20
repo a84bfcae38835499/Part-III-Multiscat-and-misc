@@ -14,7 +14,9 @@ from scipy.spatial import Voronoi
 from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
 
-fileprefix = '5x5MoS2'
+fileprefix = '3x3ikbt_10'
+fileprefix = '3x3ikbt_10'
+fileprefix = '6x6MoS2'
 useLog = False
 
 def slugify(value, allow_unicode=False):
@@ -85,7 +87,7 @@ def find_mean_stdv(values):
     stdv = np.sqrt(meanSq - mean**2)
     return mean, stdv
 
-latticeFile = open('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script', 'r')
+latticeFile = open(fileprefix + '.info_for_vivian_python_nice_plotting_hexagon_script', 'r')
 count = 0 
 
 B1 = [0,0]
@@ -443,11 +445,25 @@ for index_s in range(Nscat):
         cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
     cb1.set_label('P($n_1$,$n_2$)')
 
+    
+    eomean = entropiesOut[index_s]
+    eosdtv = entropiesOutUnc[index_s]
+    captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + entropyInstr
+    if(Nensemble == 1):
+        entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean)
+    else:
+        entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean) + "$\pm$" +  "{:.6f}".format(eosdtv)
+    
+    crossSectionWhole = cellArea * np.log(normSpecI)/np.log(1-Theta)
+    simgastr = "$\Sigma_T = $" + "{:.2f}".format(crossSectionWhole) + "Å$^2$"
+    intenstr = "Proportion of specular intensity = " + str(int(normSpecI*100))+ "%"
+    print(simgastr)
+
     additionalX = []
     additionalY = []
     additionalVals = []
 
-    padCells = True
+    padCells = False
     if(padCells):
         paddingCells = 50
         for n in range(-paddingCells,paddingCells):
@@ -505,17 +521,7 @@ for index_s in range(Nscat):
     #print(xmax)
     #print("....")
 
-    eomean = entropiesOut[index_s]
-    eosdtv = entropiesOutUnc[index_s]
-    captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + entropyInstr
-    if(Nensemble == 1):
-        entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean)
-    else:
-        entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean) + "$\pm$" +  "{:.6f}".format(eosdtv)
-    
-    crossSectionWhole = cellArea * np.log(normSpecI)/np.log(1-Theta)
-    simgastr = "$\Sigma_T = $" + "{:.2f}".format(crossSectionWhole) + "Å$^2$"
-    intenstr = "Proportion of specular intensity = " + str(int(normSpecI*100))+ "%"
+
     filenametxt=""
     if(not vanity):
         plt.figtext(0.5, -0.035, captiontxt+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
