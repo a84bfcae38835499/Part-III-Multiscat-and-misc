@@ -3,14 +3,14 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 50; Nsuper = 6;
+Nxy = 8; Nz = 50; Nsuper = 5;
 %Theta = 0.0;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "6x6ikbt_04";
-onlyWriteLatticeFile = true;
+fileprefix = "restest_8_50";
+onlyWriteLatticeFile = false;
 
 %a1=[const.a,0];
 %a2=[0,const.a];
@@ -49,6 +49,7 @@ defectDensity = double(Ndefect)/cellAreaS;
 disp("defectDensity = " + defectDensity + "/Å^2")
 defectDensity = defectDensity * ((1e10/1e2)^2);
 disp("              = " + num2str(defectDensity,'%e') + "/cm^2")
+disp("Theta = " + Theta)
 
 probV = double(Ndefect)/double(Nsuper*Nsuper);
 probS = 1 - probV;
@@ -915,10 +916,10 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
         ikbT = 12.9;
         mu = 0.92;
       else
-        %ikbT = 15.9;
+        ikbT = 15.9;
         mu = 0.49;
 
-        ikbT = 4;
+        %ikbT = 4;
         %mu = 0.5;
       end
       VmatrixElement = Vfunc_MoS2(x,y,z);

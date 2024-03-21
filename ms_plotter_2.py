@@ -14,11 +14,11 @@ from scipy.spatial import Voronoi
 from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
 
-fileprefix = '3x3ikbt_10'
 fileprefix = '6x6MoS2'
+fileprefix = '4x4MoS2'
 fileprefix = '3x3ikbt_04'
-fileprefix = '3x3MoS2'
-useLog = True
+fileprefix = '3x3ikbt_10'
+useLog = False
 
 def slugify(value, allow_unicode=False):
     """
@@ -377,9 +377,11 @@ for index_s in range(Nscat):
         plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
     mean1 = 0.
     mean2 = 0.
+    kAvg = 0.
     for ch in range(nOccChArr[index_s]):
         n1 = n1Arr[index_s][ch]
         n2 = n2Arr[index_s][ch]
+        kAvg = kAvg +plotValuesAvg[ch]*Babs*np.sqrt(n1**2+n2**2)/(Nsuper*Nsuper)
         mean1 += n1
         mean2 += n2
         if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
@@ -398,6 +400,7 @@ for index_s in range(Nscat):
         else:
             normDiffI += plotValuesAvg[ch]
             nDiffCh += 1
+    print("Average k = " + str(kAvg))
     mean1 /= nOccChArr[index_s]
     mean2 /= nOccChArr[index_s]
     meanX = mean1*b1[0]+mean2*b2[0]
@@ -464,7 +467,7 @@ for index_s in range(Nscat):
     additionalY = []
     additionalVals = []
 
-    padCells = True
+    padCells = False
     if(padCells):
         paddingCells = 50
         for n in range(-paddingCells,paddingCells):
