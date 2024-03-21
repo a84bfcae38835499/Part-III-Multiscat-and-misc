@@ -7,6 +7,7 @@ import datetime
 import unicodedata
 import re
 import matplotlib.patheffects as pe
+import matplotlib.patches as patches
 import math
 
 #packages to import
@@ -17,8 +18,8 @@ import matplotlib.cm as cm
 fileprefix = '6x6MoS2'
 fileprefix = '4x4MoS2'
 fileprefix = '3x3ikbt_04'
-fileprefix = '3x3ikbt_10'
-useLog = False
+fileprefix = 'restest_16_50'
+useLog = True
 
 def slugify(value, allow_unicode=False):
     """
@@ -437,7 +438,11 @@ for index_s in range(Nscat):
         print("heliumk_n =")
         print(heliumk_n)
         if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
-            plt.arrow(meanX,meanY,Nsuper*heliumk_n[0,0],Nsuper*heliumk_n[1,0],width=0.03,color='b',zorder=7,head_width=0.1,length_includes_head=True)
+            plt.arrow(meanX+Nsuper*heliumk_n[0,0]-2.3*np.cos(np.deg2rad(phi)),meanY+Nsuper*heliumk_n[1,0]+2.3*np.sin(np.deg2rad(phi)),
+            #plt.arrow(0,0,
+                      2.3*np.cos(np.deg2rad(phi)),-2.3*np.sin(np.deg2rad(phi)),
+                      width=0.03,color='b',zorder=7,head_width=1,head_length=2.3,length_includes_head=True,
+                     fill=False)
         ax2.add_patch(plt.Circle((meanX,meanY), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
     ax2.set_title(titelstr)
 
@@ -469,7 +474,7 @@ for index_s in range(Nscat):
 
     padCells = False
     if(padCells):
-        paddingCells = 50
+        paddingCells = 100
         for n in range(-paddingCells,paddingCells):
             for m in range(-paddingCells,paddingCells):
                 canPlaceSiteHere = True

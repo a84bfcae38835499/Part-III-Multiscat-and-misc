@@ -3,13 +3,13 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 8; Nz = 50; Nsuper = 5;
+Nxy = 32; Nz = 150; Nsuper = 5;
 %Theta = 0.0;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "restest_8_50";
+fileprefix = "restest_32_150";
 onlyWriteLatticeFile = false;
 
 %a1=[const.a,0];
@@ -577,7 +577,7 @@ for Ne = 1:Nensemble
   potStructArray(Ne).Nsuper=Nsuper;
   potStructArray(Ne).Ndefect=Ndefect;
   potStructArray(Ne).fileprefix=fileprefix;
-  plotPot = true;
+  plotPot = false;
   if(plotPot)
     Vplotted = Vout;
     %nPlot = 2/3;mPlot = 1/2;
