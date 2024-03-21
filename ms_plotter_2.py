@@ -173,12 +173,12 @@ while count < 10:
         count += 1
 
 Babs = np.sqrt(B1[0]**2+B1[1]**2)
-#print("B1 = ") 
-#print(B1)
-#print("B2 = ") 
-#print(B2)
-#print("Babs = ") 
-#print(Babs)
+print("B1 = ") 
+print(B1)
+print("B2 = ") 
+print(B2)
+print("Babs = ") 
+print(Babs)
 latticeFile.close()
 b1 = B1 / Babs
 b2 = B2 / Babs
@@ -352,6 +352,16 @@ for index_s in range(Nscat):
     #creates two subplots
     ax = plt.subplot2grid((16,20), (0,17), colspan=1, rowspan=16)
     ax2 = plt.subplot2grid((16,20), (0,0), colspan=16, rowspan=16)
+    #print(thetas)
+    E = Es[index_s]
+    theta = thetas[index_s]
+    #print(theta)
+    phi = phis[index_s]
+
+    
+    titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, $\\phi$ =" + str(phi) + "$\\degree$"
+    scatcondstr = str(E) + "_" + str(theta) + "_" + str(phi)
+    #print(scatcondstr)
 
     pathefts1 = [pe.Stroke(linewidth=1, foreground='w'), pe.Normal()]
     pathefts2 = [pe.Stroke(linewidth=2, foreground='w'), pe.Normal()]
@@ -378,11 +388,13 @@ for index_s in range(Nscat):
         plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
     mean1 = 0.
     mean2 = 0.
-    kAvg = 0.
+    n1Weighted = 0.
+    n2Weighted = 0.
     for ch in range(nOccChArr[index_s]):
         n1 = n1Arr[index_s][ch]
         n2 = n2Arr[index_s][ch]
-        kAvg = kAvg +plotValuesAvg[ch]*Babs*np.sqrt(n1**2+n2**2)/(Nsuper*Nsuper)
+        n1Weighted = n1Weighted + n1Arr[index_s][ch]*plotValuesAvg[ch]/(Nsuper*Nsuper)
+        n2Weighted = n2Weighted + n2Arr[index_s][ch]*plotValuesAvg[ch]/(Nsuper*Nsuper)
         mean1 += n1
         mean2 += n2
         if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
@@ -401,7 +413,18 @@ for index_s in range(Nscat):
         else:
             normDiffI += plotValuesAvg[ch]
             nDiffCh += 1
-    print("Average k = " + str(kAvg))
+    print("n1Weighted = " + str(n1Weighted))
+    print("n2Weighted = " + str(n2Weighted))
+    kWeighted = np.sqrt(n1Weighted*n1Weighted+n2Weighted*n2Weighted)*Babs
+    print("kWeighted = " + str(kWeighted))
+    nWeighted = kWeighted / Babs
+    kstr = "$|K|$ = " + "{:.3f}".format(kWeighted) + "Å$^{-1}$"
+    if(not vanity):
+        if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
+            plt.arrow(0,0,
+                      nWeighted*np.cos(np.deg2rad(phi)),-nWeighted*np.sin(np.deg2rad(phi)),
+                      width=0.03,color='w',zorder=7,head_width=0.5,head_length=0.2,length_includes_head=True,
+                     fill=False,linestyle=(0, (5, 5)))
     mean1 /= nOccChArr[index_s]
     mean2 /= nOccChArr[index_s]
     meanX = mean1*b1[0]+mean2*b2[0]
@@ -414,16 +437,6 @@ for index_s in range(Nscat):
     print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
     print("Specular intensity proportion : " + str(normSpecI))
     print("Diffuse intensity proportion  : " + str(normDiffI))
-    #print(thetas)
-    E = Es[index_s]
-    theta = thetas[index_s]
-    #print(theta)
-    phi = phis[index_s]
-
-    
-    titelstr = "$E$ = " + str(E) + " meV, $\\theta$ = " + str(theta) + "$\\degree$, $\\phi$ =" + str(phi) + "$\\degree$"
-    scatcondstr = str(E) + "_" + str(theta) + "_" + str(phi)
-    #print(scatcondstr)
 
     heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
                         [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
@@ -534,7 +547,7 @@ for index_s in range(Nscat):
     filenametxt=""
     if(not vanity):
         plt.figtext(0.5, -0.035, captiontxt+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-        plt.figtext(0.5, -0.07, intenstr + ", " + simgastr, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+        plt.figtext(0.5, -0.07, intenstr + ", " + simgastr+", "+kstr, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     else:
         filenametxt = "vanity"
         plt.tight_layout(pad=0)
