@@ -3,16 +3,16 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 64; Nz = 50; Nsuper = 3;
-Theta = 1;
-%Theta = (1/(Nsuper*Nsuper));
+Nxy = 16; Nz = 50; Nsuper = 1;
+%Theta = 0.9;
+Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-usingDisplacementDefects = true;
+usingDisplacementDefects = false;
   defectH = 0.5;
   defectW = 0.5;
-  minDist = const.c*0.1;
+  minDist = const.c*0.5;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "3x3unpristine"
+fileprefix = "1x1pristine"
 onlyWriteLatticeFile = false;
 
 %a1=[const.a,0];
@@ -353,7 +353,7 @@ if(usingDisplacementDefects)
   Nensemble = 1;
 end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = 10; %This is a very very rough lower bound
+Nensemble_limit = Nsuper; %This is a very very rough lower bound
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;

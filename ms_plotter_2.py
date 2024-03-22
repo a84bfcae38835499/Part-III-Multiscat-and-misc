@@ -20,7 +20,7 @@ fileprefix = 'restest_16_50'
 fileprefix = '3x3highdefect_adatom'
 fileprefix = '5x5MoS2'
 fileprefix = '1x1pristine'
-fileprefix = '1x1unpristine'
+fileprefix = '3x3unpristine'
 plotFigure = False
 useLog = False
 
@@ -480,12 +480,6 @@ for index_s in range(Nscat):
     meanY = mean1*b1[1]+mean2*b2[1]
     print("mean x, y = ")
     print(meanX, meanY)
-    #normSpecI *= float(nSpecCh+nDiffCh)/float(nSpecCh)
-    #normDiffI *= float(nSpecCh+nDiffCh)/float(nDiffCh)
-    #print("Number of specular channels : " + str(nSpecCh))
-    #print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
-    #print("Specular intensity proportion : " + str(normSpecI))
-    #print("Diffuse intensity proportion  : " + str(normDiffI))
 
     heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
                         [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
@@ -506,6 +500,7 @@ for index_s in range(Nscat):
                       arrowl*np.cos(np.deg2rad(phi)),-arrowl*np.sin(np.deg2rad(phi)),
                       width=0.00,color='b',zorder=7,head_width=1,head_length=arrowl,length_includes_head=True,
                      fill=False,overhang=1.)
+            ax2.scatter(meanX,meanY, marker = 'x',zorder=8,color='b',linewidth=1,s=5e2/np.sqrt(2))
         ax2.add_patch(plt.Circle((meanX,meanY), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (25, 50))))
     ax2.set_title(titelstr)
 
@@ -526,10 +521,17 @@ for index_s in range(Nscat):
     else:
         entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean) + "$\pm$" +  "{:.6f}".format(eosdtv)
     
+    print("----")
+    print("Number of specular channels : " + str(nSpecCh))
+    print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
+    print("Specular intensity proportion : " + str(normSpecI))
+    print("Diffuse intensity proportion  : " + str(normDiffI))
+    print("Theta  : " + str(Theta))
     crossSectionWhole = cellArea * np.log(normSpecI)/np.log(1-Theta)
     simgastr = "$\Sigma_T = $" + "{:.2f}".format(crossSectionWhole) + "Å$^2$"
     intenstr = "Proportion of specular intensity = " + str(int(normSpecI*100))+ "%"
     print(simgastr)
+    print("----")
 
     additionalX = []
     additionalY = []
@@ -537,7 +539,7 @@ for index_s in range(Nscat):
 
     padCells = True
     if(padCells):
-        paddingCells = 20
+        paddingCells = 50
         for n in range(-paddingCells,paddingCells):
             for m in range(-paddingCells,paddingCells):
                 canPlaceSiteHere = True
