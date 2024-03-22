@@ -15,11 +15,14 @@ from scipy.spatial import Voronoi
 from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
 
-fileprefix = '6x6MoS2'
-fileprefix = '4x4MoS2'
 fileprefix = '3x3ikbt_04'
 fileprefix = 'restest_16_50'
-useLog = True
+fileprefix = '3x3highdefect_adatom'
+fileprefix = '5x5MoS2'
+fileprefix = '1x1pristine'
+fileprefix = '1x1unpristine'
+plotFigure = False
+useLog = False
 
 def slugify(value, allow_unicode=False):
     """
@@ -79,23 +82,29 @@ def calculate_entropy(intensities):
 def find_mean_stdv(values):
     mean = 0
     meanSq = 0
+    #print("input = ")
+    #print(values)
     #print("type of input = " + str(type(values)))
-    n = len(values)
+    #n = len(values)
+    n = np.size(values)
+    #print("n = " + str(n))
     for v in np.nditer(values):
         mean += v
         meanSq += v**2
     mean /= n
     meanSq /= n
+    #print(f"Mean**2, msq = {mean**2}, {meanSq}")
     stdv = np.sqrt(meanSq - mean**2)
     return mean, stdv
+
 
 latticeFile = open(fileprefix + '.info_for_vivian_python_nice_plotting_hexagon_script', 'r')
 count = 0 
 
-B1 = [0,0]
-B2 = [0,0]
-a1 = [0,0]
-a2 = [0,0]
+B1 = np.array([0.,0.])
+B2 = np.array([0.,0.])
+a1 = np.array([0.,0.])
+a2 = np.array([0.,0.])
 Nsuper = 1337
 while count < 10:
     # Get next line from file
@@ -156,7 +165,7 @@ while count < 10:
     if line.startswith("Ensemble size = "):
         line = line[len("Ensemble size = "):]
         split = line.split()
-        Nensemble = float(split[0])
+        Nensemble = int(split[0])
         #print("Ensemble size = " + split[0])
         count += 1
     if line.startswith("Positional entropy = "):
@@ -208,11 +217,11 @@ scatFile.close()
 
 print("[][][][][][][][]")
 print("Number of scattering conditions = " + str(Nscat))
-print("[][][][][][][][]\n\n")
+print("[][][][][][][][]\n")
 
 dfss = []
 
-for index_n in range(int(Nensemble)):
+for index_n in range(Nensemble):
     importname =  fileprefix + str(10001+index_n) + '.out'
     print("importing file : " + importname)
     dfs = import_multiscat(importname)
@@ -238,6 +247,9 @@ coordXArr = [None]*Nscat
 coordYArr = [None]*Nscat
 brightSpotXArr = [None]*Nscat
 brightSpotYArr = [None]*Nscat
+kAvg = np.array([0.,0.])
+kAbsAvgArr = [0.]*Nscat
+kAbsAvgUncArr = [0.]*Nscat
 
 n1Arr = [None]*Nscat
 n2Arr = [None]*Nscat
@@ -267,48 +279,74 @@ for index_s in range(Nscat):
     brightSpotXArr[index_s] =(np.zeros((nOccChArr[index_s])))
     brightSpotYArr[index_s] =(np.zeros((nOccChArr[index_s])))
 
-    for index_n in range(int(Nensemble)):
+    for index_n in range(Nensemble):
         df = dfss[index_n][index_s]
         intensities = np.zeros((nOccChArr[index_s]))
         plotCoordsX = np.zeros((nOccChArr[index_s]))
         plotCoordsY = np.zeros((nOccChArr[index_s]))
-        for k in range(nOccChArr[index_s]):
+        for ch in range(nOccChArr[index_s]):
             #print("k = " + str(k))
-            row = df.iloc[k]
+            row = df.iloc[ch]
             n1 = getattr(row,'n1')
-            n1Arr[index_s][k] = int(n1)
+            n1Arr[index_s][ch] = int(n1)
             n2 = getattr(row,'n2')
-            n2Arr[index_s][k] = int(n2)
+            n2Arr[index_s][ch] = int(n2)
             I = float(getattr(row,'I'))
             #print(f"k = {k}, n1 = {n1}, n2 = {n2}, I = {I}")
-            intensities[k] = I
-            plotCoordsX[k] = b1[0] * n1 + b2[0] * n2
-            plotCoordsY[k] = b1[1] * n1 + b2[1] * n2
+            intensities[ch] = I
+            plotCoordsX[ch] = b1[0] * n1 + b2[0] * n2
+            plotCoordsY[ch] = b1[1] * n1 + b2[1] * n2
         cX[index_n] = (plotCoordsX)
         cY[index_n] = (plotCoordsY)
         iI[index_n] = (intensities)
-    #Now do ensemble averageing
+    #Now do ensemble averageing, as well as calculating of meaningful quantities so they can have error bars too
     
     iAverage = np.zeros((nOccChArr[index_s]))
-    entropiesDisposable = np.zeros((int(Nensemble)))
-    for index_n in range(int(Nensemble)):
+    entropiesDisposable = np.zeros((Nensemble))
+    kAbsDisposable = np.zeros((Nensemble))
+    for index_n in range(Nensemble):
+        Is = iI[index_n]
+        for ch in range(nOccChArr[index_s]):
+            row = df.iloc[ch]
+            I = Is[ch]
+            n1 = float(getattr(row,'n1'))
+            n2 = float(getattr(row,'n2'))
+            #print(f"n1, n2, I = {n1}, {n2}, {I}")
+            kAvg += I*(n1*B1 + n2*B2)/float(Nsuper)
+            #print("kAvg = " + str(kAvg))
+            iAverage[ch] += I
+        entropiesDisposable[index_n] = calculate_entropy(iI[index_n])
+        kAbsDisposable[index_n] = np.sqrt(kAvg[0]**2+kAvg[1]**2)
+    print("kAbsDisposable = ")
+    print(kAbsDisposable)
+    kAvg /= float(Nensemble)
+    kAvg /= Babs
+    print("kAvg (n1n2 units)= ")
+    print(kAvg)
+    iAverage /= float(Nensemble)
+    intensityArr[index_s] = iAverage
+    coordXArr[index_s] = cX[0] #this is what paranoia looks like
+    coordYArr[index_s] = cY[0]
+    entropiesOut[index_s], entropiesOutUnc[index_s] = find_mean_stdv(entropiesDisposable)
+    kAbsAvgArr[index_s], kAbsAvgUncArr[index_s] = find_mean_stdv(kAbsDisposable)
+    print("kAbsAvg = ")
+    print(kAbsAvgArr[index_s])
+    print("Unc = ")
+    print(kAbsAvgUncArr[index_s])
+
+    #Finally, for plotting, we remove channels of 0 intensity cos they cause issues when plotting
+    for index_n in range(Nensemble):
         Is = iI[index_n]
         for ch in range(nOccChArr[index_s]):
             I = Is[ch]
             if(I == 0):
                 print(f"Zero found, setting to {smolVal}")
                 I = smolVal
-            iAverage[ch] += I
-        entropiesDisposable[index_n] = calculate_entropy(iI[index_n])
-    iAverage /= Nensemble
-    intensityArr[index_s] = iAverage
-    coordXArr[index_s] = cX[0] #this is what paranoia looks like
-    coordYArr[index_s] = cY[0]
-    entropiesOut[index_s], entropiesOutUnc[index_s] = find_mean_stdv(entropiesDisposable)
 
 #We now have our varrious arrays whose index ranges over the number of scattering conditions
 #(these arrays are labelled xxxArr)
-#Ensemble averaging has been done so we now don't have to worry about it
+
+#Now we find the min and max value spots, as well as spots brigth enough to be considered plotable (I > vanityVal)
 for index_s in range(Nscat):
     pCXS = np.array([]) #These variables stand for something but icr what it is lmao
     pCYS = np.array([])
@@ -388,15 +426,17 @@ for index_s in range(Nscat):
         plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
     mean1 = 0.
     mean2 = 0.
-    n1Weighted = 0.
-    n2Weighted = 0.
+    weighted1 = 0.
+    weighted2 = 0.
+    kWeighted = [0.,0.]
     for ch in range(nOccChArr[index_s]):
         n1 = n1Arr[index_s][ch]
         n2 = n2Arr[index_s][ch]
-        n1Weighted = n1Weighted + n1Arr[index_s][ch]*plotValuesAvg[ch]/(Nsuper*Nsuper)
-        n2Weighted = n2Weighted + n2Arr[index_s][ch]*plotValuesAvg[ch]/(Nsuper*Nsuper)
+        I = plotValuesAvg[ch]
         mean1 += n1
         mean2 += n2
+        weighted1 += n1 * I
+        weighted2 += n2 * I
         if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
             n1n2 = str(int(n1/Nsuper)) + ',' + str(int(n2/Nsuper))
             #print("Annotating point " + n1n2)
@@ -413,18 +453,27 @@ for index_s in range(Nscat):
         else:
             normDiffI += plotValuesAvg[ch]
             nDiffCh += 1
-    print("n1Weighted = " + str(n1Weighted))
-    print("n2Weighted = " + str(n2Weighted))
-    kWeighted = np.sqrt(n1Weighted*n1Weighted+n2Weighted*n2Weighted)*Babs
-    print("kWeighted = " + str(kWeighted))
-    nWeighted = kWeighted / Babs
-    kstr = "$|K|$ = " + "{:.3f}".format(kWeighted) + "Å$^{-1}$"
+
+    weighted1 /= nOccChArr[index_s]
+    weighted2 /= nOccChArr[index_s]
+    weightedX = weighted1*B1[0]+weighted2*B2[0]
+    weightedY = weighted1*B1[1]+weighted2*B2[1]
+    print("weightedX, weightedY = ")
+    print(weightedX, weightedY)
+    if(Nensemble == 1):
+        kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "Å$^{-1}$"
+    else:
+        kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
+    print(kstr)
     if(not vanity):
         if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
-            plt.arrow(0,0,
-                      nWeighted*np.cos(np.deg2rad(phi)),-nWeighted*np.sin(np.deg2rad(phi)),
-                      width=0.03,color='w',zorder=7,head_width=0.5,head_length=0.2,length_includes_head=True,
-                     fill=False,linestyle=(0, (5, 5)))
+            #plt.arrow(0,0,
+            #          kAvg[0],kAvg[1],
+            #          width=0.01,color='w',zorder=7,head_width=0.5,head_length=0.5,length_includes_head=True,
+            #         fill=False,overhang=-1.)
+                     #fill=True)
+            ax2.arrow(0., 0.,kAvg[0],kAvg[1], zorder=8 ,linestyle=(0,(1, 10)), color='w',linewidth=.75,head_length=0.0,head_width=0.0)
+            ax2.scatter(kAvg[0],kAvg[1], marker = '+',zorder=8,color='w',linewidth=1,s=5e2)
     mean1 /= nOccChArr[index_s]
     mean2 /= nOccChArr[index_s]
     meanX = mean1*b1[0]+mean2*b2[0]
@@ -433,10 +482,10 @@ for index_s in range(Nscat):
     print(meanX, meanY)
     #normSpecI *= float(nSpecCh+nDiffCh)/float(nSpecCh)
     #normDiffI *= float(nSpecCh+nDiffCh)/float(nDiffCh)
-    print("Number of specular channels : " + str(nSpecCh))
-    print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
-    print("Specular intensity proportion : " + str(normSpecI))
-    print("Diffuse intensity proportion  : " + str(normDiffI))
+    #print("Number of specular channels : " + str(nSpecCh))
+    #print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
+    #print("Specular intensity proportion : " + str(normSpecI))
+    #print("Diffuse intensity proportion  : " + str(normDiffI))
 
     heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
                         [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
@@ -448,15 +497,16 @@ for index_s in range(Nscat):
     heliumk = heliumDir * np.sqrt(2*m*e*E/1000)/hbar
     heliumk_n = heliumk/(Babs*1e10)
     if(not vanity):
-        print("heliumk_n =")
-        print(heliumk_n)
+        #print("heliumk_n =")
+        #print(heliumk_n)
         if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
-            plt.arrow(meanX+Nsuper*heliumk_n[0,0]-2.3*np.cos(np.deg2rad(phi)),meanY+Nsuper*heliumk_n[1,0]+2.3*np.sin(np.deg2rad(phi)),
+            arrowl = 1
+            plt.arrow(meanX+Nsuper*heliumk_n[0,0]-arrowl*np.cos(np.deg2rad(phi)),meanY+Nsuper*heliumk_n[1,0]+arrowl*np.sin(np.deg2rad(phi)),
             #plt.arrow(0,0,
-                      2.3*np.cos(np.deg2rad(phi)),-2.3*np.sin(np.deg2rad(phi)),
-                      width=0.03,color='b',zorder=7,head_width=1,head_length=2.3,length_includes_head=True,
-                     fill=False)
-        ax2.add_patch(plt.Circle((meanX,meanY), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (5, 10))))
+                      arrowl*np.cos(np.deg2rad(phi)),-arrowl*np.sin(np.deg2rad(phi)),
+                      width=0.00,color='b',zorder=7,head_width=1,head_length=arrowl,length_includes_head=True,
+                     fill=False,overhang=1.)
+        ax2.add_patch(plt.Circle((meanX,meanY), np.sqrt(heliumk_n[0]**2 + heliumk_n[1]**2)*Nsuper, color='b', fill=False,zorder=7,linestyle=(0, (25, 50))))
     ax2.set_title(titelstr)
 
     #creates a colourbar on the first subplot
@@ -470,7 +520,7 @@ for index_s in range(Nscat):
     
     eomean = entropiesOut[index_s]
     eosdtv = entropiesOutUnc[index_s]
-    captiontxt="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + entropyInstr
+    defectstr="$n_{defect}$ = " + "{:.4e}".format(defectDensity) + " cm$^{-2}$, $H_{defect}$ = " + entropyInstr
     if(Nensemble == 1):
         entropytxt = "$H_{diffraction}$ = " + "{:.6f}".format(eomean)
     else:
@@ -485,9 +535,9 @@ for index_s in range(Nscat):
     additionalY = []
     additionalVals = []
 
-    padCells = False
+    padCells = True
     if(padCells):
-        paddingCells = 100
+        paddingCells = 20
         for n in range(-paddingCells,paddingCells):
             for m in range(-paddingCells,paddingCells):
                 canPlaceSiteHere = True
@@ -546,7 +596,7 @@ for index_s in range(Nscat):
 
     filenametxt=""
     if(not vanity):
-        plt.figtext(0.5, -0.035, captiontxt+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+        plt.figtext(0.5, -0.035, defectstr+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
         plt.figtext(0.5, -0.07, intenstr + ", " + simgastr+", "+kstr, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
     else:
         filenametxt = "vanity"

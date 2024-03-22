@@ -3,13 +3,16 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 50; Nsuper = 10;
-%Theta = 0.0;
-Theta = (1/(Nsuper*Nsuper));
+Nxy = 64; Nz = 50; Nsuper = 3;
+Theta = 1;
+%Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-usingDisplacementDefects = false;
+usingDisplacementDefects = true;
+  defectH = 0.5;
+  defectW = 0.5;
+  minDist = const.c*0.1;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "10x10MoS2";
+fileprefix = "3x3unpristine"
 onlyWriteLatticeFile = false;
 
 %a1=[const.a,0];
@@ -152,9 +155,6 @@ for i = 0:Nxy*Nsuper-1
 end
 
 if(usingDisplacementDefects)
-  minDist = const.c*1;
-  defectH = -0.5;
-  defectW = 0.5;
   randomX = 1337*ones(1,Ndefect);
   randomY = 1337*ones(1,Ndefect);
   repeat = zeros(1,Ndefect,'logical');
