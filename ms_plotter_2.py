@@ -19,15 +19,17 @@ fileprefix = '3x3ikbt_04'
 fileprefix = 'restest_16_50'
 fileprefix = '3x3highdefect_adatom'
 fileprefix = '5x5MoS2'
-fileprefix = '1x1pristine'
-fileprefix = '1x1pristine'
-pristineprefix = '1x1pristine'
+fileprefix = '2x2MoS2'
+fileprefix = 'restest_10_50'
+pristineprefix = ''
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
-plotFigure = True
+plotFigure = False
 useLog = False
 useBoth = False #Plots both log and nonlog graphs one after another
 vanity = False
+channelFontSize = 6
 
+"""
 n1n2OfInterest = [[1,0],
                   [0,0],
                   [-1,0],
@@ -37,7 +39,22 @@ n1n2OfInterest = [[1,0],
                   [1,-1],
                   [1,-2],
                   [-1,2]]
-
+n1n2Colours = [[1, 0.82, 0.149],
+                  [1, 1, 1],
+                  [0.067, 0.769, 0.451],
+                  [0.149, 0.792, 1],
+                  [0.196, 0.149, 1],
+                  [1, 0.463, 0.722],
+                  [0.518, 0.51, 0.941],
+                  [0.596, 0, 1],
+                  [1, 0.18, 0.408]]
+"""
+n1n2OfInterest = [[1,0],
+                  [0,0],
+                  [-1,0]]
+n1n2Colours = [[1, 0.82, 0.149],
+                  [1, 1, 1],
+                  [0.067, 0.769, 0.451]]
 Ninterest = sum(1 for _ in n1n2OfInterest)
 
 def slugify(value, allow_unicode=False):
@@ -510,6 +527,7 @@ for index_s in range(Nscat):
     crossSectionWhole = cellArea * np.log(normSpecI)/np.log(1-Theta)
     simgastr = "$\Sigma_{T} = $" + "{:.4f}".format(crossSectionWhole) + "Å$^2$"
     intenstr = "Specular proportion = " + str(int(normSpecI*100))+ "%"
+    print("Total cross section = " + "{:.4f}".format(crossSectionWhole) + "Å^2")
     #print(simgastr)
     print("| | | | | | | | | | | | | | | | ")
     sigmas = [0.] * Ninterest
@@ -532,6 +550,7 @@ for index_s in range(Nscat):
                         print("Σ = " + "{:.7f}".format(sigma) + "Å^2")
                         print(": : : : : : : : : : : : : : : : ")
                         sigmas[index_i] = sigma
+    print("cross sections = ")
     print(sigmas)
     print("[][][][][][][][][][][][][][][][][][][][][][][][]\n")
 
@@ -549,7 +568,7 @@ for index_s in range(Nscat):
                 mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]))
 
             #create the figure with set figure size
-            fig = plt.figure(figsize=(10,8))
+            fig = plt.figure(figsize=(15,12))
 
             #creates two subplots
             ax = plt.subplot2grid((16,20), (0,17), colspan=1, rowspan=16)
@@ -567,29 +586,14 @@ for index_s in range(Nscat):
             if(not vanity):
                 plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
                 plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
-                plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.1),color=b1col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
-                plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper),color=b2col,fontsize=8,weight='bold',path_effects=pathefts1,zorder=11)
+                plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.2),color=b1col,fontsize=8,path_effects=pathefts1,zorder=11)
+                plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper+0.1),color=b2col,fontsize=8,path_effects=pathefts1,zorder=11)
 
-                plt.arrow(0,0,a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2),width=0.05,color=a1col,zorder=6,length_includes_head=True,alpha=0.5)
-                plt.arrow(0,0,a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2),width=0.05,color=a2col,zorder=6,length_includes_head=True,alpha=0.5)
-                plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
-                plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
+                plt.arrow(0,0,Nsuper*a1[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a1[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.05,color=a1col,zorder=6,length_includes_head=True)
+                plt.arrow(0,0,Nsuper*a2[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a2[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.05,color=a2col,zorder=6,length_includes_head=True)
+                #plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
+                #plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
 
-            for ch in range(nOccChArr[index_s]):
-                n1 = n1Arr[index_s][ch]
-                n2 = n2Arr[index_s][ch]
-                I = plotValuesAvg[ch]
-                if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
-                    n1n2 = str(int(n1/Nsuper)) + ',' + str(int(n2/Nsuper))
-                    #print("Annotating point " + n1n2)
-                    if(plotValuesAvg[ch] < (valmaxArr[index_s]-valminArr[index_s])*0.75):
-                        col = 'w'
-                    else:
-                        col = 'k'
-                    if(not vanity):
-                        plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
-                                            (b1[1]*float(n1)+b2[1]*float(n2))),
-                                    fontsize=4,zorder=12,ha='center',va='center',c=col)
             if(not vanity):
                 if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
                     #plt.arrow(0,0,
@@ -599,6 +603,27 @@ for index_s in range(Nscat):
                             #fill=True)
                     ax2.arrow(0., 0.,kAvg[0],kAvg[1], zorder=8 ,linestyle=(0,(1, 10)), color='w',linewidth=.75,head_length=0.0,head_width=0.0)
                     ax2.scatter(kAvg[0],kAvg[1], marker = '+',zorder=8,color='w',linewidth=0.75,s=5e2)
+                
+                for ch in range(nOccChArr[index_s]):
+                    n1 = n1Arr[index_s][ch]
+                    n2 = n2Arr[index_s][ch]
+                    I = plotValuesAvg[ch]
+                    if(n1%int(Nsuper) == 0 and n2%int(Nsuper)==0):
+                        n1n2 = str(int(n1/Nsuper)) + ',' + str(int(n2/Nsuper))
+                        #print("Annotating point " + n1n2)
+                        if(plotValuesAvg[ch] < (valmaxArr[index_s]-valminArr[index_s])*0.75):
+                            col = 'w'
+                        else:
+                            col = 'k'
+                        plt.annotate(n1n2,((b1[0]*float(n1)+b2[0]*float(n2)),
+                                            (b1[1]*float(n1)+b2[1]*float(n2))),
+                                    fontsize=channelFontSize,zorder=12,ha='center',va='center',c=col)
+                for index_i in range(Ninterest):
+                    n1n2 = n1n2OfInterest[index_i]
+                    n1 = n1n2[0]
+                    n2 = n1n2[1]
+                    ax2.scatter(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2)),Nsuper*(b1[1]*float(n1)+b2[1]*float(n2)),
+                                marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=320,linewidth=1)
 
             heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
                                 [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
@@ -635,23 +660,33 @@ for index_s in range(Nscat):
             additionalY = []
             additionalVals = []
 
+            ymin = min(brightSpotYArr[index_s])-2
+            ymax = max(brightSpotYArr[index_s])+2
+            xmin = min(brightSpotXArr[index_s])-2
+            xmax = max(brightSpotXArr[index_s])+2
+
             padCells = True
             if(padCells):
                 print("Padding...")
                 paddingCells = 50
-                for n in range(-paddingCells,paddingCells):
-                    for m in range(-paddingCells,paddingCells):
-                        canPlaceSiteHere = True
+                for m1 in range(-paddingCells,paddingCells):
+                    for m2 in range(-paddingCells,paddingCells):
+                        x = m1*b1[0] + m2*b2[0]
+                        y = m1*b1[1] + m2*b2[1]
+                        if(y > ymax or y < ymin or x > xmax or x < xmin):
+                            canPlaceSiteHere = False
+                        else:                        
+                            canPlaceSiteHere = True
                         for ch in range(nOccChArr[index_s]):
                             n1 = n1Arr[index_s][ch]
                             n2 = n2Arr[index_s][ch]
-                            if(m == n1 and n == n2):
+                            if(m1 == n1 and m2 == n2):
                                 canPlaceSiteHere = False
                                 
                         if(canPlaceSiteHere):
                             #print(f"site added at n1, n2 = {m}, {n}")
-                            additionalX.append([b1[0]*float(m)+b2[0]*float(n)])
-                            additionalY.append([b1[1]*float(m)+b2[1]*float(n)])
+                            additionalX.append([b1[0]*float(m1)+b2[0]*float(m2)])
+                            additionalY.append([b1[1]*float(m1)+b2[1]*float(m2)])
                             additionalVals.append(smolVal)
                             #plt.annotate('+',((b1[0]*float(m)+b2[0]*float(n)),(b1[1]*float(m)+b2[1]*float(n))),fontsize=8,zorder=10,ha='center',va='center',color=[1., 0., 0.])
                         #else:
@@ -681,12 +716,8 @@ for index_s in range(Nscat):
             ax2.set_aspect('equal')
             plt.xticks([])  
             plt.yticks([])
-            ymin = min(brightSpotYArr[index_s])-1/2
-            ymax = max(brightSpotYArr[index_s])+1/2
-            xmin = min(brightSpotXArr[index_s])-1/2
-            xmax = max(brightSpotXArr[index_s])+1/2
-            ax2.set_ylim(ymin,ymax)
-            ax2.set_xlim(xmin,xmax)
+            ax2.set_ylim(ymin+3/2,ymax-3/2)
+            ax2.set_xlim(xmin+3/2,xmax-3/2)
             #print("....")
             #print(ymin)
             #print(ymax)

@@ -15,7 +15,6 @@ zMax = 6; zMin = 0;%units Å
 fileprefix = "1x1pristine"
 onlyWriteLatticeFile = false;
 plotPot = true;
-onlyPrepConf = true;
 
 %a1=[const.a,0];
 %a2=[0,const.a];
@@ -684,10 +683,7 @@ doingMSshit = true;
 if(doingMSshit)
     %potStructArray.V = Vsuper;
     confStruct=Multiscat.createConfigStruct(potStructArray);
-    Multiscat.prepareConfigFile(confStruct);
-    if(onlyPrepConf) 
-        error("Done!")
-    end
+    Multiscat.prepareConfigFile(confStruct);f=
     Multiscat.prepareFourierLabels(Vsuper,fileprefix);
     Multiscat.PreparePotentialFiles(potStructArray);
 end
