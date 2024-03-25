@@ -3,16 +3,16 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 50; Nsuper = 1;
+Nxy = 10; Nz = 100; Nsuper = 9;
 %Theta = 0.9;
-Theta = (0/(Nsuper*Nsuper));
+Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
   defectH = 0.5;
   defectW = 0.5;
   minDist = const.c*0.5;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "1x1pristine"
+fileprefix = "x9x9MoS2"
 onlyWriteLatticeFile = false;
 
 %a1=[const.a,0];
@@ -345,7 +345,7 @@ end
 if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
 %  Nensemble = (factorial(Nsites-1)) ...
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
-  Nensemble = Ndefect;  %gansta maths
+  Nensemble = 1;  %gansta maths
 else
   Nensemble = 1;
 end
@@ -353,7 +353,7 @@ if(usingDisplacementDefects)
   Nensemble = 1;
 end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = Nsuper; %This is a very very rough lower bound
+Nensemble_limit = 100; %This is a very very rough lower bound
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
