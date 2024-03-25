@@ -7,8 +7,8 @@ Reciprocal vectors:
 b1 = -1.9883       1.148
 b2 = 0      2.2959
 Defect data:
-Theta = 0.12
-Ensemble size = 5
-Positional entropy = 0.373733
-Defect density in cm^-2 = 138763884599333.2
-Total number of defects = 3
+Theta = 0.08
+Ensemble size = 6
+Positional entropy = 0.250275
+Defect density in cm^-2 = 92509256399555.47
+Total number of defects = 2

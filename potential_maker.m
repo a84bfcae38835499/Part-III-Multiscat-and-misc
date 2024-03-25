@@ -3,19 +3,19 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 1;
+Nxy = 10; Nz = 100; Nsuper = 5;
 %Theta = 0.9;
-Theta = (0/(Nsuper*Nsuper));
+Theta = (2/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
   defectH = 0.5;
   defectW = 0.5;
   minDist = const.c*0.5;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "1x1pristine"
+fileprefix = "ensembletest2"
 onlyWriteLatticeFile = false;
 plotPot = true;
-onlyPrepConf = true;
+onlyPrepConf = false;
 
 %a1=[const.a,0];
 %a2=[0,const.a];
@@ -347,9 +347,9 @@ end
 if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
 %  Nensemble = (factorial(Nsites-1)) ...
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
-  Nensemble = 5;  %gansta maths
+  Nensemble = 7;  %gansta maths
 else
-  Nensemble = 6;
+  Nensemble = 8;
 end
 if(usingDisplacementDefects)
   Nensemble = 1;
@@ -361,11 +361,6 @@ if(Nensemble > Nensemble_limit)
   Nensemble = Nensemble_limit;
 end
 
-%% data for python hex plotter
-WritePythonInfo(fileprefix,a1,a2,cellArea,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity,Ndefect);
-if(onlyWriteLatticeFile)
-    error("Done!")
-end
 
 
 potStructArray = struct([]);
@@ -400,11 +395,11 @@ else
     while(~solved)
       pizza = pizza + 1;
       if(pizza > 1000)
-        disp("Nsuper = " + Nsuper)
-        disp("Ndefect = " +Ndefect)
-        disp("successful = " + successful)
-        error("pizza = " + pizza)
-      end
+        disp("pizza = " + pizza)
+        Nensemble = successful;
+        disp("New Nensemble = " + successful)
+        solved = true;
+      else
       ms = squeeze(ones(Ndefect,1,1,1,'int64'))*69;
       ns = squeeze(ones(Ndefect,1,1,1,'int64'))*69;
       ms_available = 0:Nsuper-1;
@@ -417,65 +412,66 @@ else
       boolgrid(1,1) = true;
       ms(1) = 0;
       ns(1) = 0;
-
-      for d = 2:Ndefect
-        disp("d = " + d)
-        foundValidSpot = false;
-        while(~foundValidSpot)
-          m = randi(Nsuper)-1;
-          n = randi(Nsuper)-1;
-          avoidNearestNeighbors = true;
-          if(avoidNearestNeighbors)
-            if(boolgrid(m+1,n+1) == false ...
-                && boolgrid(mod(m+1,Nsuper)+1,n+1) == false ...
-                && boolgrid(mod(m-1,Nsuper)+1,n+1) == false ...
-                && boolgrid(mod(m,Nsuper)+1,n+1) == false ...
-                && boolgrid(m+1,mod(n+1,Nsuper)+1) == false ...
-                && boolgrid(m+1,mod(n-1,Nsuper)+1) == false ...
-                && boolgrid(mod(m+1,Nsuper)+1,mod(n+1,Nsuper)+1) == false ...
-                && boolgrid(mod(m-1,Nsuper)+1,mod(n-1,Nsuper)+1) == false)
-              foundValidSpot = true;
-              boolgrid(m+1,n+1) = true;
+    
+          for d = 2:Ndefect
+            disp("d = " + d)
+            foundValidSpot = false;
+            while(~foundValidSpot)
+              m = randi(Nsuper)-1;
+              n = randi(Nsuper)-1;
+              avoidNearestNeighbors = true;
+              if(avoidNearestNeighbors)
+                if(boolgrid(m+1,n+1) == false ...
+                    && boolgrid(mod(m+1,Nsuper)+1,n+1) == false ...
+                    && boolgrid(mod(m-1,Nsuper)+1,n+1) == false ...
+                    && boolgrid(mod(m,Nsuper)+1,n+1) == false ...
+                    && boolgrid(m+1,mod(n+1,Nsuper)+1) == false ...
+                    && boolgrid(m+1,mod(n-1,Nsuper)+1) == false ...
+                    && boolgrid(mod(m+1,Nsuper)+1,mod(n+1,Nsuper)+1) == false ...
+                    && boolgrid(mod(m-1,Nsuper)+1,mod(n-1,Nsuper)+1) == false)
+                  foundValidSpot = true;
+                  boolgrid(m+1,n+1) = true;
+                end
+              else
+                if(boolgrid(m+1,n+1) == false)
+                  foundValidSpot = true;
+                  boolgrid(m+1,n+1) = true;
+                end
+              end
             end
-          else
-            if(boolgrid(m+1,n+1) == false)
-              foundValidSpot = true;
-              boolgrid(m+1,n+1) = true;
+            disp("m, n = ")
+            disp([m n])
+            ms(d) = m;
+            ns(d) = n;
+            %ms_available = ms_available(ms_available~=m);
+            %ns_available = ns_available(ns_available~=n);
+          end
+          
+          testgrid = zeros(Nsuper,Nsuper,'logical');
+          for index = 1:length(ms)
+            mt = ms(index)+1;
+            nt = ns(index)+1;
+            testgrid(mt,nt) = true;
+          end
+          disp("Trial defect arrangement for ensemble " + Ne + " = ")
+          disp(testgrid)
+          solved = true;
+          for ne = 1:Ne
+            samplegrid = boolgrid_ensemble(:,:,ne);
+            disp("Samplegrid = ")
+            disp(samplegrid)
+            if( AreCyclicBoundaryMatriciesEqual(samplegrid,testgrid))
+              disp("This defect arrangement has already been stored!")
+              solved = false;
             end
           end
-        end
-        disp("m, n = ")
-        disp([m n])
-        ms(d) = m;
-        ns(d) = n;
-        %ms_available = ms_available(ms_available~=m);
-        %ns_available = ns_available(ns_available~=n);
+          disp("Solved = " + solved)
       end
-      
-      testgrid = zeros(Nsuper,Nsuper,'logical');
-      for index = 1:length(ms)
-        mt = ms(index)+1;
-        nt = ns(index)+1;
-        testgrid(mt,nt) = true;
       end
-      disp("Trial defect arrangement for ensemble " + Ne + " = ")
-      disp(testgrid)
-      solved = true;
-      for ne = 1:Ne
-        samplegrid = boolgrid_ensemble(:,:,ne);
-        disp("Samplegrid = ")
-        disp(samplegrid)
-        if( AreCyclicBoundaryMatriciesEqual(samplegrid,testgrid))
-          disp("This defect arrangement has already been stored!")
-          solved = false;
-        end
-      end
-      disp("Solved = " + solved)
+        disp("Solved!")
+        successful = successful + 1;
+        boolgrid_ensemble(:,:,Ne) = testgrid;
     end
-    disp("Solved!")
-    successful = successful + 1;
-    boolgrid_ensemble(:,:,Ne) = testgrid;
-  end
 for Ne = 1:Nensemble
   disp("Ensemble number " + Ne)
   %Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
@@ -621,6 +617,11 @@ for Ne = 1:Nensemble
 end
 %===
 
+end
+%% data for python hex plotter
+WritePythonInfo(fileprefix,a1,a2,cellArea,b1,b2,Nsuper,Theta,Nensemble,inputEntropy,defectDensity,Ndefect);
+if(onlyWriteLatticeFile)
+    error("Done!")
 end
   
 %% for fitting
