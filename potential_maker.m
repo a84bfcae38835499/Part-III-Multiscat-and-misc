@@ -3,17 +3,18 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 9;
+Nxy = 32; Nz = 100; Nsuper = 1;
 %Theta = 0.9;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
   defectH = 0.5;
   defectW = 0.5;
   minDist = const.c*0.5;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "x9x9MoS2"
+fileprefix = "1x1pristine"
 onlyWriteLatticeFile = false;
+plotPot = true;
 
 %a1=[const.a,0];
 %a2=[0,const.a];
@@ -46,7 +47,7 @@ cellAreaS = cellArea * (Nsuper^2);
 disp("Supercell area = " + cellAreaS + "Å^2")
 
 disp("Target number of sites = " + (Nsuper*Nsuper * Theta))
-Ndefect = int8(round(Nsuper*Nsuper * Theta));
+Ndefect = int64(round(Nsuper*Nsuper * Theta));
 disp("Actual number of sites = " + Ndefect)
 defectDensity = double(Ndefect)/cellAreaS;
 disp("defectDensity = " + defectDensity + "/Å^2")
@@ -345,9 +346,9 @@ end
 if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
 %  Nensemble = (factorial(Nsites-1)) ...
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
-  Nensemble = 1;  %gansta maths
+  Nensemble = 5;  %gansta maths
 else
-  Nensemble = 1;
+  Nensemble = 6;
 end
 if(usingDisplacementDefects)
   Nensemble = 1;
@@ -380,84 +381,6 @@ if(Ndefect == 0 || usingDisplacementDefects)
   potStructArray(1).Nxy=Nxy;
   potStructArray(1).Nsuper=Nsuper;
   potStructArray(1).Ndefect=Ndefect;
-
-  plotPot = true;
-  if(plotPot)
-    Vplotted = Vsuper;
-    comparePots = false;
-    if(comparePots)
-      ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT interpolated',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,1.5,aboveCol)
-      ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT interpolated',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,1.5,holCol)
-      ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT interpolated',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,1.5,moCol)
-    end
-    % Plot of a slice of the potential in the nth row, that is for constant x
-      row = floor(Nxy/2);
-    figure
-    contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
-        reshape(Vplotted(row,:,:), [Nxy*Nsuper,Nz]), linspace(-30,100,24))
-    
-        fontsize(gcf,scale=1)
-    xlabel('z/Å')
-    ylabel('y/Å') %is this x or y? I think y but idrk
-    colorbar
-    xlim([1.5,6])
-    title('Potential in z, used in simulation')
-    hbar = colorbar;
-    ylabel(hbar,'Energy / meV');
-    figure
-    fileindx = 1;
-    for i = 0
-      Vsoup = single(i);
-      figure
-      equipotential_plot('V', Vplotted, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
-      shading interp
-      hold on
-      view([15 45])
-      %equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
-      shading interp
-      xlim([-3.5 2]*Nsuper);
-      ylim([-0.5 3]*Nsuper);
-      daspect([1 1 1])
-      hold off
-      savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg";
-      fileindx = fileindx + 1;
-      saveas(gcf,savestr,'jpg')
-    end
-    fontsize(gcf,scale=1)
-    zSample = 3;
-    zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
-    figure
-    contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),10)
-    daspect([1 1 1])
-    xlabel('x/Å')
-    ylabel('y/Å')
-    title('Potentials at z = ' + string(zSample) + ' Å');
-    colormap(parula(15))
-    hbar = colorbar('southoutside');
-    xlabel(hbar,'Energy / meV');
-    %add indicators for where we're sampling the potential z
-    fontsize(gcf,scale=1)
-    plotPoints = true;
-    if(plotPoints)
-      hold on
-      xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
-      yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
-      plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
-      plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
-    
-      xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
-      yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
-      plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
-      plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
-    
-      xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
-      yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
-      plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
-      plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
-       hold off
-    end
-    
-  end
 else
   %% One or more defects
   disp("One or more defects!!!")
@@ -481,8 +404,8 @@ else
         disp("successful = " + successful)
         error("pizza = " + pizza)
       end
-      ms = squeeze(ones(Ndefect,1,1,1,'int8'))*69;
-      ns = squeeze(ones(Ndefect,1,1,1,'int8'))*69;
+      ms = squeeze(ones(Ndefect,1,1,1,'int64'))*69;
+      ns = squeeze(ones(Ndefect,1,1,1,'int64'))*69;
       ms_available = 0:Nsuper-1;
       ns_available = 0:Nsuper-1;
       %Another question is - How do we decide which sites to add defects on to?
@@ -557,8 +480,8 @@ for Ne = 1:Nensemble
   %Vsuper = AddSulphurDefect(false,Vsuper,1,1,a1,a2,Nsuper,Xsuper,Ysuper,Z);
 
   Vout = Vsuper;
-  for m = 0:int8(Nsuper-1)
-    for n = 0:int8(Nsuper-1)
+  for m = 0:int64(Nsuper-1)
+    for n = 0:int64(Nsuper-1)
       if(boolgrid_ensemble(m+1,n+1,Ne) == true)
         if((m == 0) || (n == 0) || (m == Nsuper-1) || (n == Nsuper-1))
           Vout = AddSulphurDefect(true,Vout,m,n,a1,a2,Nsuper,Xsuper,Ysuper,Z);
@@ -577,11 +500,10 @@ for Ne = 1:Nensemble
   potStructArray(Ne).Nsuper=Nsuper;
   potStructArray(Ne).Ndefect=Ndefect;
   potStructArray(Ne).fileprefix=fileprefix;
-  plotPot = false;
   if(plotPot)
     Vplotted = Vout;
     %nPlot = 2/3;mPlot = 1/2;
-    comparePots = true;
+    comparePots = false;
     if(comparePots)
       [xS, yS] = ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol,Nxy);
       [xH, yH] = ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol,Nxy);
@@ -637,7 +559,7 @@ for Ne = 1:Nensemble
     %add indicators for where we're sampling the potential z
     fontsize(gcf,scale=1)
 
-    plotPoints = true;
+    plotPoints = false;
     if(plotPoints)
       hold on
       %xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
@@ -677,8 +599,8 @@ for Ne = 1:Nensemble
 
       defCol = [0.3 0.7 1];
       for ne = 1:Nensemble
-        for m = 0:int8(Nsuper-1)
-          for n = 0:int8(Nsuper-1)
+        for m = 0:int64(Nsuper-1)
+          for n = 0:int64(Nsuper-1)
             if(boolgrid_ensemble(m+1,n+1,Ne))
               xPlot = double(m)*a1(1)+double(n)*a2(1);
               yPlot = double(m)*a1(2)+double(n)*a2(2);
@@ -687,12 +609,11 @@ for Ne = 1:Nensemble
           end
         end
       end
-       hold off
+      hold off
 
-      savestr = "Figures/Potentials.jpg";
-      saveas(gcf,savestr,'jpg')
     end
-    
+  savestr = "Figures/" + fileprefix + "_" + string(Ne) + ".jpg";
+  saveas(gcf,savestr,'jpg')
   end
   %===
   
@@ -709,15 +630,15 @@ end
 comparePots = true;
 SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/(Nxy*Nsuper);
 zFitMin = 1.5;
-k = int8(interp1(Z,1:numel(Z),zFitMin));
+k = int64(interp1(Z,1:numel(Z),zFitMin));
 if(k == 0)
   k = 1;
 end
 m = mPlotDef; n = nPlotDef;
 centre = m*a1+n*a2;
 result = SpaghettiBolognaise\(centre');
-i = int8(result(1))+1;
-j = int8(result(2))+1;
+i = int64(result(1))+1;
+j = int64(result(2))+1;
 %V1piece = squeeze(Vsuper(i,j,k:end));
 %Zpiece = Z(k:end);
 Zpiece = dft.zAxis;
@@ -967,7 +888,7 @@ end
 function [x,y] = ComparePotentials(Vgridded,Vline,V1name,V2name,a1,a2,m,n,Z1,Z2,zMin,plotColor,Nxy)
   Nsuper = double(size(Vgridded,1))/Nxy;
   SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/Nxy;
-  k1 = int8(interp1(Z1,1:numel(Z1),zMin))+1;
+  k1 = int64(interp1(Z1,1:numel(Z1),zMin))+1;
   centre = m*a1+n*a2;
   result = SpaghettiBolognaise\(centre');
   i = int64(result(1));
@@ -981,7 +902,7 @@ function [x,y] = ComparePotentials(Vgridded,Vline,V1name,V2name,a1,a2,m,n,Z1,Z2,
   y_ = centre(2);
   disp("x, y = " + x + ", " + y)
   disp("x_,y_= " + x_ + ", " + y_)
-  k2 = int8(interp1(Z2,1:numel(Z2),zMin))+1;
+  k2 = int64(interp1(Z2,1:numel(Z2),zMin))+1;
   %V2piece = squeeze(V2(i2,j2,:));
   V2piece = Vline;
   figure
