@@ -21,16 +21,16 @@ fileprefix = '3x3highdefect_adatom'
 fileprefix = '5x5MoS2'
 fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
-fileprefix = 'ensembletest'
+fileprefix = 'ensembletest2'
 pristineprefix = '1x1pristine'
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 plotFigure = True
 useLog = False
-useBoth = False #Plots both log and nonlog graphs one after another
+useBoth = True #Plots both log and nonlog graphs one after another
+showIndividualCrossSections = False
 vanity = False
 channelFontSize = 6
 
-"""
 n1n2OfInterest = [[1,0],
                   [0,0],
                   [-1,0],
@@ -43,8 +43,8 @@ n1n2OfInterest = [[1,0],
 n1n2Colours = [[1, 0.82, 0.149],
                   [1, 1, 1],
                   [0.067, 0.769, 0.451],
-                  [0.149, 0.792, 1],
-                  [0.196, 0.149, 1],
+                  [0.149, 0.792, 0.7],
+                  [0.296, 0.369, 1],
                   [1, 0.463, 0.722],
                   [0.518, 0.51, 0.941],
                   [0.596, 0, 1],
@@ -56,6 +56,8 @@ n1n2OfInterest = [[1,0],
 n1n2Colours = [[1, 0.82, 0.149],
                   [1, 1, 1],
                   [0.067, 0.769, 0.451]]
+"""
+
 Ninterest = sum(1 for _ in n1n2OfInterest)
 
 def slugify(value, allow_unicode=False):
@@ -97,7 +99,6 @@ def import_multiscat(fname):
     print("===")
     dslice = d.iloc[topOfSeperation:,:]
     dfs.append(dslice)
-    print("\nFinshed!")
     return(dfs)
 
 def calculate_entropy(intensities):
@@ -304,8 +305,10 @@ n1minArr = [0]*Nscat
 n1maxArr = [0]*Nscat
 n2minArr = [0]*Nscat
 n2maxArr = [0]*Nscat
-IsOfInterestAvgArr = [[0.]*Ninterest] * Nscat
-IsOfInterestUncArr = [[0.]*Ninterest] * Nscat
+IsOfIAvgArr = [[0.]*Ninterest] * Nscat
+IsOfIUncArr = [[0.]*Ninterest] * Nscat
+SigmasOfIAvgArr = [[0.]*Ninterest] * Nscat
+SigmasOfIUncArr = [[0.]*Ninterest] * Nscat
 
 valminArr = [1.]*Nscat
 valmaxArr = [0.]*Nscat
@@ -355,7 +358,8 @@ for index_s in range(Nscat):
     entropiesDisposable = np.zeros((Nensemble))
     kAbsDisposable = np.zeros((Nensemble))
     kAvg = np.array([0.,0.])
-    IsOfIDisposalbe = np.zeros((Nensemble,Ninterest))
+    IsOfIDisposable = np.zeros((Nensemble,Ninterest))
+    SigmasDisposable = np.zeros((Nensemble,Ninterest))
     for index_n in range(Nensemble):
         kAbsAvg = 0.
         kA = np.array([0.,0.])
@@ -378,7 +382,18 @@ for index_s in range(Nscat):
                     if(N1 == n1n2[0] and N2 == n1n2[1]):
                         #print("Found n1n2 of interest! = ")
                         #print(n1n2)
-                        IsOfIDisposalbe[index_n,n1n2OfInterest.index(n1n2)] = I
+                        IsOfIDisposable[index_n,n1n2OfInterest.index(n1n2)] = I
+                        if(pristineprefix != ""):
+                            for ch in range(nOccChPrisArr[index_s]):
+                                #print("k = " + str(k))
+                                row = dfspris[index_s].iloc[ch]
+                                n1 = int(getattr(row,'n1'))
+                                n2 = int(getattr(row,'n2'))
+                                if(n1n2[0] == n1 and n1n2[1] == n2):
+                                    Ipris = float(getattr(row,'I'))
+                                    SigmasDisposable[index_n,n1n2OfInterest.index(n1n2)] = \
+                                        cellArea * np.log(I/Ipris)/np.log(1-Theta)
+
         entropiesDisposable[index_n] = calculate_entropy(iI[index_n])
         kAbsAvg = np.sqrt(kA[0]**2+kA[1]**2)
         kAbsDisposable[index_n] = kAbsAvg
@@ -386,11 +401,13 @@ for index_s in range(Nscat):
     print("kAbsDisposable = ")
     print(kAbsDisposable)
     print("IsOfIDisposalbe = ")
-    print(IsOfIDisposalbe)
+    print(IsOfIDisposable)
     for index_i in range(Ninterest):
-        In1n2ens = IsOfIDisposalbe[:,index_i]
-        IsOfInterestAvgArr[index_s][index_i], IsOfInterestUncArr[index_s][index_i] = find_mean_stdv(In1n2ens)
-    kAvg
+        In1n2ens = IsOfIDisposable[:,index_i]
+        IsOfIAvgArr[index_s][index_i], IsOfIUncArr[index_s][index_i] = find_mean_stdv(In1n2ens)
+        if(pristineprefix != ""):
+            Sigman1n2ens = SigmasDisposable[:,index_i]
+            SigmasOfIAvgArr[index_s][index_i], SigmasOfIUncArr[index_s][index_i] = find_mean_stdv(Sigman1n2ens)
     kAvg /= Babs
     print("kAvg (n1n2 units)= ")
     print(kAvg)
@@ -529,11 +546,10 @@ for index_s in range(Nscat):
     print("Total cross section = " + "{:.4f}".format(crossSectionWhole) + "Å^2")
     #print(simgastr)
     print("| | | | | | | | | | | | | | | | ")
-    sigmas = [0.] * Ninterest
     for index_i in range(Ninterest):
         n1n2 = n1n2OfInterest[index_i]
         prefix = "I_" + str(n1n2) + " = "
-        print( prefix.ljust(12) + "{:.7f}".format(IsOfInterestAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(IsOfInterestUncArr[index_s][index_i]))
+        print( prefix.ljust(12) + "{:.7f}".format(IsOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(IsOfIUncArr[index_s][index_i]))
         if(pristineprefix != ""):
             for index_s in range(Nscat):
                 for ch in range(nOccChPrisArr[index_s]):
@@ -545,12 +561,8 @@ for index_s in range(Nscat):
                         I = float(getattr(row,'I'))
                         pfx = "I0" + str(n1n2OfInterest[index_i]) + " = "
                         print( pfx.ljust(12) + "{:.7f}".format(I))
-                        sigma = cellArea * np.log(IsOfInterestAvgArr[index_s][index_i]/I)/np.log(1-Theta)
-                        print("Σ = " + "{:.7f}".format(sigma) + "Å^2")
+                        print("Σ = " + "{:.7f}".format(SigmasOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å^2")
                         print(": : : : : : : : : : : : : : : : ")
-                        sigmas[index_i] = sigma
-    print("cross sections = ")
-    print(sigmas)
     print("[][][][][][][][][][][][][][][][][][][][][][][][]\n")
 
     if(plotFigure):
@@ -624,6 +636,10 @@ for index_s in range(Nscat):
                     n2 = n1n2[1]
                     ax2.scatter(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2)),Nsuper*(b1[1]*float(n1)+b2[1]*float(n2)),
                                 marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=320,linewidth=1)
+                    if(pristineprefix != "" and showIndividualCrossSections):
+                        sstr = "Σ("+str(n1)+","+str(n2)+")=\n" + "{:.4f}".format(SigmasOfIAvgArr[index_s][index_i]) + "$\pm$\n" + "{:.4f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å$^2$"
+                        ax2.annotate(sstr,(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2))+0.5,Nsuper*(b1[1]*float(n1)+b2[1]*float(n2))),color=n1n2Colours[index_i],
+                                     fontsize = 10,zorder=12,ha='left',va='bottom')
 
             heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
                                 [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
