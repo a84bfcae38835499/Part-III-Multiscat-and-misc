@@ -3,18 +3,18 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 5;
+Nxy = 10; Nz = 100; Nsuper = 6;
 %Theta = 0.9;
-Theta = (2/(Nsuper*Nsuper));
+Theta = (5/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
   defectH = 0.5;
   defectW = 0.5;
   minDist = const.c*0.5;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "ensembletest2"
+fileprefix = "_6x6_05D"
 onlyWriteLatticeFile = false;
-plotPot = true;
+plotPot = false;
 onlyPrepConf = false;
 
 %a1=[const.a,0];
@@ -344,18 +344,18 @@ end
 %% Now add imperfections to the lattice
 %Assume that we always have a defect at the (0,0) position, to fix
 %translational invariance leadings to degeneracy
-if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
+%if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
 %  Nensemble = (factorial(Nsites-1)) ...
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
-  Nensemble = 7;  %gansta maths
-else
-  Nensemble = 8;
-end
+  Nensemble = 100;  %gansta maths
+%else
+%  Nensemble = 8;
+%end
 if(usingDisplacementDefects)
   Nensemble = 1;
 end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = 100; %This is a very very rough lower bound
+Nensemble_limit = 30; %This is a very very rough lower bound
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
@@ -394,10 +394,10 @@ else
     pizza = 0;
     while(~solved)
       pizza = pizza + 1;
-      if(pizza > 1000)
+      if(pizza > 500)
         disp("pizza = " + pizza)
         Nensemble = successful;
-        disp("New Nensemble = " + successful)
+        error("New Nensemble = " + successful)
         solved = true;
       else
       ms = squeeze(ones(Ndefect,1,1,1,'int64'))*69;
@@ -414,7 +414,7 @@ else
       ns(1) = 0;
     
           for d = 2:Ndefect
-            disp("d = " + d)
+            %disp("d = " + d)
             foundValidSpot = false;
             while(~foundValidSpot)
               m = randi(Nsuper)-1;
@@ -439,8 +439,8 @@ else
                 end
               end
             end
-            disp("m, n = ")
-            disp([m n])
+            %disp("m, n = ")
+            %disp([m n])
             ms(d) = m;
             ns(d) = n;
             %ms_available = ms_available(ms_available~=m);
@@ -453,13 +453,13 @@ else
             nt = ns(index)+1;
             testgrid(mt,nt) = true;
           end
-          disp("Trial defect arrangement for ensemble " + Ne + " = ")
-          disp(testgrid)
+          %disp("Trial defect arrangement for ensemble " + Ne + " = ")
+          %disp(testgrid)
           solved = true;
           for ne = 1:Ne
             samplegrid = boolgrid_ensemble(:,:,ne);
-            disp("Samplegrid = ")
-            disp(samplegrid)
+            %disp("Samplegrid = ")
+            %disp(samplegrid)
             if( AreCyclicBoundaryMatriciesEqual(samplegrid,testgrid))
               disp("This defect arrangement has already been stored!")
               solved = false;

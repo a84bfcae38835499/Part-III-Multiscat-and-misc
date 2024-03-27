@@ -21,13 +21,14 @@ fileprefix = '3x3highdefect_adatom'
 fileprefix = '5x5MoS2'
 fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
+fileprefix = '7x7MoS2'
 fileprefix = 'ensembletest2'
 pristineprefix = '1x1pristine'
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 plotFigure = True
 useLog = False
 useBoth = True #Plots both log and nonlog graphs one after another
-showIndividualCrossSections = False
+showIndividualCrossSections = True
 vanity = False
 channelFontSize = 6
 
@@ -684,7 +685,7 @@ for index_s in range(Nscat):
             padCells = True
             if(padCells):
                 print("Padding...")
-                paddingCells = 50
+                paddingCells = 100
                 for m1 in range(-paddingCells,paddingCells):
                     for m2 in range(-paddingCells,paddingCells):
                         x = m1*b1[0] + m2*b2[0]
