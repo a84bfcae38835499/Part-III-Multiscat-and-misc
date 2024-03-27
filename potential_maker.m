@@ -3,7 +3,7 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 16; Nz = 100; Nsuper = 6;
+Nxy = 10; Nz = 100; Nsuper = 6;
 %Theta = 0.9;
 Theta = (2/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
@@ -12,7 +12,7 @@ usingDisplacementDefects = false;
   defectW = 0.5;
   minDist = const.c*0.5;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "-6x6_02D"
+fileprefix = "_6x6_02D"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -87,7 +87,7 @@ for i = 0:12*DFTsuper-1
     end
 end
 
-XDFTsuper = XDFTsuper - const.c/(2-0.3); %makes the 0,0 point be a sulphur
+XDFTsuper = XDFTsuper - const.c/(sqrt(3)); %makes the 0,0 point be a sulphur
 XDFTsuper = XDFTsuper - x1(1) - x2(1);%shifts potential to overlap with the smaller unit cell, for interpolation purposes
 YDFTsuper = YDFTsuper - x1(2) - x2(2);
 
