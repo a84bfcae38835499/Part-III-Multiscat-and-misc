@@ -24,13 +24,14 @@ fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = 'ensembletest2'
 pristineprefix = '1x1pristine'
-extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
+extractMicrostate = 1   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 plotFigure = True
 useLog = False
 useBoth = True #Plots both log and nonlog graphs one after another
 showIndividualCrossSections = True
 vanity = False
 channelFontSize = 6
+sigmaFontSize = 8
 
 n1n2OfInterest = [[1,0],
                   [0,0],
@@ -530,11 +531,11 @@ for index_s in range(Nscat):
         print("H_diff = "+ "{:.6f}".format(eomean) + "±" + "{:.6f}".format(eosdtv))
     
 
-    if(Nensemble == 1):
+    if(Nensemble == 1 or extractMicrostate > 0):
         kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "Å$^{-1}$"
         print("|K| = "+ "{:.3f}".format(kAbsAvgArr[index_s]) + "Å^-1")
     else:
-        kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
+        kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "\n$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
         print("|K| = "+ "{:.3f}".format(kAbsAvgArr[index_s]) + "±" + "{:.3f}".format(kAbsAvgUncArr[index_s]) +"Å^-1")
 
     print("Number of specular channels                  : " + str(nSpecCh))
@@ -596,8 +597,8 @@ for index_s in range(Nscat):
             hecol = [0, 0.3, 0.8]
 
             if(not vanity):
-                plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,path_effects=pathefts2,length_includes_head=True)
-                plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,path_effects=pathefts2,length_includes_head=True)
+                plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,linewidth=0.5,length_includes_head=True)
+                plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,linewidth=0.5,length_includes_head=True)
                 plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.2),color=b1col,fontsize=8,path_effects=pathefts1,zorder=11)
                 plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper+0.1),color=b2col,fontsize=8,path_effects=pathefts1,zorder=11)
 
@@ -615,7 +616,7 @@ for index_s in range(Nscat):
                             #fill=True)
                     ax2.arrow(0., 0.,kAvg[0],kAvg[1], zorder=8 ,linestyle=(0,(1, 10)), color='w',linewidth=.75,head_length=0.0,head_width=0.0)
                     ax2.scatter(kAvg[0],kAvg[1], marker = '+',zorder=8,color='w',linewidth=0.75,s=5e2)
-                    plt.annotate(kstr,(kAvg[0]+.35,kAvg[1]-0.15),color='w',fontsize=10,zorder=11,ha='left',va='top')
+                    plt.annotate(kstr,(kAvg[0]+.35,kAvg[1]-0.15),color='w',fontsize=sigmaFontSize,zorder=11,ha='left',va='top')
                 
                 for ch in range(nOccChArr[index_s]):
                     n1 = n1Arr[index_s][ch]
@@ -640,7 +641,7 @@ for index_s in range(Nscat):
                     if(pristineprefix != "" and showIndividualCrossSections):
                         sstr = "Σ("+str(n1)+","+str(n2)+")=\n" + "{:.4f}".format(SigmasOfIAvgArr[index_s][index_i]) + "$\pm$\n" + "{:.4f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å$^2$"
                         ax2.annotate(sstr,(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2))+0.5,Nsuper*(b1[1]*float(n1)+b2[1]*float(n2))),color=n1n2Colours[index_i],
-                                     fontsize = 10,zorder=12,ha='left',va='bottom')
+                                     fontsize = sigmaFontSize,zorder=12,ha='left',va='bottom')
 
             heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
                                 [-np.sin(np.deg2rad(phi)),np.cos(np.deg2rad(phi))]])
@@ -685,7 +686,7 @@ for index_s in range(Nscat):
             padCells = True
             if(padCells):
                 print("Padding...")
-                paddingCells = 100
+                paddingCells = 50
                 for m1 in range(-paddingCells,paddingCells):
                     for m2 in range(-paddingCells,paddingCells):
                         x = m1*b1[0] + m2*b2[0]

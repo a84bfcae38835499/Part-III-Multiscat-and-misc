@@ -5,14 +5,14 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 10; Nz = 100; Nsuper = 6;
 %Theta = 0.9;
-Theta = (5/(Nsuper*Nsuper));
+Theta = (6/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
   defectH = 0.5;
   defectW = 0.5;
   minDist = const.c*0.5;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "_6x6_05D"
+fileprefix = "_6x6_06D"
 onlyWriteLatticeFile = false;
 plotPot = false;
 onlyPrepConf = false;
