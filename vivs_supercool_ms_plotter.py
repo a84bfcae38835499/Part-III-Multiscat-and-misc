@@ -18,13 +18,13 @@ import matplotlib.cm as cm
 fileprefix = '3x3ikbt_04'
 fileprefix = 'restest_16_50'
 fileprefix = '3x3highdefect_adatom'
-fileprefix = '5x5MoS2'
 fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = 'ensembletest2'
+fileprefix = '5x5MoS2'
 pristineprefix = '1x1pristine'
-extractMicrostate = 6   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
+extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 plotFigure = True
 useLog = False
 useBoth = True #Plots both log and nonlog graphs one after another
@@ -533,9 +533,11 @@ for index_s in range(Nscat):
 
     if(Nensemble == 1 or extractMicrostate > 0):
         kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "Å$^{-1}$"
+        kstr_txt = kstr
         print("|K| = "+ "{:.3f}".format(kAbsAvgArr[index_s]) + "Å^-1")
     else:
-        kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "$\pm$\n" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
+        kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "\n" +"$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
+        kstr_txt = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
         print("|K| = "+ "{:.3f}".format(kAbsAvgArr[index_s]) + "±" + "{:.3f}".format(kAbsAvgUncArr[index_s]) +"Å^-1")
 
     print("Number of specular channels                  : " + str(nSpecCh))
@@ -749,7 +751,7 @@ for index_s in range(Nscat):
             filenametxt=""
             if(not vanity):
                 plt.figtext(0.5, -0.035, defectstr+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-                plt.figtext(0.5, -0.07, intenstr + ", " + simgastr+", "+kstr, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+                plt.figtext(0.5, -0.07, intenstr + ", " + simgastr+", "+kstr_txt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
             else:
                 filenametxt = "vanity"
                 plt.tight_layout(pad=0)
