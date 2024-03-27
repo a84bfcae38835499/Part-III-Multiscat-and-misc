@@ -24,7 +24,7 @@ fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = 'ensembletest2'
 pristineprefix = '1x1pristine'
-extractMicrostate = 1   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
+extractMicrostate = 6   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 plotFigure = True
 useLog = False
 useBoth = True #Plots both log and nonlog graphs one after another
@@ -535,7 +535,7 @@ for index_s in range(Nscat):
         kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "Å$^{-1}$"
         print("|K| = "+ "{:.3f}".format(kAbsAvgArr[index_s]) + "Å^-1")
     else:
-        kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "\n$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
+        kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "$\pm$\n" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
         print("|K| = "+ "{:.3f}".format(kAbsAvgArr[index_s]) + "±" + "{:.3f}".format(kAbsAvgUncArr[index_s]) +"Å^-1")
 
     print("Number of specular channels                  : " + str(nSpecCh))
@@ -639,7 +639,10 @@ for index_s in range(Nscat):
                     ax2.scatter(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2)),Nsuper*(b1[1]*float(n1)+b2[1]*float(n2)),
                                 marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=320,linewidth=1)
                     if(pristineprefix != "" and showIndividualCrossSections):
-                        sstr = "Σ("+str(n1)+","+str(n2)+")=\n" + "{:.4f}".format(SigmasOfIAvgArr[index_s][index_i]) + "$\pm$\n" + "{:.4f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å$^2$"
+                        sstr = "Σ("+str(n1)+","+str(n2)+")=\n" + "{:.4f}".format(SigmasOfIAvgArr[index_s][index_i]) 
+                        if(Nensemble > 1 and extractMicrostate == 0):
+                            sstr+="$\pm$\n"+"{:.4f}".format(SigmasOfIUncArr[index_s][index_i])
+                        sstr += "Å$^2$"
                         ax2.annotate(sstr,(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2))+0.5,Nsuper*(b1[1]*float(n1)+b2[1]*float(n2))),color=n1n2Colours[index_i],
                                      fontsize = sigmaFontSize,zorder=12,ha='left',va='bottom')
 
