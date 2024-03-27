@@ -3,18 +3,18 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 6;
+Nxy = 16; Nz = 100; Nsuper = 6;
 %Theta = 0.9;
-Theta = (7/(Nsuper*Nsuper));
+Theta = (2/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
   defectH = 0.5;
   defectW = 0.5;
   minDist = const.c*0.5;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "_6x6_07D"
+fileprefix = "-6x6_02D"
 onlyWriteLatticeFile = false;
-plotPot = false;
+plotPot = true;
 onlyPrepConf = false;
 
 %a1=[const.a,0];
@@ -347,7 +347,7 @@ end
 %if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
 %  Nensemble = (factorial(Nsites-1)) ...
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
-  Nensemble = 100;  %gansta maths
+  Nensemble = 13;  %gansta maths
 %else
 %  Nensemble = 8;
 %end
@@ -460,7 +460,7 @@ else
             samplegrid = boolgrid_ensemble(:,:,ne);
             %disp("Samplegrid = ")
             %disp(samplegrid)
-            if( AreCyclicBoundaryMatriciesEqual(samplegrid,testgrid))
+            if( AreCyclicBoundaryMatriciesEqual(samplegrid,testgrid,Ndefect))
               disp("This defect arrangement has already been stored!")
               solved = false;
             end
