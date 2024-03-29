@@ -3,7 +3,7 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 6;
+Nxy = 10; Nz = 100; Nsuper = 6;
 %Theta = 0.9;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
@@ -13,7 +13,7 @@ usingDisplacementDefects = false;
   defectW = 0.5;
   minDist = defectW;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "6x6MoS2_ikbt_4_mu_half"
+fileprefix = "_6x6"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -968,11 +968,11 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
         ikbT = 12.9;
         mu = 0.92;
       else
-        %ikbT = 15.9;
-        %mu = 0.49;
+        ikbT = 15.9;
+        mu = 0.49;
 
-        ikbT = 4;
-        mu = 0.5;
+        %ikbT = 4;
+        %mu = 0.5;
       end
       VmatrixElement = Vfunc_MoS2(x,y,z);
     else
