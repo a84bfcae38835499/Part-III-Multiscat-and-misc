@@ -22,10 +22,13 @@ fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = 'ensembletest2'
-fileprefix = '5x5MoS2'
 fileprefix = 'gv5x5_01D'
+fileprefix = '7x7MoS2'
 pristineprefix = '1x1pristine'
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
+nearestNeighborExclusion = False
+subtractDiffuseFromDiffractionChannels = True
+invMaxTheta = 3
 plotFigure = True
 useLog = False
 useBoth = True #Plots both log and nonlog graphs one after another
@@ -394,8 +397,14 @@ for index_s in range(Nscat):
                                 n2 = int(getattr(row,'n2'))
                                 if(n1n2[0] == n1 and n1n2[1] == n2):
                                     Ipris = float(getattr(row,'I'))
-                                    SigmasDisposable[index_n,n1n2OfInterest.index(n1n2)] = \
-                                        cellArea * np.log(I/Ipris)/np.log(1-Theta)
+                                    if(subtractDiffuseFromDiffractionChannels):
+                                        I = I-1/(nOccChArr[index_s])
+                                    if(nearestNeighborExclusion):
+                                        SigmasDisposable[index_n,n1n2OfInterest.index(n1n2)] = \
+                                            3*cellArea * np.log(I/Ipris)/np.log(1-3*Theta)
+                                    else:
+                                        SigmasDisposable[index_n,n1n2OfInterest.index(n1n2)] = \
+                                            cellArea * np.log(I/Ipris)/np.log(1-Theta)
 
         entropiesDisposable[index_n] = calculate_entropy(iI[index_n])
         kAbsAvg = np.sqrt(kA[0]**2+kA[1]**2)
@@ -541,13 +550,21 @@ for index_s in range(Nscat):
         kstr_txt = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
         print("|K| = "+ "{:.3f}".format(kAbsAvgArr[index_s]) + "±" + "{:.3f}".format(kAbsAvgUncArr[index_s]) +"Å^-1")
 
-    print("Number of specular channels                  : " + str(nSpecCh))
+    print("Number of diffractive channels                  : " + str(nSpecCh))
     print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
-    print("Specular intensity proportion : " + str(normSpecI))
+    print("Diffractive intensity proportion : " + str(normSpecI))
     print("Diffuse intensity proportion  : " + str(normDiffI))
-    crossSectionWhole = cellArea * np.log(normSpecI)/np.log(1-Theta)
-    simgastr = "$\Sigma_{T} = $" + "{:.4f}".format(crossSectionWhole) + "Å$^2$"
     intenstr = "Specular proportion = " + str(int(normSpecI*100))+ "%"
+    
+    if(subtractDiffuseFromDiffractionChannels):
+        normSpecI = normSpecI-(nSpecCh/nDiffCh)
+    if(nearestNeighborExclusion):
+        crossSectionWhole = \
+            3*cellArea * np.log(normSpecI)/np.log(1-3*Theta)
+    else:
+        crossSectionWhole = \
+            cellArea * np.log(normSpecI)/np.log(1-Theta)
+    simgastr = "$\Sigma_{T} = $" + "{:.4f}".format(crossSectionWhole) + "Å$^2$"
     print("Total cross section = " + "{:.4f}".format(crossSectionWhole) + "Å^2")
     #print(simgastr)
     print("| | | | | | | | | | | | | | | | ")
@@ -640,7 +657,7 @@ for index_s in range(Nscat):
                     n1 = n1n2[0]
                     n2 = n1n2[1]
                     ax2.scatter(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2)),Nsuper*(b1[1]*float(n1)+b2[1]*float(n2)),
-                                marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=320,linewidth=1)
+                                marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=200,linewidth=1)
                     if(pristineprefix != "" and showIndividualCrossSections):
                         sstr = "Σ("+str(n1)+","+str(n2)+")=\n" + "{:.4f}".format(SigmasOfIAvgArr[index_s][index_i]) 
                         if(Nensemble > 1 and extractMicrostate == 0):
@@ -692,7 +709,7 @@ for index_s in range(Nscat):
             padCells = True
             if(padCells):
                 print("Padding...")
-                paddingCells = 50
+                paddingCells = 100
                 for m1 in range(-paddingCells,paddingCells):
                     for m2 in range(-paddingCells,paddingCells):
                         x = m1*b1[0] + m2*b2[0]
