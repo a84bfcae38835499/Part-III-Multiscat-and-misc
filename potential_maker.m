@@ -5,14 +5,14 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 10; Nz = 100; Nsuper = 6;
 %Theta = 0.9;
-Theta = (2/(Nsuper*Nsuper));
+Theta = (6/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 usingDisplacementDefects = false;
   defectH = 0.5;
   defectW = 0.5;
   minDist = const.c*0.5;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "_6x6_02D"
+fileprefix = "_6x6_06D"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -347,7 +347,7 @@ end
 %if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
 %  Nensemble = (factorial(Nsites-1)) ...
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
-  Nensemble = 13;  %gansta maths
+  Nensemble = 100;  %gansta maths
 %else
 %  Nensemble = 8;
 %end
