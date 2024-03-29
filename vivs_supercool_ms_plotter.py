@@ -31,7 +31,7 @@ subtractDiffuseFromDiffractionChannels = True
 invMaxTheta = 3
 plotFigure = True
 useLog = False
-useBoth = True #Plots both log and nonlog graphs one after another
+useBoth = False #Plots both log and nonlog graphs one after another
 showIndividualCrossSections = True
 vanity = False
 channelFontSize = 5
@@ -398,7 +398,8 @@ for index_s in range(Nscat):
                                 if(n1n2[0] == n1 and n1n2[1] == n2):
                                     Ipris = float(getattr(row,'I'))
                                     if(subtractDiffuseFromDiffractionChannels):
-                                        I = I-1/(nOccChArr[index_s])
+                                        I-=1/(nOccChArr[index_s])
+                                        Ipris-=1/(nOccChArr[index_s]) 
                                     if(nearestNeighborExclusion):
                                         SigmasDisposable[index_n,n1n2OfInterest.index(n1n2)] = \
                                             3*cellArea * np.log(I/Ipris)/np.log(1-3*Theta)
@@ -554,10 +555,11 @@ for index_s in range(Nscat):
     print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
     print("Diffractive intensity proportion : " + str(normSpecI))
     print("Diffuse intensity proportion  : " + str(normDiffI))
-    intenstr = "Specular proportion = " + str(int(normSpecI*100))+ "%"
+    intenstr = "Diffractive proportion = " + str(int(normSpecI*100))+ "%"
     
     if(subtractDiffuseFromDiffractionChannels):
         normSpecI = normSpecI-(nSpecCh/nDiffCh)
+        normSpecI /= 1-(nSpecCh/nDiffCh)
     if(nearestNeighborExclusion):
         crossSectionWhole = \
             3*cellArea * np.log(normSpecI)/np.log(1-3*Theta)
@@ -619,11 +621,11 @@ for index_s in range(Nscat):
             if(not vanity):
                 plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,linewidth=0.5,length_includes_head=True)
                 plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,linewidth=0.5,length_includes_head=True)
-                plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.2),color=b1col,fontsize=8,path_effects=pathefts1,zorder=11)
-                plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper+0.1),color=b2col,fontsize=8,path_effects=pathefts1,zorder=11)
+                #plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.2),color=b1col,fontsize=8,path_effects=pathefts1,zorder=11)
+                #plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper+0.1),color=b2col,fontsize=8,path_effects=pathefts1,zorder=11)
 
-                plt.arrow(0,0,Nsuper*a1[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a1[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.05,color=a1col,zorder=6,length_includes_head=True)
-                plt.arrow(0,0,Nsuper*a2[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a2[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.05,color=a2col,zorder=6,length_includes_head=True)
+                plt.arrow(0,0,Nsuper*a1[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a1[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.04,color=a1col,zorder=6,length_includes_head=True)
+                plt.arrow(0,0,Nsuper*a2[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a2[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.04,color=a2col,zorder=6,length_includes_head=True)
                 #plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
                 #plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
 
