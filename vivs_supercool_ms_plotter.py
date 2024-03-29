@@ -630,7 +630,7 @@ for index_s in range(Nscat):
                 #plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
 
             if(not vanity):
-                if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
+                if(not(math.isclose(theta,0.))):
                     #plt.arrow(0,0,
                     #          kAvg[0],kAvg[1],
                     #          width=0.01,color='w',zorder=7,head_width=0.5,head_length=0.5,length_includes_head=True,
@@ -680,7 +680,7 @@ for index_s in range(Nscat):
             if(not vanity):
                 #print("heliumk_n =")
                 #print(heliumk_n)
-                if(not(math.isclose(theta,0.) & math.isclose(phi,0.))):
+                if(not(math.isclose(theta,0.))):
                     arrowl = 1
                     plt.arrow(meanX+Nsuper*heliumk_n[0,0]-arrowl*np.cos(np.deg2rad(phi)),meanY+Nsuper*heliumk_n[1,0]+arrowl*np.sin(np.deg2rad(phi)),
                     #plt.arrow(0,0,
