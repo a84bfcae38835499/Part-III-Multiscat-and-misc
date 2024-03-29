@@ -3,16 +3,17 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 6;
+Nxy = 10; Nz = 100; Nsuper = 5;
 %Theta = 0.9;
-Theta = (6/(Nsuper*Nsuper));
+Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-usingDisplacementDefects = false;
+Nensemble_limit = 1;
+usingDisplacementDefects = true;
   defectH = 0.5;
   defectW = 0.5;
-  minDist = const.c*0.5;
+  minDist = defectW;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "_6x6_06D"
+fileprefix = "ga5x5_01D_test"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -156,80 +157,7 @@ for i = 0:Nxy*Nsuper-1
     end
 end
 
-if(usingDisplacementDefects)
-  randomX = 1337*ones(1,Ndefect);
-  randomY = 1337*ones(1,Ndefect);
-  repeat = zeros(1,Ndefect,'logical');
-  for d = 1:Ndefect
-    solved = false;
-    while(~solved)
-      r1 = rand*Nsuper;
-      r2 = rand*Nsuper;
-      if(r1 < defectW || r1-defectW > Nsuper*const.c || r2 < defectW || r2-defectW > Nsuper*const.c)
-        repeat(d) = true;
-      end
-      R1 = r1 * a1;
-      R2 = r2 * a2; 
-      x = R1(1) + R2(1);
-      y = R1(2) + R2(2);
-      solved = true;
-      for b = 1:d-1
-        if(repeat(d))
-            disp("Repeating!")
-            for m = -1:1
-              for n = -1:1
-                centre = [randomX(b)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
-                        randomY(b)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
-                xt = centre(1);
-                yt = centre(2);
-                dist = (xt-x)^2+(yt-y)^2;
-                dist = sqrt(dist);
-                disp("dist = " + dist)
-                if(dist < minDist)
-                  solved = false;
-                end
-              end
-            end
-          else
-          xt = randomX(b);
-          yt = randomY(b);
-          dist = (xt-x)^2+(yt-y)^2;
-          dist = sqrt(dist);
-          disp("dist = " + dist)
-          if(dist < minDist)
-            solved = false;
-          end
-        end
-      end
-    disp("solved = " + solved);
-    end
-    disp("Solved!");
-    randomX(d) = x;
-    randomY(d) = y;
-  end
-  addZ = zeros(Nxy*Nsuper,Nxy*Nsuper);
-  for d = 1:Ndefect
-    if(repeat(d))
-      disp("Repeating!")
-      for m = -1:1
-        for n = -1:1
-          centre = [randomX(d)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
-                  randomY(d)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
-          addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectW);
-        end
-      end
-    else
-      addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,[randomX(d),randomY(d)],defectW);
-    end
-  end
-  for i = 1:Nxy*Nsuper
-      for j = 1:Nxy*Nsuper
-        for k = 1:Nz
-          Vsuper(i,j,k) = Vfunc_MoS2(Xsuper(i,j),Ysuper(i,j),Z(k) + addZ(i,j));
-        end
-      end
-  end
-else
+if(~usingDisplacementDefects)
   for k = 1:Nz
         V(:,:,k) = Vfunc_MoS2(X,Y,Z(k));
   end
@@ -347,15 +275,11 @@ end
 %if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
 %  Nensemble = (factorial(Nsites-1)) ...
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
-  Nensemble = 100;  %gansta maths
+  Nensemble = 10;  %gansta maths
 %else
 %  Nensemble = 8;
 %end
-if(usingDisplacementDefects)
-  Nensemble = 1;
-end
 disp("Total ensemble size = " + Nensemble)
-Nensemble_limit = 30; %This is a very very rough lower bound
 if(Nensemble > Nensemble_limit)
   disp("Truncating ensemble to just " + Nensemble_limit)
   Nensemble = Nensemble_limit;
@@ -367,16 +291,218 @@ potStructArray = struct([]);
 boolgrid_ensemble = zeros(Nsuper,Nsuper,Nensemble,'logical');
 if(Ndefect == 0 || usingDisplacementDefects)
   %% 0 defects
-  disp("No defects or using disp defects!!!")
-  potStructArray(1).V = Vsuper;
-  potStructArray(1).a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
-  potStructArray(1).zmin=Z(1);
-  potStructArray(1).zmax=Z(end);
-  potStructArray(1).zPoints=length(Z);
-  potStructArray(1).fileprefix=fileprefix;
-  potStructArray(1).Nxy=Nxy;
-  potStructArray(1).Nsuper=Nsuper;
-  potStructArray(1).Ndefect=Ndefect;
+  if(~usingDisplacementDefects)
+    disp("No defects or using disp defects!!!")
+    potStructArray(1).V = Vsuper;
+    potStructArray(1).a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
+    potStructArray(1).zmin=Z(1);
+    potStructArray(1).zmax=Z(end);
+    potStructArray(1).zPoints=length(Z);
+    potStructArray(1).fileprefix=fileprefix;
+    potStructArray(1).Nxy=Nxy;
+    potStructArray(1).Nsuper=Nsuper;
+    potStructArray(1).Ndefect=Ndefect;
+  else
+    disp("Using random gaussians!!!!")
+    for Ne = 1:Nensemble
+      randomX = 1337*ones(1,Ndefect);
+      randomY = 1337*ones(1,Ndefect);
+      repeat = zeros(1,Ndefect,'logical');
+      for d = 1:Ndefect
+        solved = false;
+        while(~solved)
+          r1 = rand*Nsuper;
+          r2 = rand*Nsuper;
+          if(r1 < defectW || r1-defectW > Nsuper*const.c || r2 < defectW || r2-defectW > Nsuper*const.c)
+            repeat(d) = true;
+          end
+          R1 = r1 * a1;
+          R2 = r2 * a2; 
+          x = R1(1) + R2(1);
+          y = R1(2) + R2(2);
+          solved = true;
+          for b = 1:d-1
+            if(repeat(d))
+                disp("Repeating!")
+                for m = -1:1
+                  for n = -1:1
+                    centre = [randomX(b)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
+                            randomY(b)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
+                    xt = centre(1);
+                    yt = centre(2);
+                    dist = (xt-x)^2+(yt-y)^2;
+                    dist = sqrt(dist);
+                    disp("dist = " + dist)
+                    if(dist < minDist)
+                      solved = false;
+                    end
+                  end
+                end
+              else
+              xt = randomX(b);
+              yt = randomY(b);
+              dist = (xt-x)^2+(yt-y)^2;
+              dist = sqrt(dist);
+              disp("dist = " + dist)
+              if(dist < minDist)
+                solved = false;
+              end
+            end
+          end
+        disp("solved = " + solved);
+        end
+        disp("Solved!");
+        randomX(d) = x;
+        randomY(d) = y;
+      end
+      addZ = zeros(Nxy*Nsuper,Nxy*Nsuper);
+      for d = 1:Ndefect
+        if(repeat(d))
+          disp("Repeating!")
+          for m = -1:1
+            for n = -1:1
+              centre = [randomX(d)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
+                      randomY(d)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
+              addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectW);
+            end
+          end
+        else
+          addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,[randomX(d),randomY(d)],defectW);
+        end
+      end
+      for i = 1:Nxy*Nsuper
+        for j = 1:Nxy*Nsuper
+          for k = 1:Nz
+            Vsuper(i,j,k) = Vfunc_MoS2(Xsuper(i,j),Ysuper(i,j),Z(k) + addZ(i,j));
+          end
+        end
+      end
+      potStructArray(Ne).V = Vsuper;
+      potStructArray(Ne).a1=Nsuper*a1; potStructArray(Ne).a2=Nsuper*a2;
+      potStructArray(Ne).zmin=Z(1);
+      potStructArray(Ne).zmax=Z(end);
+      potStructArray(Ne).zPoints=length(Z);
+      potStructArray(Ne).fileprefix=fileprefix;
+      potStructArray(Ne).Nxy=Nxy;
+      potStructArray(Ne).Nsuper=Nsuper;
+      potStructArray(Ne).Ndefect=Ndefect;
+  if(plotPot)
+    Vplotted = Vsuper;
+    %nPlot = 2/3;mPlot = 1/2;
+    comparePots = false;
+    if(comparePots)
+      [xS, yS] = ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol,Nxy);
+      [xH, yH] = ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol,Nxy);
+      [xM, yM] = ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol,Nxy);
+      [xHm, yHm] = ComparePotentials(Vplotted,dft.midHo,'Analytical potential','DFT - Mid Hollow site',a1,a2,mMidHol,nMidHol,Z,dft.zAxisHiRes,0,holMCol,Nxy);
+      [xMm, yMm] = ComparePotentials(Vplotted,dft.midMo,'Analytical potential','DFT - Mid Molybdenum',a1,a2,mMidMo,nMidMo,Z,dft.zAxisHiRes,0,moMCol,Nxy);
+    end
+    % Plot of a slice of the potential in the nth row, that is for constant x
+      row = floor(Nxy/2);
+    figure
+    contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
+        reshape(Vplotted(row,:,:), [Nxy*Nsuper,Nz]), linspace(-30,100,24))
+    
+        fontsize(gcf,scale=1)
+    xlabel('z/Å')
+    ylabel('y/Å') %is this x or y? I think y but idrk;
+    colorbar
+    xlim([1.5,6])
+    title('Potential in z, used in simulation')
+    hbar = colorbar;
+    ylabel(hbar,'Energy / meV');
+    figure
+    fileindx = 1;
+    for i = 1e-5
+      Vsoup = single(i);
+      figure
+      equipotential_plot('V', Vplotted, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+      shading interp
+      hold on
+      view([15 45])
+      %equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
+      shading interp
+      xlim([-3.5 2]*Nsuper);
+      ylim([-0.5 3]*Nsuper);
+      daspect([1 1 1])
+      hold off
+      savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg";
+      fileindx = fileindx + 1;
+      saveas(gcf,savestr,'jpg')
+    end
+    fontsize(gcf,scale=1)
+    zSample = 2.5;
+    zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
+    figure
+    contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),16)
+    daspect([1 1 1])
+    xlabel('x/Å')
+    ylabel('y/Å')
+    title('Potentials at z = ' + string(zSample) + ' Å');
+    colormap(parula(16))
+    hbar = colorbar('southoutside');
+    xlabel(hbar,'Energy / meV');
+    %add indicators for where we're sampling the potential z
+    fontsize(gcf,scale=1)
+
+    plotPoints = false;
+    if(plotPoints)
+      hold on
+      %xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
+      %yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
+      plot(xS,yS,'*',MarkerSize=24,Color=aboveCol);
+      plot(xS,yS,'.',MarkerSize=24,Color=aboveCol);
+    
+      %xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
+      %yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
+      plot(xH,yH,'+',MarkerSize=24,Color=holCol);
+      plot(xH,yH,'.',MarkerSize=24,Color=holCol);
+    
+      %xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
+      %yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
+      plot(xM,yM,'x',MarkerSize=24,Color=moCol);
+      plot(xM,yM,'.',MarkerSize=24,Color=moCol);
+
+      %xPlot = mMidHol*a1(1)+nMidHol*a2(1);
+      %yPlot = mMidHol*a1(2)+nMidHol*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=holMCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=holMCol);
+      plot(xHm,yHm,'d',MarkerSize=24,Color=holMCol);
+      plot(xHm,yHm,'.',MarkerSize=24,Color=holMCol);
+
+      %xPlot = mMidMo*a1(1)+nMidMo*a2(1);
+      %yPlot = mMidMo*a1(2)+nMidMo*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=moMCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=moMCol);
+      plot(xMm,yMm,'p',MarkerSize=24,Color=moMCol);
+      plot(xMm,yMm,'.',MarkerSize=24,Color=moMCol);
+
+      defCol = [0.3 0.7 1];
+      for ne = 1:Nensemble
+        for m = 0:int64(Nsuper-1)
+          for n = 0:int64(Nsuper-1)
+            if(boolgrid_ensemble(m+1,n+1,Ne))
+              xPlot = double(m)*a1(1)+double(n)*a2(1);
+              yPlot = double(m)*a1(2)+double(n)*a2(2);
+              plot(xPlot,yPlot,'p',MarkerSize=24, MarkerEdgeColor=[0 0 0],MarkerFaceColor=defCol);
+            end
+          end
+        end
+      end
+      hold off
+
+    end
+  savestr = "Figures/" + fileprefix + "_" + string(Ne) + ".jpg";
+  saveas(gcf,savestr,'jpg')
+  end
+    end
+  end
 else
   %% One or more defects
   disp("One or more defects!!!")

@@ -23,6 +23,7 @@ fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = 'ensembletest2'
 fileprefix = '5x5MoS2'
+fileprefix = 'gv5x5_01D'
 pristineprefix = '1x1pristine'
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 plotFigure = True
