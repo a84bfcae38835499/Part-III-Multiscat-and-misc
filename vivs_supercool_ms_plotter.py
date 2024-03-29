@@ -34,8 +34,8 @@ useLog = False
 useBoth = True #Plots both log and nonlog graphs one after another
 showIndividualCrossSections = True
 vanity = False
-channelFontSize = 6
-sigmaFontSize = 8
+channelFontSize = 5
+sigmaFontSize = 7
 
 n1n2OfInterest = [[1,0],
                   [0,0],
@@ -601,7 +601,7 @@ for index_s in range(Nscat):
                 mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]))
 
             #create the figure with set figure size
-            fig = plt.figure(figsize=(15,12))
+            fig = plt.figure(figsize=(10,8))
 
             #creates two subplots
             ax = plt.subplot2grid((16,20), (0,17), colspan=1, rowspan=16)
@@ -657,13 +657,13 @@ for index_s in range(Nscat):
                     n1 = n1n2[0]
                     n2 = n1n2[1]
                     ax2.scatter(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2)),Nsuper*(b1[1]*float(n1)+b2[1]*float(n2)),
-                                marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=200,linewidth=1)
+                                marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=50,linewidth=1)
                     if(pristineprefix != "" and showIndividualCrossSections):
                         sstr = "Σ("+str(n1)+","+str(n2)+")=\n" + "{:.4f}".format(SigmasOfIAvgArr[index_s][index_i]) 
                         if(Nensemble > 1 and extractMicrostate == 0):
                             sstr+="$\pm$\n"+"{:.4f}".format(SigmasOfIUncArr[index_s][index_i])
                         sstr += "Å$^2$"
-                        ax2.annotate(sstr,(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2))+0.5,Nsuper*(b1[1]*float(n1)+b2[1]*float(n2))),color=n1n2Colours[index_i],
+                        ax2.annotate(sstr,(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2))+0.75,Nsuper*(b1[1]*float(n1)+b2[1]*float(n2))),color=n1n2Colours[index_i],
                                      fontsize = sigmaFontSize,zorder=12,ha='left',va='bottom')
 
             heliumRot = np.matrix([[np.cos(np.deg2rad(phi)),np.sin(np.deg2rad(phi))],
