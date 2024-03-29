@@ -1,0 +1,27 @@
+Real space vectors:
+a1 = -3.16           0
+a2 = 1.58      2.7366
+Unit cell area = 8.6478
+Nsuper = 5
+Reciprocal vectors:
+b1 = -1.9883       1.148
+b2 = 0      2.2959
+Defect data:
+Theta = 0.8
+Ensemble size = 10
+Positional entropy = 0.597822
+Defect density in cm^-2 = 925092563995554.9
+Total number of defects = 20Real space vectors:
+a1 = -3.16           0
+a2 = 1.58      2.7366
+Unit cell area = 8.6478
+Nsuper = 3
+Reciprocal vectors:
+b1 = -1.9883       1.148
+b2 = 0      2.2959
+Defect data:
+Theta = 0.11111
+Ensemble size = 1
+Positional entropy = 0.346793
+Defect density in cm^-2 = 128485078332715.9
+Total number of defects = 1

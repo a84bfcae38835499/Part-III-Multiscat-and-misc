@@ -5,15 +5,15 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 10; Nz = 100; Nsuper = 5;
 %Theta = 0.9;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (60/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-Nensemble_limit = 1;
+Nensemble_limit = 10;
 usingDisplacementDefects = true;
-  defectH = 0.5;
+  defectH = -0.5;
   defectW = 0.5;
   minDist = defectW;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "ga5x5_01D_test"
+fileprefix = "gv5x5_60D"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
