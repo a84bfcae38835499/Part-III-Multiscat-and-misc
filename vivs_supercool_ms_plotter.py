@@ -21,13 +21,18 @@ fileprefix = '3x3highdefect_adatom'
 fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
-fileprefix = 'ensembletest2'
 fileprefix = 'gv5x5_01D'
-fileprefix = '7x7MoS2'
+fileprefix = 'ensembletest2'
 pristineprefix = '1x1pristine'
+
+filenametxt="diffuseCompensationMode = 2"
+
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True
-subtractDiffuseFromDiffractionChannels = True
+diffuseCompensationMode = 2
+                        #0 : Don't compensate
+                        #1 : subtract 1/N from both prsitine and nonpris intensities
+                        #2 : subtract the mean diffuse channel intensity from the unpristine intensity
 invMaxTheta = 3
 plotFigure = True
 useLog = False
@@ -370,6 +375,20 @@ for index_s in range(Nscat):
         kAbsAvg = 0.
         kA = np.array([0.,0.])
         Is = iI[index_n]
+
+        iDiffuse = 0.
+        nDiffuse = 0.
+        for ch in range(nOccChArr[index_s]): #this loop is to get the diffuse bakground
+            row = df.iloc[ch]
+            I = Is[ch]
+            n1 = float(getattr(row,'n1'))
+            n2 = float(getattr(row,'n2'))
+            if(n1%int(Nsuper) != 0 and n2%int(Nsuper)!=0):
+                iDiffuse += I
+                nDiffuse += 1
+        
+        meanDiffuseIntensity = iDiffuse/nDiffuse
+        print(f"meanDiffuseIntensity = {meanDiffuseIntensity}")
         for ch in range(nOccChArr[index_s]):
             row = df.iloc[ch]
             I = Is[ch]
@@ -397,12 +416,14 @@ for index_s in range(Nscat):
                                 n2 = int(getattr(row,'n2'))
                                 if(n1n2[0] == n1 and n1n2[1] == n2):
                                     Ipris = float(getattr(row,'I'))
-                                    if(subtractDiffuseFromDiffractionChannels):
+                                    if(diffuseCompensationMode == 1):
                                         I-=1/(nOccChArr[index_s])
-                                        Ipris-=1/(nOccChArr[index_s]) 
+                                        Ipris-=1/(nOccChArr[index_s])
+                                    elif(diffuseCompensationMode == 2):
+                                        I-=meanDiffuseIntensity
                                     if(nearestNeighborExclusion):
                                         SigmasDisposable[index_n,n1n2OfInterest.index(n1n2)] = \
-                                            3*cellArea * np.log(I/Ipris)/np.log(1-3*Theta)
+                                            invMaxTheta*cellArea * np.log(I/Ipris)/np.log(1-invMaxTheta*Theta)
                                     else:
                                         SigmasDisposable[index_n,n1n2OfInterest.index(n1n2)] = \
                                             cellArea * np.log(I/Ipris)/np.log(1-Theta)
@@ -557,12 +578,15 @@ for index_s in range(Nscat):
     print("Diffuse intensity proportion  : " + str(normDiffI))
     intenstr = "Diffractive proportion = " + str(int(normSpecI*100))+ "%"
     
-    if(subtractDiffuseFromDiffractionChannels):
+    if(diffuseCompensationMode == 1):
         normSpecI = normSpecI-(nSpecCh/nDiffCh)
         normSpecI /= 1-(nSpecCh/nDiffCh)
+    elif(diffuseCompensationMode == 2):
+        normSpecI -= normDiffI/nDiffCh
+    
     if(nearestNeighborExclusion):
         crossSectionWhole = \
-            3*cellArea * np.log(normSpecI)/np.log(1-3*Theta)
+            invMaxTheta*cellArea * np.log(normSpecI)/np.log(1-invMaxTheta*Theta)
     else:
         crossSectionWhole = \
             cellArea * np.log(normSpecI)/np.log(1-Theta)
@@ -768,7 +792,6 @@ for index_s in range(Nscat):
             #print(xmax)
             #print("....")
 
-            filenametxt=""
             if(not vanity):
                 plt.figtext(0.5, -0.035, defectstr+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
                 plt.figtext(0.5, -0.07, intenstr + ", " + simgastr+", "+kstr_txt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)

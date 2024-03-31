@@ -31,18 +31,30 @@ n1n2Colours = [[1, 0.82, 0.149],
                   [0.596, 0, 1],
                   [1, 0.18, 0.408]]
 
-
 Ninterest = sum(1 for _ in n1n2OfInterest)
 Ninplane = 5
 Noutplane = Ninterest - Ninplane
 n1n2Inplane = n1n2OfInterest[:Ninplane]
 n1n2Outplane = n1n2OfInterest[Ninplane:]
-print("---")
-print(n1n2Inplane)
 print("===")
+print(n1n2Inplane)
+print("---")
 print(n1n2Outplane)
+print("===")
 
 Thetas = np.array([
+    0/36,
+    1/36,
+    2/36,
+    3/36,
+    4/36,
+    5/36,
+    6/36,
+    7/36
+])
+NIs = sum(1 for _ in n1n2OfInterest)
+
+Is = np.arrat([
     
 ])
 
