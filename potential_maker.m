@@ -3,17 +3,17 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 6;
+Nxy = 10; Nz = 100; Nsuper = 5;
 %Theta = 0.9;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 1;
-usingDisplacementDefects = false;
+usingDisplacementDefects = true;
   defectH = -0.5;
   defectW = 0.5;
   minDist = defectW;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "_6x6"
+fileprefix = "g-5x5_00D"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
