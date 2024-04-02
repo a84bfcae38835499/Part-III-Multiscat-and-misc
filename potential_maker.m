@@ -3,17 +3,19 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 5;
+Nxy = 32; Nz = 100; Nsuper = 2;
 %Theta = 0.9;
-Theta = (0/(Nsuper*Nsuper));
+Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 1;
 usingDisplacementDefects = true;
-  defectH = -0.5;
-  defectW = 0.5;
-  minDist = defectW;
+displacementMode = 1; % 0 = Gaussians
+                      % 1 = Hemisphere
+  defectH = 0.5;
+  defectW = 1.;
+  minDist = 2*defectW;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "g-5x5_00D"
+fileprefix = "2x2sphere-test"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -292,7 +294,7 @@ boolgrid_ensemble = zeros(Nsuper,Nsuper,Nensemble,'logical');
 if(Ndefect == 0 || usingDisplacementDefects)
   %% 0 defects
   if(~usingDisplacementDefects)
-    disp("No defects or using disp defects!!!")
+    disp("No defects!!!")
     potStructArray(1).V = Vsuper;
     potStructArray(1).a1=Nsuper*a1; potStructArray.a2=Nsuper*a2;
     potStructArray(1).zmin=Z(1);
@@ -303,7 +305,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
     potStructArray(1).Nsuper=Nsuper;
     potStructArray(1).Ndefect=Ndefect;
   else
-    disp("Using random gaussians!!!!")
+    disp("Using displacement defects!!!!")
     for Ne = 1:Nensemble
       randomX = 1337*ones(1,Ndefect);
       randomY = 1337*ones(1,Ndefect);
@@ -363,11 +365,30 @@ if(Ndefect == 0 || usingDisplacementDefects)
             for n = -1:1
               centre = [randomX(d)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
                       randomY(d)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
-              addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectW);
+              if(displacementMode == 0)
+                    addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectW);
+              elseif(displacementMode == 1)
+                  xt = centre(1);
+                  yt = centre(2);
+                  dist = (xt-Xsuper).^2+(yt-Ysuper).^2;
+                  yarrr = max(0,1-dist/(defectW^2));
+                  addZ = addZ - defectH*sqrt(yarrr);
+              end
+               
             end
           end
         else
-          addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,[randomX(d),randomY(d)],defectW);
+          centre = [randomX(d)
+                  randomY(d)];
+          if(displacementMode == 0)
+                addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectW);
+          elseif(displacementMode == 1)
+              xt = centre(1);
+              yt = centre(2);
+              dist = (xt-Xsuper).^2+(yt-Ysuper).^2;
+              yarrr = max(0,1-dist/(defectW^2));
+              addZ = addZ - defectH*sqrt(yarrr);
+          end
         end
       end
       for i = 1:Nxy*Nsuper
@@ -1076,5 +1097,5 @@ function [Q] = Qhexfunc(X,Y)
   X_n = X ./ (const.c);
   Y_n = Y ./ (const.c*sqrt(3));
   Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
-  %Q = cos(2*pi*nu/const.a)^5 + cos(2*pi*mu/const.a)^5;
+  %Q = 1;
 end
