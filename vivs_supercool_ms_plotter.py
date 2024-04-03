@@ -14,6 +14,7 @@ import math
 from scipy.spatial import Voronoi
 from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
+pristineprefix = '1x1pristine'
 
 fileprefix = '3x3ikbt_04'
 fileprefix = 'restest_16_50'
@@ -22,10 +23,11 @@ fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = 'gv5x5_01D'
-fileprefix = 'ensembletest2'
-pristineprefix = '1x1pristine'
+fileprefix = 'g-5x5_00D'
 
 filenametxt="diffuseCompensationMode = 2"
+pristineprefix = ''
+scatcondprefix = 'fileprefix'
 
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True
@@ -70,6 +72,9 @@ n1n2Colours = [[1, 0.82, 0.149],
 """
 
 Ninterest = sum(1 for _ in n1n2OfInterest)
+
+if(scatcondprefix == ''):
+    scatcondprefix = fileprefix
 
 def slugify(value, allow_unicode=False):
     """
@@ -242,7 +247,7 @@ latticeFile.close()
 b1 = B1 / Babs
 b2 = B2 / Babs
 
-scatFile = open(fileprefix + '.in_scatcond', 'r')
+scatFile = open(scatcondprefix + '.in_scatcond', 'r')
 
 Nscat = sum(1 for _ in scatFile)
 Nscat -= 1
@@ -252,7 +257,7 @@ thetas = []
 phis = []
 
 scatFile.close()
-scatFile = open(fileprefix + '.in_scatcond', 'r')
+scatFile = open(scatcondprefix + '.in_scatcond', 'r')
 
 line = scatFile.readline()
 for index_s in range(Nscat):
