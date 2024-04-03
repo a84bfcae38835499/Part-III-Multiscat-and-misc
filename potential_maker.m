@@ -1112,8 +1112,8 @@ function [checksum] = vivCheckSum(intArray1, intArray2)
   end
 end
 function [Q] = Qhexfunc(X,Y)
-  %X_n = X ./ (const.c);
-  %Y_n = Y ./ (const.c*sqrt(3));
-  %Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
-  Q = 1;
+  X_n = X ./ (const.c);
+  Y_n = Y ./ (const.c*sqrt(3));
+  Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
+  %Q = 1;
 end
