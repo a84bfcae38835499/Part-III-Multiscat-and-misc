@@ -3,19 +3,19 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 2;
+Nxy = 10; Nz = 100; Nsuper = 5;
 %Theta = 0.9;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 1;
-usingDisplacementDefects = true;
+usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
   defectH = 1.;
   defectR = 1.;
   minDist = defectR;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "2x2sphere-test"
+fileprefix = "_5x5_01D"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
