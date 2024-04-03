@@ -11,11 +11,11 @@ Nensemble_limit = 1;
 usingDisplacementDefects = true;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
-  defectH = 1.;
+  defectH = .0;
   defectR = 1.;
   minDist = defectR;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "2x2volcano"
+fileprefix = "1x1flat"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -380,7 +380,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
                   factor = (1./( 1+exp((r-mu)*ikbT) ));
                   factor = (factor.*( 1+exp((-mu)*ikbT) ));
                   yarr = factor.*(yarr)+ ... 
-                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,mu).*(defectR*4*sqrt(2*pi)));
+                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,mu));
                   addZ = addZ - defectH*yarr;
               end
                
@@ -404,7 +404,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
                   factor = (1./( 1+exp((r-mu)*ikbT) ));
                   factor = (factor.*( 1+exp((-mu)*ikbT) ));
                   yarr = factor.*(yarr)+ ... 
-                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,mu).*(defectR*4*sqrt(2*pi)));
+                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,mu));
                   addZ = addZ - defectH*yarr;
           end
         end
