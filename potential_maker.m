@@ -11,11 +11,11 @@ Nensemble_limit = 1;
 usingDisplacementDefects = true;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
-  defectH = .0;
+  defectH = 1.;
   defectR = 1.;
   minDist = defectR;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "1x1flat"
+fileprefix = "2x2sphere-test"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -369,7 +369,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
                     addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectR*3);
               elseif(displacementMode == 1)
                   ikbT = 10;
-                  mu = defectR*.9;
+                  mu = defectR*.75;
                   xt = centre(1);
                   yt = centre(2);
                   dist = (xt-Xsuper).^2+(yt-Ysuper).^2;
@@ -380,7 +380,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
                   factor = (1./( 1+exp((r-mu)*ikbT) ));
                   factor = (factor.*( 1+exp((-mu)*ikbT) ));
                   yarr = factor.*(yarr)+ ... 
-                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,mu));
+                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,defectR/2));
                   addZ = addZ - defectH*yarr;
               end
                
@@ -393,7 +393,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
                 addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectR/2);
           elseif(displacementMode == 1)
                   ikbT = 10;
-                  mu = defectR*.9;
+                  mu = defectR*.75;
                   xt = centre(1);
                   yt = centre(2);
                   dist = (xt-Xsuper).^2+(yt-Ysuper).^2;
@@ -404,7 +404,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
                   factor = (1./( 1+exp((r-mu)*ikbT) ));
                   factor = (factor.*( 1+exp((-mu)*ikbT) ));
                   yarr = factor.*(yarr)+ ... 
-                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,mu));
+                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,defectR/2));
                   addZ = addZ - defectH*yarr;
           end
         end
