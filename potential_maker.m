@@ -3,7 +3,7 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 2;
+Nxy = 32; Nz = 100; Nsuper = 2;
 %Theta = 0.9;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
@@ -11,11 +11,11 @@ Nensemble_limit = 1;
 usingDisplacementDefects = true;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
-  defectH = .5;
-  defectR = .5;
-  minDist = 2*defectR;
+  defectH = 1.;
+  defectR = 1.;
+  minDist = defectR;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "2x2sphere-test"
+fileprefix = "2x2volcano"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -366,15 +366,22 @@ if(Ndefect == 0 || usingDisplacementDefects)
               centre = [randomX(d)+m*a1(1)*Nsuper+n*a2(1)*Nsuper
                       randomY(d)+m*a1(2)*Nsuper+n*a2(2)*Nsuper];
               if(displacementMode == 0)
-                    addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectR);
+                    addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectR*3);
               elseif(displacementMode == 1)
+                  ikbT = 10;
+                  mu = defectR*.9;
                   xt = centre(1);
                   yt = centre(2);
                   dist = (xt-Xsuper).^2+(yt-Ysuper).^2;
+                  r = sqrt(dist);
                   yarr = max(0,1-dist/(defectR^2));
                   yarr = sqrt(yarr);
-                  yarr = max(yarr, Gaussian2D(Xsuper,Ysuper,centre,defectR/2));
-                  addZ = addZ - defectH*sqrt(yarr);
+
+                  factor = (1./( 1+exp((r-mu)*ikbT) ));
+                  factor = (factor.*( 1+exp((-mu)*ikbT) ));
+                  yarr = factor.*(yarr)+ ... 
+                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,mu).*(defectR*4*sqrt(2*pi)));
+                  addZ = addZ - defectH*yarr;
               end
                
             end
@@ -385,13 +392,20 @@ if(Ndefect == 0 || usingDisplacementDefects)
           if(displacementMode == 0)
                 addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectR/2);
           elseif(displacementMode == 1)
-              xt = centre(1);
-              yt = centre(2);
-              dist = (xt-Xsuper).^2+(yt-Ysuper).^2;
-              yarr = max(0,1-dist/(defectR^2));
-              yarr = sqrt(yarr);
-              yarr = max(yarr, Gaussian2D(Xsuper,Ysuper,centre,defectR));
-              addZ = addZ - defectH*sqrt(yarr);
+                  ikbT = 10;
+                  mu = defectR*.9;
+                  xt = centre(1);
+                  yt = centre(2);
+                  dist = (xt-Xsuper).^2+(yt-Ysuper).^2;
+                  r = sqrt(dist);
+                  yarr = max(0,1-dist/(defectR^2));
+                  yarr = sqrt(yarr);
+
+                  factor = (1./( 1+exp((r-mu)*ikbT) ));
+                  factor = (factor.*( 1+exp((-mu)*ikbT) ));
+                  yarr = factor.*(yarr)+ ... 
+                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,mu).*(defectR*4*sqrt(2*pi)));
+                  addZ = addZ - defectH*yarr;
           end
         end
       end
@@ -971,8 +985,8 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
     
     r = (x-centre(1)).^2+(y-centre(2)).^2;
     r = sqrt(r)./const.c;
-    maxr = min(r,[],"all");
-    minr = min(r,[],"all");
+    %maxr = min(r,[],"all");
+    %minr = min(r,[],"all");
     extent = 0.3;
     cutoff = 1;
     s = extent * const.c;
@@ -1021,13 +1035,13 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
     factor = (1./( 1+exp((r-mu)*ikbT) ));
     factor = (factor.*( 1+exp((-mu)*ikbT) ));
     %factor = factor./( 1+exp((r-hardCut)*10000));
-    maxf = max(factor,[],"all");
-    minf = min(factor,[],"all");
-    if(maxf > 1. )
-      error("Max more than 1!")
-    elseif(minf < 0.)
-        error("Min less than 0!")
-    end
+    %maxf = max(factor,[],"all");
+    %minf = min(factor,[],"all");
+    %if(maxf > 1. )
+    %  error("Max more than 1!")
+    %elseif(minf < 0.)
+    %    error("Min less than 0!")
+    %end
     if(isnan(factor))
       error("Nans found!")
     end
@@ -1098,8 +1112,8 @@ function [checksum] = vivCheckSum(intArray1, intArray2)
   end
 end
 function [Q] = Qhexfunc(X,Y)
-  X_n = X ./ (const.c);
-  Y_n = Y ./ (const.c*sqrt(3));
-  Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
-  %Q = 1;
+  %X_n = X ./ (const.c);
+  %Y_n = Y ./ (const.c*sqrt(3));
+  %Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
+  Q = 1;
 end
