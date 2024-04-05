@@ -387,7 +387,7 @@ c
       dimension d(n), e(m), f(m,n), p(n), t(m,m)
       dimension ix(n), iy(n), ivx(nfc), ivy(nfc)
       real starT, currT, dT
-      real timeLimit
+      parameter (timeLimit = 30000) ! = 8 hours, 20 minutes
 c
 c     NB:
 c     This subroutine implements a preconditioned version of GMRES(l).
@@ -408,7 +408,6 @@ c     Setup for GMRES(l):
 c
       write(*,69) ' Convg. threshold = ',eps
 69    format(A,F11.8)
-      timeLimit = 20000
       mn = m*n
       do i = 1,mn
          x(i) = (0.0d0,0.0d0) 
@@ -539,25 +538,26 @@ c
          diff = max(diff,abs(unit-1.0d0))
          call cpu_time(currT)
          dT = currT-startT
-137      format(A,F11.8,A,F6.0,A1,F6.0,A1)
-138      format(A,A1,A,F11.8,A1,A,A,F6.0,A1,F6.0,A1)
+137      format(A,F11.8,A,F7.0,A1,F7.0,A1)
+138      format(A,A1,A,F11.8,A1,A,A,F7.0,A1,F7.0,A1)
          flush(OUTPUT_UNIT)
          if (diff .lt. eps) then
             kconv = kconv+1
             write(*,138, advance='NO') ' Convergance diff = '
-     +      , achar(27),'[96m',diff,achar(27),'[0m',' T ='
+     +      , achar(27),'[96m',diff,achar(27),'[0m',', T = '
      +      , dT, '/',timeLimit, achar(13)
          else
             kconv = 0
             write(*,137, advance='NO') ' Convergance diff = '
-     +      ,diff,' T=',dT, '/',timeLimit,achar(13)
+     +      ,diff,', T =',dT, '/',timeLimit,achar(13)
          endif
          kk = k
          if (kconv.eq.3 .or. xnorm.eq.0.0d0) go to 2
          if(dT.gt.timeLimit) then
 139      format(A1,A,A,A1,A)
             write(*,139) achar(27),'[91m',
-     +      'ERROR: did not converger in time!',achar(27),'[0m'
+     +      ' ERROR: did not converger in time!',achar(27),'[0m'
+            go to 2
          endif
       enddo
    2  continue
