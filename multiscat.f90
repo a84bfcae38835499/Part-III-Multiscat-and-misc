@@ -211,6 +211,7 @@ program multiscat
         end do
         call precon (m,n,vfc,nfc,nfc00,d,e,f,t)
         ifail=0
+        print'("StartT = "F10.0" seconds")',startTime
         call gmres  (x,xx,y,m,ix,iy,n,n00,vfc,ivx,ivy,nfc,a,b,c,d,e,f,p,s,t,eps,ipc,ifail)
     
         !if failure, then put all intensity to -1
