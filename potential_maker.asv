@@ -3,19 +3,19 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 100; Nsuper = 2;
+Nxy = 16; Nz = 100; Nsuper = 4;
 %Theta = 0.9;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (6/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-Nensemble_limit = 1;
-usingDisplacementDefects = true;
+Nensemble_limit = 3;
+usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
   defectH = 1.;
   defectR = 1.;
   minDist = defectR;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "2x2sphere-test"
+fileprefix = "-4x5_05D"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -302,6 +302,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
     potStructArray(1).zPoints=length(Z);
     potStructArray(1).fileprefix=fileprefix;
     potStructArray(1).Nxy=Nxy;
+    potStructArray(1).Nz=Nz;
     potStructArray(1).Nsuper=Nsuper;
     potStructArray(1).Ndefect=Ndefect;
   else
@@ -315,7 +316,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
         while(~solved)
           r1 = rand*Nsuper;
           r2 = rand*Nsuper;
-          if(r1 < defectR || r1-defectR > Nsuper*const.c || r2 < defectR || r2-defectR > Nsuper*const.c)
+          if(r1 < defectR*2 || r1-defectR*2 > Nsuper*const.c || r2 < defectR*2 || r2-defectR*2 > Nsuper*const.c)
             repeat(d) = true;
           end
           R1 = r1 * a1;
@@ -368,18 +369,19 @@ if(Ndefect == 0 || usingDisplacementDefects)
               if(displacementMode == 0)
                     addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectR*3);
               elseif(displacementMode == 1)
-                  ikbT = 200;
-                  mu = defectR*.0;
+                  ikbT = 10;
+                  mu = defectR*.75;
                   xt = centre(1);
                   yt = centre(2);
                   dist = (xt-Xsuper).^2+(yt-Ysuper).^2;
+                  r = sqrt(dist);
                   yarr = max(0,1-dist/(defectR^2));
                   yarr = sqrt(yarr);
 
-                  factor = (1./( 1+exp((yarr-mu)*ikbT) ));
+                  factor = (1./( 1+exp((r-mu)*ikbT) ));
                   factor = (factor.*( 1+exp((-mu)*ikbT) ));
                   yarr = factor.*(yarr)+ ... 
-                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,defectR*4).*(defectR*4*sqrt(2*pi)));
+                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,defectR/2));
                   addZ = addZ - defectH*yarr;
               end
                
@@ -391,19 +393,19 @@ if(Ndefect == 0 || usingDisplacementDefects)
           if(displacementMode == 0)
                 addZ = addZ - defectH*Gaussian2D(Xsuper,Ysuper,centre,defectR/2);
           elseif(displacementMode == 1)
-                  ikbT = 200;
-                  mu = defectR*.0;
+                  ikbT = 10;
+                  mu = defectR*.75;
                   xt = centre(1);
                   yt = centre(2);
                   dist = (xt-Xsuper).^2+(yt-Ysuper).^2;
-                  dist
+                  r = sqrt(dist);
                   yarr = max(0,1-dist/(defectR^2));
                   yarr = sqrt(yarr);
 
-                  factor = (1./( 1+exp((yarr-mu)*ikbT) ));
+                  factor = (1./( 1+exp((r-mu)*ikbT) ));
                   factor = (factor.*( 1+exp((-mu)*ikbT) ));
                   yarr = factor.*(yarr)+ ... 
-                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,defectR*4).*(defectR*4*sqrt(2*pi)));
+                    (1-factor).*(Gaussian2D(Xsuper,Ysuper,centre,defectR/2));
                   addZ = addZ - defectH*yarr;
           end
         end
@@ -422,6 +424,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
       potStructArray(Ne).zPoints=length(Z);
       potStructArray(Ne).fileprefix=fileprefix;
       potStructArray(Ne).Nxy=Nxy;
+      potStructArray(Ne).Nz=Nz;
       potStructArray(Ne).Nsuper=Nsuper;
       potStructArray(Ne).Ndefect=Ndefect;
   if(plotPot)
@@ -1111,8 +1114,8 @@ function [checksum] = vivCheckSum(intArray1, intArray2)
   end
 end
 function [Q] = Qhexfunc(X,Y)
-  %X_n = X ./ (const.c);
-  %Y_n = Y ./ (const.c*sqrt(3));
-  %Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
-  Q = 1;
+  X_n = X ./ (const.c);
+  Y_n = Y ./ (const.c*sqrt(3));
+  Q = ((cos(2*pi*(X_n-Y_n))+cos(4*pi*Y_n)+cos(2*pi*(X_n+Y_n))) + 3/2)/(4.5);
+  %Q = 1;
 end

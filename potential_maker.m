@@ -3,11 +3,11 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 5;
+Nxy = 32; Nz = 100; Nsuper = 1;
 %Theta = 0.9;
-Theta = (6/(Nsuper*Nsuper));
+Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-Nensemble_limit = 3;
+Nensemble_limit = 1;
 usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
@@ -15,7 +15,7 @@ displacementMode = 1; % 0 = Gaussians
   defectR = 1.;
   minDist = defectR;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "_5x5_05D"
+fileprefix = "-1x1pristine"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -302,6 +302,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
     potStructArray(1).zPoints=length(Z);
     potStructArray(1).fileprefix=fileprefix;
     potStructArray(1).Nxy=Nxy;
+    potStructArray(1).Nz=Nz;
     potStructArray(1).Nsuper=Nsuper;
     potStructArray(1).Ndefect=Ndefect;
   else
@@ -423,6 +424,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
       potStructArray(Ne).zPoints=length(Z);
       potStructArray(Ne).fileprefix=fileprefix;
       potStructArray(Ne).Nxy=Nxy;
+      potStructArray(Ne).Nz=Nz;
       potStructArray(Ne).Nsuper=Nsuper;
       potStructArray(Ne).Ndefect=Ndefect;
   if(plotPot)

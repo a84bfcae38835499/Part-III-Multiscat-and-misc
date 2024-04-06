@@ -25,7 +25,8 @@ classdef Multiscat
                 dLine2 = ['Nxy = ',num2str(potStructArray(i).Nxy)];
                 dLine3 = ['Nsuper = ',num2str(potStructArray(i).Nsuper)];
                 dLine4 = ['Ndefect = ',num2str(potStructArray(i).Ndefect)];
-                finalstr = [dLine1,newline,dLine2,newline,dLine3,newline,dLine4,newline,'Dummy line5',newline];
+                dLine5 = ['Nz = ',num2str(potStructArray(i).Nz)];
+                finalstr = [dLine1,newline,dLine2,newline,dLine3,newline,dLine4,newline,dLine5,newline];
                 fprintf(filePot,finalstr);
                 
                 for n_i=1:Nx
