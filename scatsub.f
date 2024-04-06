@@ -386,6 +386,8 @@ c
       complex*16 a(n), b(n), c(n), s(n)
       dimension d(n), e(m), f(m,n), p(n), t(m,m)
       dimension ix(n), iy(n), ivx(nfc), ivy(nfc)
+      real starT, currT, dT
+      parameter (timeLimit = 30000) ! = 8 hours, 20 minutes
 c
 c     NB:
 c     This subroutine implements a preconditioned version of GMRES(l).
@@ -405,12 +407,12 @@ c
 c     Setup for GMRES(l):
 c
       write(*,69) ' Convg. threshold = ',eps
-69    format(A,F13.8)
+69    format(A,F11.8)
       mn = m*n
       do i = 1,mn
          x(i) = (0.0d0,0.0d0) 
       enddo
-
+      call cpu_time(starT)
 c
 c     Initial step:
 c
@@ -534,20 +536,29 @@ c
             p(j) = pj
          enddo
          diff = max(diff,abs(unit-1.0d0))
-137      format(A1,A,F14.8)
-138      format(A1,A,A1,A,F14.8,A1,A)
+         call cpu_time(currT)
+         dT = currT-startT
+137      format(A,F11.8,A,F7.0,A1,F7.0,A1)
+138      format(A,A1,A,F11.8,A1,A,A,F7.0,A1,F7.0,A1)
          flush(OUTPUT_UNIT)
          if (diff .lt. eps) then
             kconv = kconv+1
-            write(*,138, advance='NO') achar(13),' Convergance diff ='
-     +      , achar(27),'[96m',diff,achar(27),'[0m'
+            write(*,138, advance='NO') ' Convergance diff = '
+     +      , achar(27),'[96m',diff,achar(27),'[0m',', T = '
+     +      , dT, '/',timeLimit, achar(13)
          else
             kconv = 0
-            write(*,137, advance='NO') achar(13),' Convergance diff ='
-     +      ,diff
+            write(*,137, advance='NO') ' Convergance diff = '
+     +      ,diff,', T =',dT, '/',timeLimit,achar(13)
          endif
          kk = k
          if (kconv.eq.3 .or. xnorm.eq.0.0d0) go to 2
+         if(dT.gt.timeLimit) then
+139      format(A1,A,A,A1,A)
+            write(*,139) achar(27),'[91m',
+     +      ' ERROR: did not converger in time!',achar(27),'[0m'
+            go to 2
+         endif
       enddo
    2  continue
 c

@@ -10,11 +10,14 @@ import matplotlib.patheffects as pe
 import matplotlib.patches as patches
 import math
 
+filenametxt=""
+pristineprefix = ''
+
 #packages to import
 from scipy.spatial import Voronoi
 from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
-pristineprefix = '1x1pristine'
+
 
 fileprefix = '3x3ikbt_04'
 fileprefix = 'restest_16_50'
@@ -23,13 +26,12 @@ fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = 'gv5x5_01D'
-fileprefix = 'g-5x5_00D'
+fileprefix = 'gv5x5_03D'
 
-filenametxt="diffuseCompensationMode = 2"
-pristineprefix = ''
-scatcondprefix = 'fileprefix'
+scatcondprefix = 'gaussian'
+pristineprefix = 'g-5x5_00D'
 
-extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
+extractMicrostate = 1   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True
 diffuseCompensationMode = 2
                         #0 : Don't compensate
@@ -298,7 +300,7 @@ for index_s in range(Nscat):
 
 if(pristineprefix != ""):
     nOccChPrisArr = [0]*Nscat
-    print("Importing pristine file " + pristineprefix + ".out")
+    print("Importing pristine file " + pristineprefix + "10001.out")
     dfspris = import_multiscat(pristineprefix+'10001.out')
     for index_s in range(Nscat):
         print("index_s = " + str(index_s))
