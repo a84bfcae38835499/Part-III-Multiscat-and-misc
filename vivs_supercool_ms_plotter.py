@@ -10,7 +10,8 @@ import matplotlib.patheffects as pe
 import matplotlib.patches as patches
 import math
 
-filenametxt=""
+filenametxt=''
+scatcondprefix = ''
 pristineprefix = ''
 
 #packages to import
@@ -26,10 +27,10 @@ fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = 'gv5x5_01D'
-fileprefix = 'gv5x5_03D'
+fileprefix = '-1x1pristine'
 
-scatcondprefix = 'gaussian'
-pristineprefix = 'g-5x5_00D'
+#scatcondprefix = 'gaussian'
+#pristineprefix = 'g-5x5_00D'
 
 extractMicrostate = 1   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True

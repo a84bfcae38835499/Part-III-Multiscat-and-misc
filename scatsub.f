@@ -710,9 +710,9 @@ c     -------------------------------------------------------------------
 c
       dimension ix(n), iy(n), d(n), p(n)
       sum = 0.0d0
-      !if (itest.eq.1) then
-      !   write (21,601) ei,theta,phi !6.3.24 this was screwing with multicondition csv reading
-      !endif 
+      if (itest.eq.1) then
+         write (21,601) ei,theta,phi !6.3.24 this was screwing with multicondition csv reading
+      endif 
       do j = 1,n
          jx = ix(j)
          jy = iy(j)
