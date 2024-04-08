@@ -5,9 +5,9 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 10; Nz = 100; Nsuper = 5;
 %Theta = 0.9;
-Theta = (5/(Nsuper*Nsuper));
+Theta = (6/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-Nensemble_limit = 4;
+Nensemble_limit = 3;
 usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
