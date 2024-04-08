@@ -5,9 +5,9 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 10; Nz = 100; Nsuper = 5;
 %Theta = 0.9;
-Theta = (5/(Nsuper*Nsuper));
+Theta = (6/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-Nensemble_limit = 2;
+Nensemble_limit = 1;
 usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
@@ -15,7 +15,7 @@ displacementMode = 1; % 0 = Gaussians
   defectR = 0.5;
   minDist = defectR;
 zMax = 6; zMin = 0;%units Å
-fileprefix = "_5x5_05D"
+fileprefix = "_5x5_06D"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
