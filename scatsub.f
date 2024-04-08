@@ -575,6 +575,7 @@ c
 c     all done? 
 c
       if (kconv.lt.3 .and. xnorm.gt.0.0d0) then
+         print *,'ifail = 1'
          ifail=1
       endif
 c

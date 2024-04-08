@@ -214,9 +214,9 @@ program multiscat
         call gmres  (x,xx,y,m,ix,iy,n,n00,vfc,ivx,ivy,nfc,a,b,c,d,e,f,p,s,t,eps,ipc,ifail)
     
         !if failure, then put all intensity to -1
-        if (ifail.eq.1) then
-          p=-1
-        end if
+        !if (ifail.eq.1) then
+        !  p=-1
+        !end if !commented out by viv
         
         ! write outputs 
         print *, 'Energy / meV    Theta / deg    Phi / deg        I00         Sum ' 
