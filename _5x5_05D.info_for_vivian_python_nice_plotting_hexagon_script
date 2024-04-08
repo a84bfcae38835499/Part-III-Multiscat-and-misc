@@ -7,11 +7,11 @@ Reciprocal vectors:
 b1 = -1.9883       1.148
 b2 = 0      2.2959
 Defect data:
-Theta = 0.24
-Ensemble size = 3
-Positional entropy = 0.694561
-Defect density in cm^-2 = 277527769198666.4
-Total number of defects = 6Real space vectors:
+Theta = 0.2
+Ensemble size = 2
+Positional entropy = 0.597822
+Defect density in cm^-2 = 231273140998888.7
+Total number of defects = 5Real space vectors:
 a1 = -3.16           0
 a2 = 1.58      2.7366
 Unit cell area = 8.6478
