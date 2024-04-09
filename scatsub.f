@@ -407,13 +407,17 @@ c
 c     Setup for GMRES(l):
 c
       write(*,69) ' Convg. threshold = ',eps
+      call cpu_time(startT)
 69    format(A,F11.8)
       mn = m*n
       do i = 1,mn
          x(i) = (0.0d0,0.0d0) 
       enddo
+<<<<<<< Updated upstream
       
       call cpu_time(startT)
+=======
+>>>>>>> Stashed changes
 c
 c     Initial step:
 c
@@ -455,7 +459,6 @@ c
          p(j) = 0.0d0
       enddo
       do k = 1,l
-
          kount = kount+1
          do i = 1,mn
             x(i) = x(i)/xnorm
