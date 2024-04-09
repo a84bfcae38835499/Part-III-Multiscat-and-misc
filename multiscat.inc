@@ -1,7 +1,7 @@
 !Hard limits on Multiscat parameters included everywhere at compile time
 
       parameter (NZFIXED_MAX = 550)        !max no of z points in fixed pot.
-      parameter (NVFCFIXED_MAX = 1024)      !max no of fourier cmpts (fixed, from file)
-      parameter (nmax = 1440)    !NOTE: This is set higher in sams repo, this vm eats too much ram!!      diffraction channels
+      parameter (NVFCFIXED_MAX = 10240)      !max no of fourier cmpts (fixed, from file)
+      parameter (nmax = 14400)    !NOTE: This is set higher in sams repo, this vm eats too much ram!!      diffraction channels
       parameter (mmax = 550)    !         z grid points
-      parameter (nfcx = 1024)    !         max number of potential fourier components per z slice
+      parameter (nfcx = 10240)    !         max number of potential fourier components per z slice

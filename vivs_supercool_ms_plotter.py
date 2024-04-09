@@ -27,7 +27,7 @@ fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = 'gv5x5_01D'
-fileprefix = '-1x1pristine'
+fileprefix = '_1x1_01D'
 
 #scatcondprefix = 'gaussian'
 #pristineprefix = 'g-5x5_00D'
@@ -395,7 +395,10 @@ for index_s in range(Nscat):
                 iDiffuse += I
                 nDiffuse += 1
         
-        meanDiffuseIntensity = iDiffuse/nDiffuse
+        if(Nsuper == 1):
+            meanDiffuseIntensity = 0.
+        else:
+            meanDiffuseIntensity = iDiffuse/nDiffuse
         print(f"meanDiffuseIntensity = {meanDiffuseIntensity}")
         for ch in range(nOccChArr[index_s]):
             row = df.iloc[ch]
@@ -586,18 +589,21 @@ for index_s in range(Nscat):
     print("Diffuse intensity proportion  : " + str(normDiffI))
     intenstr = "Diffractive proportion = " + str(int(normSpecI*100))+ "%"
     
-    if(diffuseCompensationMode == 1):
-        normSpecI = normSpecI-(nSpecCh/nDiffCh)
-        normSpecI /= 1-(nSpecCh/nDiffCh)
-    elif(diffuseCompensationMode == 2):
-        normSpecI -= normDiffI/nDiffCh
-    
-    if(nearestNeighborExclusion):
-        crossSectionWhole = \
-            invMaxTheta*cellArea * np.log(normSpecI)/np.log(1-invMaxTheta*Theta)
+    if(Nsuper != 1):
+        if(diffuseCompensationMode == 1):
+            normSpecI = normSpecI-(nSpecCh/nDiffCh)
+            normSpecI /= 1-(nSpecCh/nDiffCh)
+        elif(diffuseCompensationMode == 2):
+            normSpecI -= normDiffI/nDiffCh
+        
+        if(nearestNeighborExclusion):
+            crossSectionWhole = \
+                invMaxTheta*cellArea * np.log(normSpecI)/np.log(1-invMaxTheta*Theta)
+        else:
+            crossSectionWhole = \
+                cellArea * np.log(normSpecI)/np.log(1-Theta)
     else:
-        crossSectionWhole = \
-            cellArea * np.log(normSpecI)/np.log(1-Theta)
+        crossSectionWhole = 0.
     simgastr = "$\Sigma_{T} = $" + "{:.4f}".format(crossSectionWhole) + "Å$^2$"
     print("Total cross section = " + "{:.4f}".format(crossSectionWhole) + "Å^2")
     #print(simgastr)

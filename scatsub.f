@@ -386,7 +386,7 @@ c
       complex*16 a(n), b(n), c(n), s(n)
       dimension d(n), e(m), f(m,n), p(n), t(m,m)
       dimension ix(n), iy(n), ivx(nfc), ivy(nfc)
-      real starT, currT, dT
+      real startT, currT, dT
       parameter (timeLimit = 30000) ! = 8 hours, 20 minutes
 c
 c     NB:
@@ -412,7 +412,8 @@ c
       do i = 1,mn
          x(i) = (0.0d0,0.0d0) 
       enddo
-      call cpu_time(starT)
+      
+      call cpu_time(startT)
 c
 c     Initial step:
 c
@@ -535,6 +536,11 @@ c
             diff = max(diff,abs(pj-p(j)))
             p(j) = pj
          enddo
+         !print *, ''
+         !print *, 'diff = '
+         !print *, diff
+         !print *, 'unit = '
+         !print *, unit
          diff = max(diff,abs(unit-1.0d0))
          call cpu_time(currT)
          dT = currT-startT
@@ -549,7 +555,7 @@ c
          else
             kconv = 0
             write(*,137, advance='NO') ' Convergance diff = '
-     +      ,diff,', T =',dT, '/',timeLimit,achar(13)
+     +      ,diff,', T = ',dT, '/',timeLimit,achar(13)
          endif
          kk = k
          if (kconv.eq.3 .or. xnorm.eq.0.0d0) go to 2
@@ -575,13 +581,13 @@ c
 c     all done? 
 c
       if (kconv.lt.3 .and. xnorm.gt.0.0d0) then
+         print *,''
          print *,'ifail = 1'
          ifail=1
       endif
 c
 c     yes!
 c
-      print *,''
       return
       end
 
@@ -711,9 +717,9 @@ c     -------------------------------------------------------------------
 c
       dimension ix(n), iy(n), d(n), p(n)
       sum = 0.0d0
-      if (itest.eq.1) then
-         write (21,601) ei,theta,phi !6.3.24 this was screwing with multicondition csv reading
-      endif 
+      !if (itest.eq.1) then
+      !   write (21,601) ei,theta,phi !6.3.24 this was screwing with multicondition csv reading
+      !endif 
       do j = 1,n
          jx = ix(j)
          jy = iy(j)
