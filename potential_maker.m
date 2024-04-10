@@ -3,15 +3,15 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 10; Nz = 100; Nsuper = 1;
+Nxy = 32; Nz = 100; Nsuper = 1;
 %Theta = 0.9;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 1;
-usingDisplacementDefects = false;
+usingDisplacementDefects = true;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
-  defectH = 0.5;
+  defectH = 0.;
   defectR = 0.5;
   minDist = defectR;
 zMax = 6; zMin = 0;%units Å

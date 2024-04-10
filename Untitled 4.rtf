@@ -1,0 +1,52 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2761
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+\
+\\section*\{Outline\}\
+\\subsection\{Introduction\}\
+Talk about the relevance of helium-surface scattering, how defects and nonideal surfaces lead to diffuse, or Knudsen, scattering, how this process isn't well understood, mention real world applications like 2D material 'doping' with defects\
+\\subsection\{Methods\}\
+Explain\
+\\begin\{itemize\}\
+    \\item What Multiscat is, how it works (in summary)\
+    \\item How to interpret the diffraction pattern, in terms of:\
+    \\begin\{description\}\
+    \\item[-] Shannon entropy\
+    \\item[-] |k|?\
+    \\item[-] Defect cross section\
+    \\end\{description\}\
+    and define them and explain what they physically mean obvs. Also, define which specular channels we care about - specifically, why only the ones along the principle axis and a few ones to either side cos they're the ones we can measure in real life\
+    \\item The empirical form of the \\mos2 interaction potential potential, its inspiration from Wolken LiF and why it has the symmetries it does (corrugation = 0 above points useful for fitting)\
+    \\item How adding defects works using Fermi-Dirac(R) envelope\
+    \\item How MATLAB was used:\
+    \\begin\{description\}\
+        \\item[-] To interpolate the incorrect-symmetry DFT into a useful unit cell (and why this interpolated potential alone wouldn't be good enough)\
+        \\item[-] To fit parameters of my empirical potential to DFT\
+        \\item[-] To fit the defect parameters to DFT\
+        \\item[-] Show graphs of how the fits look like in the end, and a pretty equipotential of a defect in a supercell. Also mention the limits of how large a supercell we could make, citing the appendix\
+        \\item[-] Also, how I prepared ensembles of same-$\\Theta$ potentials with different defect placements to emulate a larger cell than was possible (todo: check helium decoherence length to justify this)\
+    \\end\{description\}\
+    \\item Finally, citing both Nadav and Luke as well as Poelsema and Comsa, explain the method for generating Gaussian defects which shift the z axis locally, and explain the expected angular cross section dependence for vacancies (no $\\theta$ dependence) and adatoms ($\\propto 1/\\cos(\\theta)$).\
+\\end\{itemize\}\
+\\subsection\{Results\}\
+Here present the results (when they arrive). Key results:\
+\\begin\{enumerate\}\
+    \\item Repeat of Luke and Nadav's paper:\
+    \\begin\{description\}\
+        \\item[-] $H_\{diffrac\}$ and $|k|$ vs. $\\Theta$ (both for realistic vacancies as well as vacancies/adatoms)\
+    \\end\{description\}\
+    \\item How each of the observable specular channel intensities varies with $\\Theta$, as well as the average across all channels\
+    \\item Same as above but for the defect cross section\
+    \\item How the Gaussian defect cross sections vary with incident $\\theta$\
+\\end\{enumerate\}\
+\\subsection\{Conclusion\}\
+And they all lived happily ever after\
+\\subsection\{Appendix\}\
+Put all the boring stuff here - Timing graphs for different sized supercells and different resolutions, perhaps a derivation of the lattice gas formula\
+\
+}
