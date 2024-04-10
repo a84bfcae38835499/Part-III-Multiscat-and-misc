@@ -5,17 +5,17 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 32; Nz = 100; Nsuper = 1;
 %Theta = 0.9;
-Theta = (1/(Nsuper*Nsuper));
+Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 1;
-usingDisplacementDefects = true;
+usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
   defectH = 0.;
   defectR = 0.5;
   minDist = defectR;
-zMax = 6; zMin = 0;%units Å
-fileprefix = "_1x1_01D"
+zMax = 6; zMin = 2;%units Å
+fileprefix = "-1x1interp"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -170,21 +170,12 @@ if(~usingDisplacementDefects)
           end
       end
   end
-  Vinterpsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
-  for z = 1:Nz
-      for nx = 1:Nxy:Nsuper*Nxy
-          for ny = 1:Nxy:Nsuper*Nxy
-              Vinterpsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = Vinterp(:,:,z);
-          end
-      end
-  end
 end
 %We strictly ought to be careful with boundary conditions cos MS doesn't
 %actually check them lol
 %===
 %% Now interpolate the DFT data into a useful basis
-interpolateDFTdata = false;
-Vvect = zeros(Nz*Nxy*Nxy,1);
+interpolateDFTdata = true;
 
 if(interpolateDFTdata)
   oldmethod = true;
@@ -257,6 +248,14 @@ if(interpolateDFTdata)
     equipotential_plot('V', Vinterp, 'V0', 0, 'z', Z, 'X', N1, 'Y', N2)
     shading interp
   end
+  Vinterpsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
+  for z = 1:Nz
+      for nx = 1:Nxy:Nsuper*Nxy
+          for ny = 1:Nxy:Nsuper*Nxy
+              Vinterpsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = Vinterp(:,:,z);
+          end
+      end
+  end
 end
 
 %writematrix(Vsuper,"V.csv")
@@ -266,7 +265,7 @@ end
 
 %===
 %% oh fuck
-copyInterp = false;
+copyInterp = true;
 if(copyInterp)
   Vsuper = Vinterpsuper;
 end
@@ -305,6 +304,121 @@ if(Ndefect == 0 || usingDisplacementDefects)
     potStructArray(1).Nz=Nz;
     potStructArray(1).Nsuper=Nsuper;
     potStructArray(1).Ndefect=Ndefect;
+  if(plotPot)
+    Vplotted = Vsuper;
+    %nPlot = 2/3;mPlot = 1/2;
+    comparePots = false;
+    if(comparePots)
+      [xS, yS] = ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol,Nxy);
+      [xH, yH] = ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol,Nxy);
+      [xM, yM] = ComparePotentials(Vplotted,dft.aboveMod,'Analytical potential','DFT - Molybdenum',a1,a2,mPlotMo,nPlotMo,Z,dft.zAxis,0,moCol,Nxy);
+      [xHm, yHm] = ComparePotentials(Vplotted,dft.midHo,'Analytical potential','DFT - Mid Hollow site',a1,a2,mMidHol,nMidHol,Z,dft.zAxisHiRes,0,holMCol,Nxy);
+      [xMm, yMm] = ComparePotentials(Vplotted,dft.midMo,'Analytical potential','DFT - Mid Molybdenum',a1,a2,mMidMo,nMidMo,Z,dft.zAxisHiRes,0,moMCol,Nxy);
+    end
+    % Plot of a slice of the potential in the nth row, that is for constant x
+      row = floor(Nxy/2);
+    figure
+    contourf(Z,  linspace(0, const.c*Nsuper, Nxy*Nsuper), ...%!!!
+        reshape(Vplotted(row,:,:), [Nxy*Nsuper,Nz]), linspace(-30,100,24))
+    
+        fontsize(gcf,scale=1)
+    xlabel('z/Å')
+    ylabel('y/Å') %is this x or y? I think y but idrk;
+    colorbar
+    xlim([1.5,6])
+    title('Potential in z, used in simulation')
+    hbar = colorbar;
+    ylabel(hbar,'Energy / meV');
+    figure
+    fileindx = 1;
+    for i = 1e-5
+      Vsoup = single(i);
+      figure
+      equipotential_plot('V', Vplotted, 'V0', Vsoup, 'z', Z, 'X', Xsuper, 'Y', Ysuper)
+      shading interp
+      hold on
+      view([15 45])
+      %equipotential_plot('V',VDFTsuper,'V0', Vsoup, 'z',ZDFT,'X',XDFTsuper,'Y',YDFTsuper)
+      shading interp
+      xlim([-3.5 2]*Nsuper);
+      ylim([-0.5 3]*Nsuper);
+      daspect([1 1 1])
+      hold off
+      savestr = "Figures/Frames/frame_" +num2str(fileindx,'%06d')+ ".jpg";
+      fileindx = fileindx + 1;
+      saveas(gcf,savestr,'jpg')
+    end
+    fontsize(gcf,scale=1)
+    zSample = 2.5;
+    zRow = floor((zSample - zMin)/(zMax-zMin) * Nz);
+    figure
+    contourf(Xsuper,Ysuper,Vplotted(:,:,zRow),16)
+    daspect([1 1 1])
+    xlabel('x/Å')
+    ylabel('y/Å')
+    title('Potentials at z = ' + string(zSample) + ' Å');
+    colormap(parula(16))
+    hbar = colorbar('southoutside');
+    xlabel(hbar,'Energy / meV');
+    %add indicators for where we're sampling the potential z
+    fontsize(gcf,scale=1)
+
+    plotPoints = false;
+    if(plotPoints)
+      hold on
+      %xPlot = mPlotDef*a1(1)+nPlotDef*a2(1);
+      %yPlot = mPlotDef*a1(2)+nPlotDef*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=aboveCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=aboveCol);
+      plot(xS,yS,'*',MarkerSize=24,Color=aboveCol);
+      plot(xS,yS,'.',MarkerSize=24,Color=aboveCol);
+    
+      %xPlot = mPlotHol*a1(1)+nPlotHol*a2(1);
+      %yPlot = mPlotHol*a1(2)+nPlotHol*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=holCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=holCol);
+      plot(xH,yH,'+',MarkerSize=24,Color=holCol);
+      plot(xH,yH,'.',MarkerSize=24,Color=holCol);
+    
+      %xPlot = mPlotMo*a1(1)+nPlotMo*a2(1);
+      %yPlot = mPlotMo*a1(2)+nPlotMo*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=moCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=moCol);
+      plot(xM,yM,'x',MarkerSize=24,Color=moCol);
+      plot(xM,yM,'.',MarkerSize=24,Color=moCol);
+
+      %xPlot = mMidHol*a1(1)+nMidHol*a2(1);
+      %yPlot = mMidHol*a1(2)+nMidHol*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=holMCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=holMCol);
+      plot(xHm,yHm,'d',MarkerSize=24,Color=holMCol);
+      plot(xHm,yHm,'.',MarkerSize=24,Color=holMCol);
+
+      %xPlot = mMidMo*a1(1)+nMidMo*a2(1);
+      %yPlot = mMidMo*a1(2)+nMidMo*a2(2);
+      %plot(xPlot,yPlot,'*',MarkerSize=24,Color=moMCol);
+      %plot(xPlot,yPlot,'.',MarkerSize=24,Color=moMCol);
+      plot(xMm,yMm,'p',MarkerSize=24,Color=moMCol);
+      plot(xMm,yMm,'.',MarkerSize=24,Color=moMCol);
+
+      defCol = [0.3 0.7 1];
+      for ne = 1:Nensemble
+        for m = 0:int64(Nsuper-1)
+          for n = 0:int64(Nsuper-1)
+            if(boolgrid_ensemble(m+1,n+1,Ne))
+              xPlot = double(m)*a1(1)+double(n)*a2(1);
+              yPlot = double(m)*a1(2)+double(n)*a2(2);
+              plot(xPlot,yPlot,'p',MarkerSize=24, MarkerEdgeColor=[0 0 0],MarkerFaceColor=defCol);
+            end
+          end
+        end
+      end
+      hold off
+
+    end
+  savestr = "Figures/" + fileprefix + ".jpg";
+  saveas(gcf,savestr,'jpg')
+  end
   else
     disp("Using displacement defects!!!!")
     for Ne = 1:Nensemble
