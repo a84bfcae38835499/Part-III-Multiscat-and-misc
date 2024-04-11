@@ -413,11 +413,7 @@ c
       do i = 1,mn
          x(i) = (0.0d0,0.0d0) 
       enddo
-<<<<<<< Updated upstream
-      
       call cpu_time(startT)
-=======
->>>>>>> Stashed changes
 c
 c     Initial step:
 c
