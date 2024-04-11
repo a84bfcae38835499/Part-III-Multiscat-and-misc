@@ -387,7 +387,7 @@ c
       dimension d(n), e(m), f(m,n), p(n), t(m,m)
       dimension ix(n), iy(n), ivx(nfc), ivy(nfc)
       real startT, currT, dT
-      parameter (timeLimit = 30000) ! = 8 hours, 20 minutes
+      parameter (timeLimit = 43200) ! = 12 hours
 c
 c     NB:
 c     This subroutine implements a preconditioned version of GMRES(l).
@@ -560,6 +560,7 @@ c
          if (kconv.eq.3 .or. xnorm.eq.0.0d0) go to 2
          if(dT.gt.timeLimit) then
 139      format(A1,A,A,A1,A)
+            print *, ''
             write(*,139) achar(27),'[91m',
      +      ' ERROR: did not converger in time!',achar(27),'[0m'
             go to 2
