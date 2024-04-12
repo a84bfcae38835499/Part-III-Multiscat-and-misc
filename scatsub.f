@@ -373,7 +373,7 @@ c	   if ierr != 0 program terminates printing out precon 2, meaning rs failed
       end
  
       subroutine gmres (x,xx,y,m,ix,iy,n,n00,vfc,ivx,ivy,nfc,
-     +                  a,b,c,d,e,f,p,s,t,eps,ipc,ifail)
+     +                  a,b,c,d,e,f,p,s,t,eps,ipc,ifail,timeLimit)
       use, intrinsic :: iso_fortran_env, only: OUTPUT_UNIT
       implicit double precision (a-h,o-z)
 c
@@ -386,8 +386,7 @@ c
       complex*16 a(n), b(n), c(n), s(n)
       dimension d(n), e(m), f(m,n), p(n), t(m,m)
       dimension ix(n), iy(n), ivx(nfc), ivy(nfc)
-      real startT, currT, dT
-      parameter (timeLimit = 43200) ! = 12 hours
+      real startT, currT, dT, timeLimit
 c
 c     NB:
 c     This subroutine implements a preconditioned version of GMRES(l).

@@ -13,7 +13,7 @@ program multiscat
   include 'multiscat.inc'
 
   !Define filenames
-  character*40 inputfile,outfile,fourierfile, fourierLabelsFile, scattCondFile
+  character*40 inputfile,outfile,fourierfile, fourierLabelsFile, scattCondFile, timeLimitStr
       
   !Arrays
   complex*16 x(mmax,nmax), y(mmax,nmax), vfc(mmax,nfcx)
@@ -32,7 +32,7 @@ program multiscat
   !Variables for potential, represented as fourier data
   complex*16 vfcfixed(NZFIXED_MAX,NVFCFIXED_MAX)   !FC's at the fixed points
   
-  real :: startTime, startTotalTime, currTime
+  real :: startTime, startTotalTime, currTime, timeLimit
   character(len=40) :: fileprefix
 
   common /const/ hemass, rmlmda
@@ -53,6 +53,14 @@ program multiscat
   call getarg(1,inputfile)
   if (inputfile.eq.'') stop 'Error: you must supply a configuration file to run Multiscat.'
   print *, 'Reading parameters from input file: ',inputfile
+  call getarg(2,timeLimitStr)
+  if (timeLimitStr.eq.'') then
+    print *, 'No time limit supplied, setting to default value!'
+    timeLimit = 10000.0
+  else
+    read(timeLimitStr,"(F15.10)") timeLimit
+  endif
+  print *, 'Time limit = ', timeLimit
   print *, ''
 
   !=====================read in parameters from config file==========================
@@ -211,7 +219,7 @@ program multiscat
         end do
         call precon (m,n,vfc,nfc,nfc00,d,e,f,t)
         ifail=0
-        call gmres  (x,xx,y,m,ix,iy,n,n00,vfc,ivx,ivy,nfc,a,b,c,d,e,f,p,s,t,eps,ipc,ifail)
+        call gmres (x,xx,y,m,ix,iy,n,n00,vfc,ivx,ivy,nfc,a,b,c,d,e,f,p,s,t,eps,ipc,ifail,timeLimit)
     
         !if failure, then put all intensity to -1
         !if (ifail.eq.1) then
