@@ -30,7 +30,7 @@ fileprefix = '_1x1_01D'
 fileprefix = 'ga5x5_01D'
 
 scatcondprefix = 'gaussian'
-pristineprefix = 'g-5x5_00D'
+pristineprefix = 'g-1x1_00D'
 
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True
@@ -326,10 +326,10 @@ n1minArr = [0]*Nscat
 n1maxArr = [0]*Nscat
 n2minArr = [0]*Nscat
 n2maxArr = [0]*Nscat
-IsOfIAvgArr = [[0.]*Ninterest] * Nscat
-IsOfIUncArr = [[0.]*Ninterest] * Nscat
-SigmasOfIAvgArr = [[0.]*Ninterest] * Nscat
-SigmasOfIUncArr = [[0.]*Ninterest] * Nscat
+IsOfIAvgArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
+IsOfIUncArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
+SigmasOfIAvgArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
+SigmasOfIUncArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
 
 valminArr = [1.]*Nscat
 valmaxArr = [0.]*Nscat
@@ -451,7 +451,11 @@ for index_s in range(Nscat):
     print(IsOfIDisposable)
     for index_i in range(Ninterest):
         In1n2ens = IsOfIDisposable[:,index_i]
-        IsOfIAvgArr[index_s][index_i], IsOfIUncArr[index_s][index_i] = find_mean_stdv(In1n2ens)
+        avg, unc = find_mean_stdv(In1n2ens)
+        yarr1 = IsOfIAvgArr[index_s]
+        yarr1[index_i] = avg
+        yarr2 = IsOfIUncArr[index_s]
+        yarr2[index_i] = unc
         if(pristineprefix != ""):
             Sigman1n2ens = SigmasDisposable[:,index_i]
             SigmasOfIAvgArr[index_s][index_i], SigmasOfIUncArr[index_s][index_i] = find_mean_stdv(Sigman1n2ens)
@@ -505,8 +509,8 @@ for index_s in range(Nscat):
 #name as the ones before
 execTime = datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M')
 
+print("\n----\n")
 for index_s in range(Nscat):
-    print("----")
     plotValuesAvg = intensityArr[index_s]
     plotCoordsX = coordXArr[index_s]
     plotCoordsY = coordYArr[index_s]
@@ -550,7 +554,7 @@ for index_s in range(Nscat):
     #print("mean x, y = ")
     #print(meanX, meanY)
     
-    print("\n[][][][][][][][][][][][][][][][][][][][][][][][]")
+    print("[][][][][][][][][][][][][][][][][][][][][][][][]")
     #print(kstr)
     E = Es[index_s]
     theta = thetas[index_s]
@@ -615,19 +619,17 @@ for index_s in range(Nscat):
         prefix = "I_" + str(n1n2) + " = "
         print( prefix.ljust(12) + "{:.7f}".format(IsOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(IsOfIUncArr[index_s][index_i]))
         if(pristineprefix != ""):
-            for index_s in range(Nscat):
-                for ch in range(nOccChPrisArr[index_s]):
-                    #print("k = " + str(k))
-                    row = dfspris[index_s].iloc[ch]
-                    n1 = int(getattr(row,'n1'))
-                    n2 = int(getattr(row,'n2'))
-                    if(n1n2[0] == n1 and n1n2[1] == n2):
-                        I = float(getattr(row,'I'))
-                        pfx = "I0" + str(n1n2OfInterest[index_i]) + " = "
-                        print( pfx.ljust(12) + "{:.7f}".format(I))
-                        print("Σ = " + "{:.7f}".format(SigmasOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å^2")
-                        print(": : : : : : : : : : : : : : : : ")
-    print("[][][][][][][][][][][][][][][][][][][][][][][][]\n")
+            for ch in range(nOccChPrisArr[index_s]):
+                #print("k = " + str(k))
+                row = dfspris[index_s].iloc[ch]
+                n1 = int(getattr(row,'n1'))
+                n2 = int(getattr(row,'n2'))
+                if(n1n2[0] == n1 and n1n2[1] == n2):
+                    I = float(getattr(row,'I'))
+                    pfx = "I0" + str(n1n2OfInterest[index_i]) + " = "
+                    print( pfx.ljust(12) + "{:.7f}".format(I))
+                    print("Σ_" + str(n1n2OfInterest[index_i]) +" = " + "{:.7f}".format(SigmasOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å^2")
+                    print(": : : : : : : : : : : : : : : : ")
 
     if(plotFigure):
         if(useBoth):

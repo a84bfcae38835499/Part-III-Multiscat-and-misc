@@ -16,7 +16,7 @@ displacementMode = 1; % 0 = Gaussians
   defectR = 0.5;
   minDist = defectR;
 zMax = 6; zMin = 2;%units Å
-fileprefix = "-1x1interp"
+fileprefix = "g-1x1_00D"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -280,7 +280,7 @@ end
 
 %===
 %% oh fuck
-copyInterp = true;
+copyInterp = false;
 if(copyInterp)
   Vsuper = Vinterpsuper;
 end
