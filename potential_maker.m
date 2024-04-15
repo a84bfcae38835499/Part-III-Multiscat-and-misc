@@ -8,6 +8,7 @@ Nxy = 32; Nz = 100; Nsuper = 1;
 Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 1;
+avoidNearestNeighbors = true;
 usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
@@ -59,14 +60,28 @@ defectDensity = defectDensity * ((1e10/1e2)^2);
 disp("              = " + num2str(defectDensity,'%e') + "/cm^2")
 disp("Theta = " + Theta)
 
-probV = double(Ndefect)/double(Nsuper*Nsuper);
-probS = 1 - probV;
-if(probV > 0. && probS > 0.)
-  inputEntropy = - double(Ndefect) * probV*log(probV) - ...
-    (Nsuper^2-double(Ndefect)) * probS*log(probS);
-  inputEntropy = inputEntropy/(-Nsuper^2*0.5*log(0.5));
+if(avoidNearestNeighbors)
+  %TODO Check this ASAP!!!!! WE've been underestimating the positional entropy
+  %because of nearest neighbor exclusion!
+  probV = double(Ndefect*3)/double(Nsuper*Nsuper);
+  probS = 1 - probV;
+  if(probV > 0. && probS > 0.)
+    inputEntropy = - double(Ndefect*3) * probV*log(probV) - ...
+      (Nsuper^2-double(Ndefect*3)) * probS*log(probS);
+    inputEntropy = inputEntropy/(-Nsuper^2*0.5*log(0.5));
+  else
+    inputEntropy = 0;
+  end
 else
-  inputEntropy = 0;
+  probV = double(Ndefect)/double(Nsuper*Nsuper);
+  probS = 1 - probV;
+  if(probV > 0. && probS > 0.)
+    inputEntropy = - double(Ndefect) * probV*log(probV) - ...
+      (Nsuper^2-double(Ndefect)) * probS*log(probS);
+    inputEntropy = inputEntropy/(-Nsuper^2*0.5*log(0.5));
+  else
+    inputEntropy = 0;
+  end
 end
 disp("Input entropy = " + num2str(inputEntropy))
 %% Import Min's DFT
@@ -700,7 +715,6 @@ else
             while(~foundValidSpot)
               m = randi(Nsuper)-1;
               n = randi(Nsuper)-1;
-              avoidNearestNeighbors = true;
               if(avoidNearestNeighbors)
                 if(boolgrid(m+1,n+1) == false ...
                     && boolgrid(mod(m+1,Nsuper)+1,n+1) == false ...

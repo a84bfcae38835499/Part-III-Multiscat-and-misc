@@ -26,20 +26,20 @@ fileprefix = '3x3highdefect_adatom'
 fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
-fileprefix = 'gv5x5_01D'
 fileprefix = '_1x1_01D'
+fileprefix = 'ga5x5_01D'
 
-#scatcondprefix = 'gaussian'
-#pristineprefix = 'g-5x5_00D'
+scatcondprefix = 'gaussian'
+pristineprefix = 'g-5x5_00D'
 
-extractMicrostate = 1   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
+extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True
 diffuseCompensationMode = 2
                         #0 : Don't compensate
                         #1 : subtract 1/N from both prsitine and nonpris intensities
                         #2 : subtract the mean diffuse channel intensity from the unpristine intensity
 invMaxTheta = 3
-plotFigure = True
+plotFigure = False
 useLog = False
 useBoth = False #Plots both log and nonlog graphs one after another
 showIndividualCrossSections = True
@@ -47,6 +47,7 @@ vanity = False
 channelFontSize = 5
 sigmaFontSize = 7
 
+"""
 n1n2OfInterest = [[1,0],
                   [0,0],
                   [-1,0],
@@ -72,7 +73,6 @@ n1n2OfInterest = [[1,0],
 n1n2Colours = [[1, 0.82, 0.149],
                   [1, 1, 1],
                   [0.067, 0.769, 0.451]]
-"""
 
 Ninterest = sum(1 for _ in n1n2OfInterest)
 
@@ -214,7 +214,7 @@ while count < 10:
         line = line[len("Theta = "):]
         split = line.split()
         Theta = float(split[0])
-        #print("Theta = " + split[0])
+        print("Theta = " + split[0])
         count += 1
     if line.startswith("Ensemble size = "):
         line = line[len("Ensemble size = "):]
@@ -224,7 +224,7 @@ while count < 10:
         else:
             Nensemble = 1
             Nensemble_true = int(split[0])
-        #print("Ensemble size = " + split[0])
+        print("Ensemble size = " + split[0])
         count += 1
     if line.startswith("Positional entropy = "):
         line = line[len("Positional entropy = "):]
@@ -236,8 +236,10 @@ while count < 10:
         line = line[len("Defect density in cm^-2 = "):]
         split = line.split()
         defectDensity = float(split[0])
-        #print("Defect density in cm^-2 = " + split[0])
+        print("Defect density in cm^-2 = " + split[0])
         count += 1
+
+Nensemble = 4
 
 Babs = np.sqrt(B1[0]**2+B1[1]**2)
 print("B1 = ") 
@@ -395,7 +397,7 @@ for index_s in range(Nscat):
                 iDiffuse += I
                 nDiffuse += 1
         
-        if(Nsuper == 1):
+        if(int(Nsuper) == 1):
             meanDiffuseIntensity = 0.
         else:
             meanDiffuseIntensity = iDiffuse/nDiffuse
