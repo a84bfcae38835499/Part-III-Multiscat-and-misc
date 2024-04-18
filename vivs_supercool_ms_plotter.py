@@ -27,10 +27,12 @@ fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = '_1x1_01D'
-fileprefix = 'ga5x5_01D'
+fileprefix = '_6x6_01D'
 
 scatcondprefix = 'gaussian'
+scatcondprefix = '1x1pristine'
 pristineprefix = 'g-1x1_00D'
+pristineprefix = '1x1pristine'
 
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True
@@ -39,11 +41,11 @@ diffuseCompensationMode = 2
                         #1 : subtract 1/N from both prsitine and nonpris intensities
                         #2 : subtract the mean diffuse channel intensity from the unpristine intensity
 invMaxTheta = 3
-plotFigure = False
-useLog = False
+plotFigure = True
+useLog = True
 useBoth = False #Plots both log and nonlog graphs one after another
 showIndividualCrossSections = True
-vanity = False
+vanity = False #Generates an un-annoted plot with no gridlines TODO: investigate Qhull options to make it prettier
 channelFontSize = 5
 sigmaFontSize = 7
 
@@ -238,8 +240,6 @@ while count < 10:
         defectDensity = float(split[0])
         print("Defect density in cm^-2 = " + split[0])
         count += 1
-
-Nensemble = 4
 
 Babs = np.sqrt(B1[0]**2+B1[1]**2)
 print("B1 = ") 
@@ -648,8 +648,12 @@ for index_s in range(Nscat):
             fig = plt.figure(figsize=(10,8))
 
             #creates two subplots
-            ax = plt.subplot2grid((16,20), (0,17), colspan=1, rowspan=16)
-            ax2 = plt.subplot2grid((16,20), (0,0), colspan=16, rowspan=16)
+            if(not vanity):
+                ax = plt.subplot2grid((16,20), (0,17), colspan=1, rowspan=16)
+                ax2 = plt.subplot2grid((16,20), (0,0), colspan=16, rowspan=16)
+            else:
+                ax2 = plt.subplot2grid((16,16), (0,0), colspan=16, rowspan=16)
+
 
 
             pathefts1 = [pe.Stroke(linewidth=1, foreground='w'), pe.Normal()]
@@ -735,11 +739,12 @@ for index_s in range(Nscat):
 
             #creates a colourbar on the first subplot
             #print("valminArr[index_s],valmaxArr[index_s = " + str(valminArr[index_s]) + "," + str(valmaxArr[index_s]))
-            if(b):
-                cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
-            else:
-                cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
-            cb1.set_label('$I_{n_1,n_2}$')
+            if(not vanity):
+                if(b):
+                    cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
+                else:
+                    cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
+                cb1.set_label('$I_{n_1,n_2}$')
 
             additionalX = []
             additionalY = []
@@ -816,6 +821,7 @@ for index_s in range(Nscat):
             else:
                 filenametxt = "vanity"
                 plt.tight_layout(pad=0)
+                fig.patch.set_facecolor('k')
 
             if(filenametxt == ""):
                 filenametxt = fileprefix
