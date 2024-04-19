@@ -27,10 +27,12 @@ fileprefix = '2x2MoS2'
 fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = '_1x1_01D'
-fileprefix = '_6x6_01D'
+fileprefix = 'ga5x5_03D'
+fileprefix = '_5x5_04D'
 
 scatcondprefix = 'gaussian'
 scatcondprefix = '1x1pristine'
+
 pristineprefix = 'g-1x1_00D'
 pristineprefix = '1x1pristine'
 
@@ -42,8 +44,8 @@ diffuseCompensationMode = 2
                         #2 : subtract the mean diffuse channel intensity from the unpristine intensity
 invMaxTheta = 3
 plotFigure = True
-useLog = True
-useBoth = False #Plots both log and nonlog graphs one after another
+useLog = False
+useBoth = True #Plots both log and nonlog graphs one after another
 showIndividualCrossSections = True
 vanity = False #Generates an un-annoted plot with no gridlines TODO: investigate Qhull options to make it prettier
 channelFontSize = 5
@@ -71,10 +73,14 @@ n1n2Colours = [[1, 0.82, 0.149],
 """
 n1n2OfInterest = [[1,0],
                   [0,0],
-                  [-1,0]]
+                  [-1,0],
+                  [-2,0],
+                  [-3,0]]
 n1n2Colours = [[1, 0.82, 0.149],
                   [1, 1, 1],
-                  [0.067, 0.769, 0.451]]
+                  [0.067, 0.769, 0.451],
+                  [0.149, 0.792, 0.7],
+                  [0.296, 0.369, 1],]
 
 Ninterest = sum(1 for _ in n1n2OfInterest)
 
@@ -353,7 +359,7 @@ for index_s in range(Nscat):
 
 
     for index_n in range(Nensemble):
-        print(f"index_n = {index_n}")
+        #print(f"index_n = {index_n}")
         df = dfss[index_n][index_s]
         intensities = np.zeros((nOccChArr[index_s]))
         plotCoordsX = np.zeros((nOccChArr[index_s]))
@@ -445,10 +451,10 @@ for index_s in range(Nscat):
         kAbsAvg = np.sqrt(kA[0]**2+kA[1]**2)
         kAbsDisposable[index_n] = kAbsAvg
         kAvg += kA / float(Nensemble)
-    print("kAbsDisposable = ")
-    print(kAbsDisposable)
-    print("IsOfIDisposalbe = ")
-    print(IsOfIDisposable)
+    #print("kAbsDisposable = ")
+    #print(kAbsDisposable)
+    #print("IsOfIDisposalbe = ")
+    #print(IsOfIDisposable)
     for index_i in range(Ninterest):
         In1n2ens = IsOfIDisposable[:,index_i]
         avg, unc = find_mean_stdv(In1n2ens)
@@ -616,8 +622,6 @@ for index_s in range(Nscat):
     print("| | | | | | | | | | | | | | | | ")
     for index_i in range(Ninterest):
         n1n2 = n1n2OfInterest[index_i]
-        prefix = "I_" + str(n1n2) + " = "
-        print( prefix.ljust(12) + "{:.7f}".format(IsOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(IsOfIUncArr[index_s][index_i]))
         if(pristineprefix != ""):
             for ch in range(nOccChPrisArr[index_s]):
                 #print("k = " + str(k))
@@ -628,8 +632,11 @@ for index_s in range(Nscat):
                     I = float(getattr(row,'I'))
                     pfx = "I0" + str(n1n2OfInterest[index_i]) + " = "
                     print( pfx.ljust(12) + "{:.7f}".format(I))
-                    print("Σ_" + str(n1n2OfInterest[index_i]) +" = " + "{:.7f}".format(SigmasOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å^2")
-                    print(": : : : : : : : : : : : : : : : ")
+        prefix = "I_" + str(n1n2) + " = "
+        print( prefix.ljust(12) + "{:.7f}".format(IsOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(IsOfIUncArr[index_s][index_i]))
+        if(pristineprefix != ""):
+            print("Σ_" + str(n1n2OfInterest[index_i]) +" = " + "{:.7f}".format(SigmasOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å^2")
+        print(": : : : : : : : : : : : : : : : ")
 
     if(plotFigure):
         if(useBoth):
@@ -705,7 +712,7 @@ for index_s in range(Nscat):
                     n1 = n1n2[0]
                     n2 = n1n2[1]
                     ax2.scatter(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2)),Nsuper*(b1[1]*float(n1)+b2[1]*float(n2)),
-                                marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=50,linewidth=1)
+                                marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=100,linewidth=1)
                     if(pristineprefix != "" and showIndividualCrossSections):
                         sstr = "Σ("+str(n1)+","+str(n2)+")=\n" + "{:.4f}".format(SigmasOfIAvgArr[index_s][index_i]) 
                         if(Nensemble > 1 and extractMicrostate == 0):
@@ -758,7 +765,7 @@ for index_s in range(Nscat):
             padCells = True
             if(padCells):
                 print("Padding...")
-                paddingCells = 100
+                paddingCells = 50
                 for m1 in range(-paddingCells,paddingCells):
                     for m2 in range(-paddingCells,paddingCells):
                         x = m1*b1[0] + m2*b2[0]
@@ -826,6 +833,7 @@ for index_s in range(Nscat):
             if(filenametxt == ""):
                 filenametxt = fileprefix
             if(extractMicrostate != 0):
+                filenametxt = fileprefix
                 filenametxt += " (Ensemble number " + str(extractMicrostate) + "/" + str(Nensemble_true) + ")"
                 
             plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
