@@ -28,7 +28,7 @@ fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = '_1x1_01D'
 fileprefix = 'ga5x5_03D'
-fileprefix = '_5x5_04D'
+fileprefix = '8x8MoS2'
 
 scatcondprefix = 'gaussian'
 scatcondprefix = '1x1pristine'
@@ -765,7 +765,7 @@ for index_s in range(Nscat):
             padCells = True
             if(padCells):
                 print("Padding...")
-                paddingCells = 50
+                paddingCells = 100
                 for m1 in range(-paddingCells,paddingCells):
                     for m2 in range(-paddingCells,paddingCells):
                         x = m1*b1[0] + m2*b2[0]
