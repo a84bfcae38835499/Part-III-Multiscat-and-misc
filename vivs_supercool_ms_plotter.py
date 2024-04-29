@@ -28,13 +28,13 @@ fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = '_1x1_01D'
 fileprefix = 'ga5x5_03D'
-fileprefix = '8x8MoS2'
+fileprefix = 'ga5x5_08D'
 
-scatcondprefix = 'gaussian'
 scatcondprefix = '1x1pristine'
+scatcondprefix = 'gaussian'
 
-pristineprefix = 'g-1x1_00D'
 pristineprefix = '1x1pristine'
+pristineprefix = 'g-1x1_00D'
 
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True
