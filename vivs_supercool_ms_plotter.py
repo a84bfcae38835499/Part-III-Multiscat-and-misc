@@ -19,6 +19,8 @@ from scipy.spatial import Voronoi
 from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
 
+n1n2OfInterest = []
+n1n2Colours = []
 
 fileprefix = '3x3ikbt_04'
 fileprefix = 'restest_16_50'
@@ -28,13 +30,13 @@ fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = '_1x1_01D'
 fileprefix = 'ga5x5_03D'
-fileprefix = 'ga5x5_08D'
+fileprefix = '_5x5_05D'
 
-scatcondprefix = '1x1pristine'
 scatcondprefix = 'gaussian'
+scatcondprefix = '1x1pristine'
 
-pristineprefix = '1x1pristine'
 pristineprefix = 'g-1x1_00D'
+pristineprefix = '1x1pristine'
 
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True
@@ -45,13 +47,17 @@ diffuseCompensationMode = 2
 invMaxTheta = 3
 plotFigure = True
 useLog = False
-useBoth = True #Plots both log and nonlog graphs one after another
+useBoth = False #Plots both log and nonlog graphs one after another
+writeCaption = True
+captionFontSize = 8
 showIndividualCrossSections = True
+showMeanK = True
+showA = False
+showB = True
 vanity = False #Generates an un-annoted plot with no gridlines TODO: investigate Qhull options to make it prettier
-channelFontSize = 5
-sigmaFontSize = 7
+channelFontSize = 6
+sigmaFontSize = 6
 
-"""
 n1n2OfInterest = [[1,0],
                   [0,0],
                   [-1,0],
@@ -81,6 +87,7 @@ n1n2Colours = [[1, 0.82, 0.149],
                   [0.067, 0.769, 0.451],
                   [0.149, 0.792, 0.7],
                   [0.296, 0.369, 1],]
+"""
 
 Ninterest = sum(1 for _ in n1n2OfInterest)
 
@@ -319,6 +326,7 @@ if(pristineprefix != ""):
 entropiesOut = [0.]*Nscat
 entropiesOutUnc = [0.]*Nscat
 intensityArr = [None]*Nscat
+intensityUncArr = [None]*Nscat
 coordXArr = [None]*Nscat
 coordYArr = [None]*Nscat
 brightSpotXArr = [None]*Nscat
@@ -382,6 +390,9 @@ for index_s in range(Nscat):
         
     #Now do ensemble averageing, as well as calculating of meaningful quantities so they can have error bars too
     iAverage = np.zeros((nOccChArr[index_s]))
+    iUnc = 0.
+    iDiffractDisposable = np.zeros((Nensemble))
+    iDiffuseDisposable = np.zeros((Nensemble))
     entropiesDisposable = np.zeros((Nensemble))
     kAbsDisposable = np.zeros((Nensemble))
     kAvg = np.array([0.,0.])
@@ -408,6 +419,8 @@ for index_s in range(Nscat):
         else:
             meanDiffuseIntensity = iDiffuse/nDiffuse
         print(f"meanDiffuseIntensity = {meanDiffuseIntensity}")
+        iDiffuseDisposable = meanDiffuseIntensity
+        iDiffractDisposable = 1 - iDiffractDisposable
         for ch in range(nOccChArr[index_s]):
             row = df.iloc[ch]
             I = Is[ch]
@@ -635,6 +648,9 @@ for index_s in range(Nscat):
         prefix = "I_" + str(n1n2) + " = "
         print( prefix.ljust(12) + "{:.7f}".format(IsOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(IsOfIUncArr[index_s][index_i]))
         if(pristineprefix != ""):
+            iRatio = IsOfIAvgArr[index_s][index_i]/n1n2OfInterest[index_i]
+            iRatioUnc = iRatio * (IsOfIUncArr[index_s][index_i] / IsOfIAvgArr[index_s][index_i])
+            print( "I/I0 = " + "{:.7f}".format(iRatio) + " ± " + "{:.7f}".format(iRatioUnc))
             print("Σ_" + str(n1n2OfInterest[index_i]) +" = " + "{:.7f}".format(SigmasOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å^2")
         print(": : : : : : : : : : : : : : : : ")
 
@@ -652,7 +668,7 @@ for index_s in range(Nscat):
                 mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]))
 
             #create the figure with set figure size
-            fig = plt.figure(figsize=(10,8))
+            fig = plt.figure(figsize=(8,6))
 
             #creates two subplots
             if(not vanity):
@@ -672,15 +688,16 @@ for index_s in range(Nscat):
             hecol = [0, 0.3, 0.8]
 
             if(not vanity):
-                plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,linewidth=0.5,length_includes_head=True)
-                plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,linewidth=0.5,length_includes_head=True)
-                #plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.2),color=b1col,fontsize=8,path_effects=pathefts1,zorder=11)
-                #plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper+0.1),color=b2col,fontsize=8,path_effects=pathefts1,zorder=11)
-
-                plt.arrow(0,0,Nsuper*a1[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a1[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.04,color=a1col,zorder=6,length_includes_head=True)
-                plt.arrow(0,0,Nsuper*a2[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a2[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.04,color=a2col,zorder=6,length_includes_head=True)
-                #plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
-                #plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
+                if(showB):
+                    plt.arrow(0,0,b1[0]*Nsuper,b1[1]*Nsuper,width=0.05,color=b1col,zorder=7,linewidth=0.5,length_includes_head=True)
+                    plt.arrow(0,0,b2[0]*Nsuper,b2[1]*Nsuper,width=0.05,color=b2col,zorder=7,linewidth=0.5,length_includes_head=True)
+                    #plt.annotate("b1", (b1[0]*Nsuper,b1[1]*Nsuper+0.2),color=b1col,fontsize=8,path_effects=pathefts1,zorder=11)
+                    #plt.annotate("b2", (b2[0]*Nsuper,b2[1]*Nsuper+0.1),color=b2col,fontsize=8,path_effects=pathefts1,zorder=11)
+                if(showA):
+                    plt.arrow(0,0,Nsuper*a1[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a1[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.04,color=a1col,zorder=6,length_includes_head=True)
+                    plt.arrow(0,0,Nsuper*a2[0]/(2*np.sqrt(a1[0]**2+a1[1]**2)),Nsuper*a2[1]/(2*np.sqrt(a1[0]**2+a1[1]**2)),width=0.04,color=a2col,zorder=6,length_includes_head=True)
+                    #plt.annotate("a1", (a1[0]/np.sqrt(a1[0]**2+a1[1]**2),a1[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a1col,fontsize=8,weight='bold',zorder = 5)
+                    #plt.annotate("a2", (a2[0]/np.sqrt(a1[0]**2+a1[1]**2),a2[1]/np.sqrt(a1[0]**2+a1[1]**2)),color=a2col,fontsize=8,weight='bold',zorder = 5)
 
             if(not vanity):
                 if(not(math.isclose(theta,0.))):
@@ -689,9 +706,10 @@ for index_s in range(Nscat):
                     #          width=0.01,color='w',zorder=7,head_width=0.5,head_length=0.5,length_includes_head=True,
                     #         fill=False,overhang=-1.)
                             #fill=True)
-                    ax2.arrow(0., 0.,kAvg[0],kAvg[1], zorder=8 ,linestyle=(0,(1, 10)), color='w',linewidth=.75,head_length=0.0,head_width=0.0)
-                    ax2.scatter(kAvg[0],kAvg[1], marker = '+',zorder=8,color='w',linewidth=0.75,s=5e2)
-                    plt.annotate(kstr,(kAvg[0]+.35,kAvg[1]-0.15),color='w',fontsize=sigmaFontSize,zorder=11,ha='left',va='top')
+                    if(showMeanK):
+                        ax2.arrow(0., 0.,kAvg[0],kAvg[1], zorder=8 ,linestyle=(0,(1, 10)), color='w',linewidth=.75,head_length=0.0,head_width=0.0)
+                        ax2.scatter(kAvg[0],kAvg[1], marker = '+',zorder=8,color='w',linewidth=0.75,s=5e2)
+                        plt.annotate(kstr,(kAvg[0]+.35,kAvg[1]-0.15),color='w',fontsize=sigmaFontSize,zorder=11,ha='left',va='top')
                 
                 for ch in range(nOccChArr[index_s]):
                     n1 = n1Arr[index_s][ch]
@@ -751,7 +769,7 @@ for index_s in range(Nscat):
                     cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
                 else:
                     cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
-                cb1.set_label('$I_{n_1,n_2}$')
+                cb1.set_label('$Intensity$')
 
             additionalX = []
             additionalY = []
@@ -823,8 +841,9 @@ for index_s in range(Nscat):
             #print("....")
 
             if(not vanity):
-                plt.figtext(0.5, -0.035, defectstr+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
-                plt.figtext(0.5, -0.07, intenstr + ", " + simgastr+", "+kstr_txt, wrap=True, horizontalalignment='center', fontsize=12,transform=ax2.transAxes)
+                if(writeCaption):
+                    plt.figtext(0.5, -0.035, defectstr+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=captionFontSize,transform=ax2.transAxes)
+                    plt.figtext(0.5, -0.07, intenstr + ", " + simgastr+", "+kstr_txt, wrap=True, horizontalalignment='center', fontsize=captionFontSize,transform=ax2.transAxes)
             else:
                 filenametxt = "vanity"
                 plt.tight_layout(pad=0)
@@ -836,7 +855,8 @@ for index_s in range(Nscat):
                 filenametxt = fileprefix
                 filenametxt += " (Ensemble number " + str(extractMicrostate) + "/" + str(Nensemble_true) + ")"
                 
-            plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=12,fontstyle='italic',transform=ax2.transAxes)
+            if(writeCaption):
+                plt.figtext(0.5, -0.11, filenametxt, wrap=True, horizontalalignment='center', fontsize=captionFontSize,fontstyle='italic',transform=ax2.transAxes)
             
             
             savestr = "Figures/Diffraction_multi/" + execTime + "_" + slugify(filenametxt) + "_" + scatcondstr
