@@ -50,7 +50,7 @@ useLog = False
 useBoth = False #Plots both log and nonlog graphs one after another
 writeCaption = True
 captionFontSize = 8
-showIndividualCrossSections = True
+showIndividualRatios = True
 showMeanK = True
 showA = False
 showB = True
@@ -164,6 +164,26 @@ def find_mean_stdv(values):
     meanSq /= n
     #print(f"Mean**2, msq = {mean**2}, {meanSq}")
     stdv = np.sqrt(meanSq - mean**2)
+    return mean, stdv
+
+def find_mean_stdv_with_stdvin(values, sigmas):
+    mean = 0
+    invMeanSq = 0
+    print("sigmas = ")
+    print(sigmas)
+    variences = sigmas**2
+    print("vars = ")
+    print(variences)
+    #print("type of input = " + str(type(values)))
+    #n = len(values)
+    n = np.size(values)
+    #print("n = " + str(n))
+    for i in range(n):
+        mean += values[i]/variences[i]
+        invMeanSq += 1/variences[i]
+    mean /= invMeanSq
+    #print(f"Mean**2, msq = {mean**2}, {meanSq}")
+    stdv = np.sqrt(1/invMeanSq)
     return mean, stdv
 
 
@@ -342,8 +362,8 @@ n2minArr = [0]*Nscat
 n2maxArr = [0]*Nscat
 IsOfIAvgArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
 IsOfIUncArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
-SigmasOfIAvgArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
-SigmasOfIUncArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
+RatiosOfIAvgArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
+RatiosOfIUncArr = list([0. for _ in range(Ninterest)] for _ in range(Nscat))
 
 valminArr = [1.]*Nscat
 valmaxArr = [0.]*Nscat
@@ -391,36 +411,41 @@ for index_s in range(Nscat):
     #Now do ensemble averageing, as well as calculating of meaningful quantities so they can have error bars too
     iAverage = np.zeros((nOccChArr[index_s]))
     iUnc = 0.
-    iDiffractDisposable = np.zeros((Nensemble))
-    iDiffuseDisposable = np.zeros((Nensemble))
+    iDiffractDisposable = np.zeros(([]))
+    iDiffuseDisposable = np.zeros(([]))
+    nDiffuse = 0
+    nDiffract = 0
+    
     entropiesDisposable = np.zeros((Nensemble))
     kAbsDisposable = np.zeros((Nensemble))
     kAvg = np.array([0.,0.])
     IsOfIDisposable = np.zeros((Nensemble,Ninterest))
-    SigmasDisposable = np.zeros((Nensemble,Ninterest))
+    RatiosDisposable = np.zeros((Nensemble,Ninterest))
+    RatiosUncDisposable = np.zeros((Nensemble,Ninterest))
+    print("1/N = " + "{:.7f}".format(1/float(nOccChArr[index_s])))
     for index_n in range(Nensemble):
         kAbsAvg = 0.
         kA = np.array([0.,0.])
         Is = iI[index_n]
 
-        iDiffuse = 0.
-        nDiffuse = 0.
         for ch in range(nOccChArr[index_s]): #this loop is to get the diffuse bakground
             row = df.iloc[ch]
             I = Is[ch]
             n1 = float(getattr(row,'n1'))
             n2 = float(getattr(row,'n2'))
             if(n1%int(Nsuper) != 0 and n2%int(Nsuper)!=0):
-                iDiffuse += I
+                iDiffuseDisposable = np.append(iDiffuseDisposable,I)
                 nDiffuse += 1
+            else:
+                iDiffractDisposable = np.append(iDiffractDisposable,I)
+                nDiffract += 1
+
         
         if(int(Nsuper) == 1):
-            meanDiffuseIntensity = 0.
+            meanDiffuseIntensity, mDIUnc = 0.
         else:
-            meanDiffuseIntensity = iDiffuse/nDiffuse
-        print(f"meanDiffuseIntensity = {meanDiffuseIntensity}")
-        iDiffuseDisposable = meanDiffuseIntensity
-        iDiffractDisposable = 1 - iDiffractDisposable
+            meanDiffuseIntensity, mDIUnc = find_mean_stdv(iDiffuseDisposable)
+        print( "mDI = " + "{:.7f}".format(meanDiffuseIntensity) + " ± " + "{:.7f}".format(mDIUnc))
         for ch in range(nOccChArr[index_s]):
             row = df.iloc[ch]
             I = Is[ch]
@@ -453,12 +478,8 @@ for index_s in range(Nscat):
                                         Ipris-=1/(nOccChArr[index_s])
                                     elif(diffuseCompensationMode == 2):
                                         I-=meanDiffuseIntensity
-                                    if(nearestNeighborExclusion):
-                                        SigmasDisposable[index_n,n1n2OfInterest.index(n1n2)] = \
-                                            invMaxTheta*cellArea * np.log(I/Ipris)/np.log(1-invMaxTheta*Theta)
-                                    else:
-                                        SigmasDisposable[index_n,n1n2OfInterest.index(n1n2)] = \
-                                            cellArea * np.log(I/Ipris)/np.log(1-Theta)
+                                    RatiosDisposable[index_n,n1n2OfInterest.index(n1n2)] = I/Ipris
+                                    RatiosUncDisposable[index_n,n1n2OfInterest.index(n1n2)] = mDIUnc/Ipris
 
         entropiesDisposable[index_n] = calculate_entropy(iI[index_n])
         kAbsAvg = np.sqrt(kA[0]**2+kA[1]**2)
@@ -476,21 +497,24 @@ for index_s in range(Nscat):
         yarr2 = IsOfIUncArr[index_s]
         yarr2[index_i] = unc
         if(pristineprefix != ""):
-            Sigman1n2ens = SigmasDisposable[:,index_i]
-            SigmasOfIAvgArr[index_s][index_i], SigmasOfIUncArr[index_s][index_i] = find_mean_stdv(Sigman1n2ens)
+            Ratio1n2ens = RatiosDisposable[:,index_i]
+            Ratio1n2ensUnc = RatiosUncDisposable[:,index_i]
+            RatiosOfIAvgArr[index_s][index_i], RatiosOfIUncArr[index_s][index_i] = find_mean_stdv_with_stdvin(Ratio1n2ens,Ratio1n2ensUnc)
     kAvg /= Babs
-    print("kAvg (n1n2 units)= ")
-    print(kAvg)
+    #print("kAvg (n1n2 units)= ")
+    #print(kAvg)
+    print("RatiosOfIAvgArr = ")
+    print(RatiosOfIAvgArr)
     iAverage /= float(Nensemble)
     intensityArr[index_s] = iAverage
     coordXArr[index_s] = cX[0] #assume (hope) that each ensemble has the same number of open channels
     coordYArr[index_s] = cY[0]
     entropiesOut[index_s], entropiesOutUnc[index_s] = find_mean_stdv(entropiesDisposable)
     kAbsAvgArr[index_s], kAbsAvgUncArr[index_s] = find_mean_stdv(kAbsDisposable)
-    print("kAbsAvg = ")
-    print(kAbsAvgArr[index_s])
-    print("Unc = ")
-    print(kAbsAvgUncArr[index_s])
+    #print("kAbsAvg = ")
+    #print(kAbsAvgArr[index_s])
+    #print("Unc = ")
+    #print(kAbsAvgUncArr[index_s])
 
     #Finally, for plotting, we remove channels of 0 intensity cos they cause issues when plotting
     for index_n in range(Nensemble):
@@ -648,10 +672,8 @@ for index_s in range(Nscat):
         prefix = "I_" + str(n1n2) + " = "
         print( prefix.ljust(12) + "{:.7f}".format(IsOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(IsOfIUncArr[index_s][index_i]))
         if(pristineprefix != ""):
-            iRatio = IsOfIAvgArr[index_s][index_i]/n1n2OfInterest[index_i]
-            iRatioUnc = iRatio * (IsOfIUncArr[index_s][index_i] / IsOfIAvgArr[index_s][index_i])
-            print( "I/I0 = " + "{:.7f}".format(iRatio) + " ± " + "{:.7f}".format(iRatioUnc))
-            print("Σ_" + str(n1n2OfInterest[index_i]) +" = " + "{:.7f}".format(SigmasOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å^2")
+            print( "I/I0 = " + "{:.7f}".format(RatiosOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(RatiosOfIUncArr[index_s][index_i]))
+            #print("Σ_" + str(n1n2OfInterest[index_i]) +" = " + "{:.7f}".format(SigmasOfIAvgArr[index_s][index_i]) + " ± " + "{:.7f}".format(SigmasOfIUncArr[index_s][index_i]) + "Å^2")
         print(": : : : : : : : : : : : : : : : ")
 
     if(plotFigure):
@@ -731,7 +753,7 @@ for index_s in range(Nscat):
                     n2 = n1n2[1]
                     ax2.scatter(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2)),Nsuper*(b1[1]*float(n1)+b2[1]*float(n2)),
                                 marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=100,linewidth=1)
-                    if(pristineprefix != "" and showIndividualCrossSections):
+                    if(pristineprefix != "" and showIndividualRatios):
                         sstr = "Σ("+str(n1)+","+str(n2)+")=\n" + "{:.4f}".format(SigmasOfIAvgArr[index_s][index_i]) 
                         if(Nensemble > 1 and extractMicrostate == 0):
                             sstr+="$\pm$\n"+"{:.4f}".format(SigmasOfIUncArr[index_s][index_i])
