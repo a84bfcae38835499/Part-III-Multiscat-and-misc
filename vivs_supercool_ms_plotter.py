@@ -186,6 +186,42 @@ def find_mean_stdv_with_stdvin(values, sigmas):
     stdv = np.sqrt(1/invMeanSq)
     return mean, stdv
 
+def calculate_sigmas(I,I0,Iunc):
+    #Cross section reigimes:
+    #   - Pure diffuse (1 parameter [sigma])
+    #       * Small cross section (only nn overlap)
+    #       * Large cross section (Unit cell is smallest unit of reflection)
+    #   - Partially reflecting (3 parameters [phi, rho, simga])
+    phi = np.pi
+    rho = 0.5
+
+    sigmaDiffuseLarge = invMaxTheta * cellArea * (np.log(I/I0))/((1-invMaxTheta*Theta))
+    expectedOverlapAmountNoOverlappingOverlaps = Theta *  (1-Theta)**3 + 2 * (Theta)**2 * (1-Theta) + 3 * (Theta)**3
+    expectedOverlapAmountYesOverlappingOverlaps = 0.5 #TODO
+    sigmaSmallNoReflectNOO = cellArea * (1-(1-Theta-np.sqrt(I/I0))/((1-Theta)*expectedOverlapAmountNoOverlappingOverlaps))
+    sigmaSmallNoReflectYOO = cellArea * (1-(1-Theta-np.sqrt(I/I0))/((1-Theta)*expectedOverlapAmountYesOverlappingOverlaps)) #TODO
+    sigmaSmallReflectingNOO = cellArea * 
+    sigmaSmallReflectingYOO = cellArea
+    return sigmaSmallNoReflectNOO, sigmaSmallNoReflectYOO, sigmaDiffuseLarge, sigmaReflecting
+
+def calculate_I_I0_large_cs(Theta,Sigma): #This is our y-data, I/I_0. We Fit S to the real data
+    I_I0 = np.power((1-invMaxTheta * Theta),Sigma/(invMaxTheta*cellArea))
+    return I_I0
+
+def calculate_I_I0_small_diffuse_NOO_cs(Theta,S,phase): #This is our y-data, I/I_0. We Fit S to the real data
+    def F(Theta,R,D):
+        return (1-Theta)*(Theta**6+(R-D/6)/(R)*Theta*(1-Theta)**3+(R-D/3)/(R)*(Theta**2)*(1-Theta)+(R-D/2)/(R)*(Theta**3))
+    I_I0 = F(Theta,cellArea,S-cellArea)**2 + Theta**2 + 2*Theta*F(Theta,cellArea,S-cellArea)*np.cos(phase)
+    return I_I0
+
+def calculate_I_I0_small_reflecting_2_NOO_cs(Theta,S,phase,rho): #This is our y-data, I/I_0. We Fit S to the real data
+    def F(Theta,R,D):
+        return (1-Theta)*(Theta**6+(R-D/6)/(R)*Theta*(1-Theta)**3+(R-D/3)/(R)*(Theta**2)*(1-Theta)+(R-D/2)/(R)*(Theta**3))
+    I_I0 = F(Theta,cellArea,S-cellArea)**2 + (rho**2)*(Theta**2) + 2*rho*Theta*F(Theta,cellArea,S-cellArea)*np.cos(phase)
+    return I_I0
+
+#===============================================
+
 
 latticeFile = open(fileprefix + '.info_for_vivian_python_nice_plotting_hexagon_script', 'r')
 count = 0 
