@@ -30,7 +30,7 @@ fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = '_1x1_01D'
 fileprefix = 'ga5x5_03D'
-fileprefix = '_5x5_05D'
+fileprefix = '_5x5_07D'
 
 scatcondprefix = 'gaussian'
 scatcondprefix = '1x1pristine'
@@ -40,12 +40,12 @@ pristineprefix = '1x1pristine'
 
 extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
 nearestNeighborExclusion = True
-diffuseCompensationMode = 2
+diffuseCompensationMode = 0
                         #0 : Don't compensate
                         #1 : subtract 1/N from both prsitine and nonpris intensities
                         #2 : subtract the mean diffuse channel intensity from the unpristine intensity
 invMaxTheta = 3
-plotFigure = True
+plotFigure = False
 useLog = False
 useBoth = False #Plots both log and nonlog graphs one after another
 writeCaption = True
@@ -58,6 +58,7 @@ vanity = False #Generates an un-annoted plot with no gridlines TODO: investigate
 channelFontSize = 6
 sigmaFontSize = 6
 
+"""
 n1n2OfInterest = [[1,0],
                   [0,0],
                   [-1,0],
@@ -87,7 +88,6 @@ n1n2Colours = [[1, 0.82, 0.149],
                   [0.067, 0.769, 0.451],
                   [0.149, 0.792, 0.7],
                   [0.296, 0.369, 1],]
-"""
 
 Ninterest = sum(1 for _ in n1n2OfInterest)
 
@@ -185,43 +185,6 @@ def find_mean_stdv_with_stdvin(values, sigmas):
     #print(f"Mean**2, msq = {mean**2}, {meanSq}")
     stdv = np.sqrt(1/invMeanSq)
     return mean, stdv
-
-def calculate_sigmas(I,I0,Iunc):
-    #Cross section reigimes:
-    #   - Pure diffuse (1 parameter [sigma])
-    #       * Small cross section (only nn overlap)
-    #       * Large cross section (Unit cell is smallest unit of reflection)
-    #   - Partially reflecting (3 parameters [phi, rho, simga])
-    phi = np.pi
-    rho = 0.5
-
-    sigmaDiffuseLarge = invMaxTheta * cellArea * (np.log(I/I0))/((1-invMaxTheta*Theta))
-    expectedOverlapAmountNoOverlappingOverlaps = Theta *  (1-Theta)**3 + 2 * (Theta)**2 * (1-Theta) + 3 * (Theta)**3
-    expectedOverlapAmountYesOverlappingOverlaps = 0.5 #TODO
-    sigmaSmallNoReflectNOO = cellArea * (1-(1-Theta-np.sqrt(I/I0))/((1-Theta)*expectedOverlapAmountNoOverlappingOverlaps))
-    sigmaSmallNoReflectYOO = cellArea * (1-(1-Theta-np.sqrt(I/I0))/((1-Theta)*expectedOverlapAmountYesOverlappingOverlaps)) #TODO
-    sigmaSmallReflectingNOO = cellArea * 
-    sigmaSmallReflectingYOO = cellArea
-    return sigmaSmallNoReflectNOO, sigmaSmallNoReflectYOO, sigmaDiffuseLarge, sigmaReflecting
-
-def calculate_I_I0_large_cs(Theta,Sigma): #This is our y-data, I/I_0. We Fit S to the real data
-    I_I0 = np.power((1-invMaxTheta * Theta),Sigma/(invMaxTheta*cellArea))
-    return I_I0
-
-def calculate_I_I0_small_diffuse_NOO_cs(Theta,S,phase): #This is our y-data, I/I_0. We Fit S to the real data
-    def F(Theta,R,D):
-        return (1-Theta)*(Theta**6+(R-D/6)/(R)*Theta*(1-Theta)**3+(R-D/3)/(R)*(Theta**2)*(1-Theta)+(R-D/2)/(R)*(Theta**3))
-    I_I0 = F(Theta,cellArea,S-cellArea)**2 + Theta**2 + 2*Theta*F(Theta,cellArea,S-cellArea)*np.cos(phase)
-    return I_I0
-
-def calculate_I_I0_small_reflecting_2_NOO_cs(Theta,S,phase,rho): #This is our y-data, I/I_0. We Fit S to the real data
-    def F(Theta,R,D):
-        return (1-Theta)*(Theta**6+(R-D/6)/(R)*Theta*(1-Theta)**3+(R-D/3)/(R)*(Theta**2)*(1-Theta)+(R-D/2)/(R)*(Theta**3))
-    I_I0 = F(Theta,cellArea,S-cellArea)**2 + (rho**2)*(Theta**2) + 2*rho*Theta*F(Theta,cellArea,S-cellArea)*np.cos(phase)
-    return I_I0
-
-#===============================================
-
 
 latticeFile = open(fileprefix + '.info_for_vivian_python_nice_plotting_hexagon_script', 'r')
 count = 0 
