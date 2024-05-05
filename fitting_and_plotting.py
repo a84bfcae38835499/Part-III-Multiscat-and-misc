@@ -116,10 +116,9 @@ while count < 10:
         print("Defect density in cm^-2 = " + split[0])
         count += 1
 
-Thetas = np.array([1e-10,1/25,2/25,3/25,4/25,5/25,6/25])
+Thetas = np.array([0,1/25,2/25,3/25,4/25,5/25,6/25])
 N = Thetas.size
 Thetas_continuum = np.linspace(0.,1.,500)
-
 
 I10 = np.array([1.,0.8343576,0.6972710,0.5820808,0.4816842,0.3830502,0.3218771
 ])
@@ -145,6 +144,7 @@ I_30 = np.array([1.,0.8402811,0.6926791,0.5560454,0.4404330,0.3453218,0.2964200
 ])
 I_30unc = np.array([1e-10,0.0020416,0.0018611,0.0019598,0.0028706,0.0037053,0.0099891
 ])
+
 n1n2OfInterest = [[1,0],
                   [0,0],
                   [-1,0],
@@ -157,6 +157,12 @@ n1n2Colours = [[1, 0.82, 0.149],
                   [0.296, 0.369, 1],]
 n1n2IArr = [I10,I00,I_10,I_20,I_30]
 n1n2IUncArr = [I10unc,I00unc,I_10unc,I_20unc,I_30unc]
+"""
+n1n2OfInterest = [[-1,0]]
+n1n2Colours = [[0.067, 0.769, 0.451]]
+n1n2IArr = [I_10]
+n1n2IUncArr = [I_10unc]
+"""
 Ninterest = len(n1n2OfInterest)
 
 def i_L(Theta,S):
@@ -223,8 +229,9 @@ for i in range(Ninterest):
     print("* - - - - - -")
 
     p_L, c_L, infodict_L, null, null = curve_fit(
-        i_L,Thetas,I,sigma=IUnc,absolute_sigma=True,
-        p0 = 2.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
+        i_L,Thetas,I,
+        #sigma=IUnc,absolute_sigma=True,
+        p0 = 1.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
         )
     S_L = p_L[0]
     SE = np.sqrt(np.diag(c_L))
@@ -236,13 +243,15 @@ for i in range(Ninterest):
     print("* - - - - - -")
 
     p_tb_small, c_tb_small, infodict_tb_small, null, null = curve_fit(
-        i_tb_S_D,Thetas,I,sigma=IUnc,absolute_sigma=True,
+        i_tb_S_D,Thetas,I,
+        #sigma=IUnc,absolute_sigma=True,
         p0 = 2.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
         )
     eta_tb_small = p_tb_small[0]
     S_tb_small = cellArea * (eta_tb_small)**2
     SE = np.sqrt(np.diag(c_tb_small))
-    S_tb_small_Unc = cellArea * SE[0]**2
+    eta_tb_small_Unc = SE[0]
+    S_tb_small_Unc = cellArea * eta_tb_small_Unc**2
 
     #print(p_tb_small)
     #print(c_tb_small)
@@ -252,7 +261,8 @@ for i in range(Ninterest):
     print("* - - - - - -")
 
     p_tb_medium, c_tb_medium, infodict_tb_medium, null, null = curve_fit(
-        i_tb_M_D,Thetas,I,sigma=IUnc,absolute_sigma=True,
+        i_tb_M_D,Thetas,I,
+        #sigma=IUnc,absolute_sigma=True,
         p0 = 2.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
         )
     eta_tb_medium = p_tb_medium[0]
@@ -268,7 +278,8 @@ for i in range(Ninterest):
     print("* = = = = = =")
 
     p_tb_small_r, c_tb_small_r, infodict_tb_small_r, null, null = curve_fit(
-        i_tb_S_R,Thetas,I,sigma=IUnc,absolute_sigma=True,
+        i_tb_S_R,Thetas,I,
+        #sigma=IUnc,absolute_sigma=True,
         p0 = [1.5,1.5,0,np.pi],check_finite = True,nan_policy='raise',full_output=True,
         bounds=[[1,1,0,0],[1.5,1.5,1,2*np.pi]]
         )
@@ -297,8 +308,9 @@ for i in range(Ninterest):
     print("* = = = = = =")
 
     p_tb_medium_r, c_tb_medium_r, infodict_tb_medium_r, null, null = curve_fit(
-        i_tb_M_R,Thetas,I,sigma=IUnc,
-        p0 = [1.5,1.5,0.,np.pi],check_finite = True,nan_policy='raise',full_output=True,absolute_sigma=True,
+        i_tb_M_R,Thetas,I,
+        #sigma=IUnc,absolute_sigma=True,
+        p0 = [1.8,1.8,0.,np.pi],check_finite = True,nan_policy='raise',full_output=True,
         bounds=[[1.5,1.5,0,0],[2,2,1,2*np.pi]]
         )
     #print(p_tb_medium_r)
@@ -339,7 +351,7 @@ for i in range(Ninterest):
     ax1.fill_between(Thetas_continuum, fD_L_L, fD_L_U, alpha=0.3, edgecolor=clr, facecolor=clr)
     
     #===============================================
-    clr = np.array([.5, 1., .0])
+    clr = np.array([.3, .8, .0])
     fD_tb_medium = i_tb_M_D(Thetas_continuum,eta_tb_medium)
     fD_tb_medium_L = i_tb_M_D(Thetas_continuum,eta_tb_medium-eta_tb_medium_Unc)
     fD_tb_medium_U = i_tb_M_D(Thetas_continuum,eta_tb_medium+eta_tb_medium_Unc)
@@ -351,6 +363,7 @@ for i in range(Ninterest):
     ax1.fill_between(Thetas_continuum, fD_tb_medium_L, fD_tb_medium_U, alpha=0.3, edgecolor=clr, facecolor=clr)
 
     #===============================================
+    """
     clr = np.array([1.0, .5, .0])
     fD_tb_medium_r = i_tb_M_R(Thetas_continuum,eta_tb_medium_r,xi_tb_medium_r,rho_def_tb_medium_r,delta_def_tb_medium_r)
     fD_tb_medium_r_L = i_tb_M_R(Thetas_continuum,eta_tb_medium_r-eta_tb_medium_r_Unc,xi_tb_medium_r-xi_tb_medium_r_Unc,rho_def_tb_medium_r-rho_def_tb_medium_r_Unc,delta_def_tb_medium_r-delta_def_tb_medium_r_Unc)
@@ -363,9 +376,35 @@ for i in range(Ninterest):
     ax1.plot(Thetas_continuum,fD_tb_medium_r_L,color=clr/2)
     ax1.plot(Thetas_continuum,fD_tb_medium_r_U,color=clr/2)
     ax1.fill_between(Thetas_continuum, fD_tb_medium_r_L, fD_tb_medium_r_U, alpha=0.3, edgecolor=clr, facecolor=clr)
+    """
+    #===============================================
+    """
+    clr = np.array([1.0, .5, .0])
+    fD_tb_small_r = i_tb_M_R(Thetas_continuum,eta_tb_small_r,xi_tb_small_r,rho_def_tb_small_r,delta_def_tb_small_r)
+    fD_tb_small_r_L = i_tb_M_R(Thetas_continuum,eta_tb_small_r-eta_tb_small_r_Unc,xi_tb_small_r-xi_tb_small_r_Unc,rho_def_tb_small_r-rho_def_tb_small_r_Unc,delta_def_tb_small_r-delta_def_tb_small_r_Unc)
+    fD_tb_small_r_U = i_tb_M_R(Thetas_continuum,eta_tb_small_r+eta_tb_small_r_Unc,xi_tb_small_r+xi_tb_small_r_Unc,rho_def_tb_small_r+rho_def_tb_small_r_Unc,delta_def_tb_small_r+delta_def_tb_small_r_Unc)
+    ax1.plot(Thetas_continuum,fD_tb_small_r,label="Small $\Sigma$, reflecting\n"+
+            "S=" + "{:.5f}".format(S_tb_small_r) + "$\pm$" + "{:.5f}".format(S_tb_small_r_Unc)+"\n"
+            "$\\rho$ = " +"{:.5f}".format(rho_def_tb_small_r) + "$\pm$" + "{:.5f}".format(rho_def_tb_small_r_Unc)+ "\n" +
+            "$\delta$ = " +"{:.5f}".format(delta_def_tb_small_r) + "$\pm$" + "{:.5f}".format(delta_def_tb_small_r_Unc),
+            color=clr)
+    ax1.plot(Thetas_continuum,fD_tb_small_r_L,color=clr/2)
+    ax1.plot(Thetas_continuum,fD_tb_small_r_U,color=clr/2)
+    ax1.fill_between(Thetas_continuum, fD_tb_small_r_L, fD_tb_small_r_U, alpha=0.3, edgecolor=clr, facecolor=clr)
+    """
+    #===============================================
+    clr = np.array([0, 0.4, 0.4])
+    fD_tb_small = i_tb_M_D(Thetas_continuum,eta_tb_small)
+    fD_tb_small_L = i_tb_M_D(Thetas_continuum,eta_tb_small-eta_tb_small_Unc)
+    fD_tb_small_U = i_tb_M_D(Thetas_continuum,eta_tb_small+eta_tb_small_Unc)
+    ax1.plot(Thetas_continuum,fD_tb_small,label="Small $\Sigma$\n"+
+             "S=" + "{:.5f}".format(S_tb_small) + "$\pm$" + "{:.5f}".format(S_tb_small_Unc),
+             color=clr)
+    ax1.plot(Thetas_continuum,fD_tb_small_L,color=clr/2)
+    ax1.plot(Thetas_continuum,fD_tb_small_U,color=clr/2)
+    ax1.fill_between(Thetas_continuum, fD_tb_small_L, fD_tb_small_U, alpha=0.3, edgecolor=clr, facecolor=clr)
 
     #===============================================
-    
     plt.legend()
     plt.savefig(fname=slugify("Figures/Fitted Plots/" + execTime +"_fitting_" + str(n1n2)),dpi=300)
     plt.show()
