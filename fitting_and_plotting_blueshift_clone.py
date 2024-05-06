@@ -115,24 +115,60 @@ while count < 10:
         print("Defect density in cm^-2 = " + split[0])
         count += 1
 
-Thetas = np.array([x/25 for x in range(0,9)]+[x/25 for x in range(10,30,5)])
+#Thetas = np.array([x/25 for x in range(1,9)]+[x/25 for x in range(10,30,5)])
+Thetas = np.array([x/25 for x in range(0,10)])
 N = Thetas.size
 print(Thetas)
 Thetas_continuum = np.linspace(0.,1.,500)
 
-K = np.array([1.8196899,1.8319695,])
-K_Unc = np.array([0,0.0262528,])
 
+Adatom_H_diff = np.array([0.482082, 0.520447,0.548192,0.572525,0.593844,0.614375,0.639014,0.654021,0.673540,0.688574
+])
+Adatom_H_diff_Unc = np.array([0, 0.004248,0.003308,0.004460,0.006082,0.006033,0.006615,0.006312,0.005530,0.005966
+])
+
+Adatom_K = np.array([1.8196899,1.8319695,1.8632271,1.8917125,1.8843851,1.9361424,1.9477458,1.9530034,1.9903159,2.0129283
+])
+Adatom_K_Unc = np.array([0,0.0262528,0.0497557,0.0474716,0.0893587,0.0878799,0.0696341,0.0722962,0.0910749,0.0931299
+])
+
+
+Vacancy_H_diff = np.array([0.482082,0.518472,0.546852,0.571712,0.594904,0.621270,0.636488,0.653600,0.674068,0.687810
+])
+Vacancy_H_diff_Unc = np.array([0,0.004146,0.002800,0.007577,0.004823,0.004684,0.005989,0.005131,0.004122,0.011551
+
+])
+                                                                                        #   v extremely anomalous shit goin
+Vacancy_K = np.array([1.8196899,1.8337429,1.8547909,1.8771613,1.9104914,1.9690134,1.9689019,2.0050719,1.9985184,2.0403300
+])
+Vacancy_K_Unc = np.array([0,0.0188508,0.0375486,0.0332651,0.0922589,0.0565959,0.0807228,0.0896489,0.0740899,0.0852711
+])
 #how can I contrive to write this line of code:
 #   phi lo mean a Kunc
 
-H_diff = np.array([1.,0.8343576,0.6972710,0.5820808,0.4816842,0.3830502,0.3218771
-])
-H_diff_Unc = np.array([1e-10,0.0007715,0.0007532,0.0007406,0.0010848,0.0014003,0.0037750
-])
 
+fig = plt.figure()
+ax1 = fig.add_subplot(111)
+plt.title("Entropy and |K| against $\Theta$")
+ax1.set_ylabel("H$_{diff}$")
+ax2 = ax1.twinx()
+ax2.set_ylabel("|$K$|/$Å^{-1}$")
+ax1.set_xlabel("$\Theta$")
+ax1.set_xlim(min(Thetas),max(Thetas))
+ax1.set_ylim(min(Adatom_H_diff),max(Adatom_H_diff))
+ax1.errorbar(x=Thetas,y=Adatom_H_diff,yerr=Adatom_H_diff_Unc,label="Adatom H$_{diff}$",
+                 color=[0.,0.,1.],linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
+ax2.errorbar(x=Thetas,y=Adatom_K,yerr=Adatom_K_Unc,label="Adatom |$K$|",
+                 color=[1,.5,0.],linestyle=(0,(4,10)),marker='+',markersize=10,capsize=2.)
+
+ax1.errorbar(x=Thetas,y=Vacancy_H_diff,yerr=Vacancy_H_diff_Unc,label="Vacancy H$_{diff}$",
+                 color=[1,0,0.5],linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
+ax2.errorbar(x=Thetas,y=Vacancy_K,yerr=Vacancy_K_Unc,label="Vacancy |$K$|",
+                 color=[0.,0.5,0.5],linestyle=(0,(4,10)),marker='+',markersize=10,capsize=2.)
+ax1.legend(loc=1)
+ax2.legend(loc=0)
 
 plt.legend()
-plt.savefig(fname="Figures/Blueshift/"+slugify( execTime +"_yarrrr me hearties"),dpi=300)
+plt.savefig(fname="Figures/Blueshift/"+slugify( execTime ) + "_blueshift",dpi=300)
 plt.show()
 print("* Saved figure")

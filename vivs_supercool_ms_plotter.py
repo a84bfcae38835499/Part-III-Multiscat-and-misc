@@ -30,7 +30,7 @@ fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = '_1x1_01D'
 fileprefix = 'ga5x5_03D'
-fileprefix = 'ga5x5_02D'
+fileprefix = 'gv5x5_10D'
 
 scatcondprefix = '1x1pristine'
 scatcondprefix = 'gaussian'
@@ -46,9 +46,9 @@ diffuseCompensationMode = 0
                         #1 : subtract 1/N from both prsitine and nonpris intensities
                         #2 : subtract the mean diffuse channel intensity from the unpristine intensity
 invMaxTheta = 3
-plotFigure = False
+plotFigure = True
 useLog = False
-useBoth = False #Plots both log and nonlog graphs one after another
+useBoth = True #Plots both log and nonlog graphs one after another
 writeCaption = True
 captionFontSize = 8
 showIndividualRatios = True
@@ -442,7 +442,8 @@ for index_s in range(Nscat):
                 nDiffract += 1
         if(pristineprefix!=""):
             if(int(Nsuper) == 1):
-                meanDiffuseIntensity, mDIUnc = 0.
+                meanDiffuseIntensity = 0.
+                mDIUnc = 0.
             else:
                 meanDiffuseIntensity, mDIUnc = find_mean_stdv(iDiffuseDisposable)
             print( "mDI = " + "{:.7f}".format(meanDiffuseIntensity) + " ± " + "{:.7f}".format(mDIUnc))
@@ -618,6 +619,8 @@ for index_s in range(Nscat):
     print("Defect density = " + "{:.4e}".format(defectDensity) + " cm^-2")
     print("Θ = " + str(Theta))
     print("H_def  = " + entropyInstr)
+
+    print("<=>-<=>-<=>-<=>-<=>")
     if(Nensemble == 1):
         entropytxt = "$H_{diff}$ = " + "{:.6f}".format(eomean)
         print("H_diff = "+ "{:.6f}".format(eomean))
@@ -635,6 +638,7 @@ for index_s in range(Nscat):
         kstr_txt = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
         print("|K| = "+ "{:.7f}".format(kAbsAvgArr[index_s]) + " ± " + "{:.7f}".format(kAbsAvgUncArr[index_s]) +" Å^-1")
 
+    print("<=>-<=>-<=>-<=>-<=>")
     print("Number of diffractive channels                  : " + str(nSpecCh))
     print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
     print("Diffractive intensity proportion : " + str(normSpecI))
@@ -757,10 +761,9 @@ for index_s in range(Nscat):
                     ax2.scatter(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2)),Nsuper*(b1[1]*float(n1)+b2[1]*float(n2)),
                                 marker=(6, 0, 0),color=n1n2Colours[index_i], zorder=6,facecolors='none',s=100,linewidth=1)
                     if(pristineprefix != "" and showIndividualRatios):
-                        sstr = "Σ("+str(n1)+","+str(n2)+")=\n" + "{:.4f}".format(SigmasOfIAvgArr[index_s][index_i]) 
+                        sstr = "I("+str(n1)+","+str(n2)+")/I$_0$=\n" + "{:.4f}".format(RatiosOfIAvgArr[index_s][index_i]) 
                         if(Nensemble > 1 and extractMicrostate == 0):
-                            sstr+="$\pm$\n"+"{:.4f}".format(SigmasOfIUncArr[index_s][index_i])
-                        sstr += "Å$^2$"
+                            sstr+="$\pm$\n"+"{:.4f}".format(RatiosOfIUncArr[index_s][index_i])
                         ax2.annotate(sstr,(Nsuper*(b1[0]*float(n1)+b2[0]*float(n2))+0.75,Nsuper*(b1[1]*float(n1)+b2[1]*float(n2))),color=n1n2Colours[index_i],
                                      fontsize = sigmaFontSize,zorder=12,ha='left',va='bottom')
 
