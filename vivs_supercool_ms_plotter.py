@@ -30,15 +30,16 @@ fileprefix = 'restest_10_50'
 fileprefix = '7x7MoS2'
 fileprefix = '_1x1_01D'
 fileprefix = 'ga5x5_03D'
-fileprefix = '_5x5_07D'
+fileprefix = 'ga5x5_02D'
 
-scatcondprefix = 'gaussian'
 scatcondprefix = '1x1pristine'
+scatcondprefix = 'gaussian'
 
-pristineprefix = 'g-1x1_00D'
 pristineprefix = '1x1pristine'
+pristineprefix = 'g-1x1_00D'
 
-extractMicrostate = 0   #Set this to an int >0 to override ensemble averaging to plot only one microstate of an ensemble
+extractMicrostate = 0   #Set this to an int >0 to overcride ensemble averaging to plot only one microstate of an ensemble
+extractScatcond = 2   #Set this to an int >0 to skip all incident conditions apart from the this one
 nearestNeighborExclusion = True
 diffuseCompensationMode = 0
                         #0 : Don't compensate
@@ -57,7 +58,8 @@ showB = True
 vanity = False #Generates an un-annoted plot with no gridlines TODO: investigate Qhull options to make it prettier
 channelFontSize = 6
 sigmaFontSize = 6
-
+n1n2OfInterest = [[0,0]]
+n1n2Colours = [[0.,0.,0.]]
 """
 n1n2OfInterest = [[1,0],
                   [0,0],
@@ -77,7 +79,6 @@ n1n2Colours = [[1, 0.82, 0.149],
                   [0.518, 0.51, 0.941],
                   [0.596, 0, 1],
                   [1, 0.18, 0.408]]
-"""
 n1n2OfInterest = [[1,0],
                   [0,0],
                   [-1,0],
@@ -88,6 +89,7 @@ n1n2Colours = [[1, 0.82, 0.149],
                   [0.067, 0.769, 0.451],
                   [0.149, 0.792, 0.7],
                   [0.296, 0.369, 1],]
+"""
 
 Ninterest = sum(1 for _ in n1n2OfInterest)
 
@@ -438,13 +440,12 @@ for index_s in range(Nscat):
             else:
                 iDiffractDisposable = np.append(iDiffractDisposable,I)
                 nDiffract += 1
-
-        
-        if(int(Nsuper) == 1):
-            meanDiffuseIntensity, mDIUnc = 0.
-        else:
-            meanDiffuseIntensity, mDIUnc = find_mean_stdv(iDiffuseDisposable)
-        print( "mDI = " + "{:.7f}".format(meanDiffuseIntensity) + " ± " + "{:.7f}".format(mDIUnc))
+        if(pristineprefix!=""):
+            if(int(Nsuper) == 1):
+                meanDiffuseIntensity, mDIUnc = 0.
+            else:
+                meanDiffuseIntensity, mDIUnc = find_mean_stdv(iDiffuseDisposable)
+            print( "mDI = " + "{:.7f}".format(meanDiffuseIntensity) + " ± " + "{:.7f}".format(mDIUnc))
         for ch in range(nOccChArr[index_s]):
             row = df.iloc[ch]
             I = Is[ch]
@@ -552,7 +553,10 @@ for index_s in range(Nscat):
 execTime = datetime.datetime.now().strftime('_%Y-%m-%d_%H-%M')
 
 print("\n----\n")
+
 for index_s in range(Nscat):
+    if(extractScatcond != 0):
+        index_s = extractScatcond
     plotValuesAvg = intensityArr[index_s]
     plotCoordsX = coordXArr[index_s]
     plotCoordsY = coordYArr[index_s]
@@ -619,17 +623,17 @@ for index_s in range(Nscat):
         print("H_diff = "+ "{:.6f}".format(eomean))
     else:
         entropytxt = "$H_{diff}$ = " + "{:.6f}".format(eomean) + "$\pm$" +  "{:.6f}".format(eosdtv)
-        print("H_diff = "+ "{:.6f}".format(eomean) + "±" + "{:.6f}".format(eosdtv))
+        print("H_diff = "+ "{:.6f}".format(eomean) + " ± " + "{:.6f}".format(eosdtv))
     
 
     if(Nensemble == 1 or extractMicrostate > 0):
         kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "Å$^{-1}$"
         kstr_txt = kstr
-        print("|K| = "+ "{:.3f}".format(kAbsAvgArr[index_s]) + "Å^-1")
+        print("|K| = "+ "{:.7f}".format(kAbsAvgArr[index_s]) + " Å^-1")
     else:
         kstr = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "\n" +"$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
         kstr_txt = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
-        print("|K| = "+ "{:.3f}".format(kAbsAvgArr[index_s]) + "±" + "{:.3f}".format(kAbsAvgUncArr[index_s]) +"Å^-1")
+        print("|K| = "+ "{:.7f}".format(kAbsAvgArr[index_s]) + " ± " + "{:.7f}".format(kAbsAvgUncArr[index_s]) +" Å^-1")
 
     print("Number of diffractive channels                  : " + str(nSpecCh))
     print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
@@ -891,3 +895,5 @@ for index_s in range(Nscat):
             else:
                 plt.savefig(fname=savestr,dpi=300)
             plt.show()
+    if(extractScatcond != 0):
+        break

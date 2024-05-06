@@ -5,7 +5,7 @@ rng("shuffle");
 %contained in the overall superlattice (or rather the square root of that)
 Nxy = 16; Nz = 10; Nsuper = 5;
 %Theta = 0.9;
-Theta = (5/(Nsuper*Nsuper));
+Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 9;
 avoidNearestNeighbors = true;
@@ -16,9 +16,9 @@ displacementMode = 1; % 0 = Gaussians
   defectR = 0.5;
   minDist = defectR;
 zMax = 6; zMin = 2;%units Å
-fileprefix = "sdfghjkk"
-onlyWriteLatticeFile = true;
-plotPot = false;
+fileprefix = "g-5x5_00D"
+onlyWriteLatticeFile = false;
+plotPot = true;
 onlyPrepConf = false;
 
 %a1=[const.a,0];
@@ -291,7 +291,7 @@ end
 %if(Ndefect ~= 0 && (Nsuper*Nsuper)-1 - Ndefect > 0)
 %  Nensemble = (factorial(Nsites-1)) ...
 %    /(factorial(Nsites - Ndefect)*factorial(Ndefect));
-  Nensemble = 10;  %gansta maths
+  Nensemble = 1;  %gansta maths
 %else
 %  Nensemble = 8;
 %end
