@@ -139,9 +139,9 @@ fileprefix = '_1x1_01D'
 fileprefix = 'ga5x5_03D'
 fileprefix = '5x5MoS2'
 fileprefix = 'ga5x5_04D'
-fileprefixes = ['ga5x5_0' + str(x) + 'D' for x in range(1,10)]
+fileprefixes = ['gv5x5_0' + str(x) + 'D' for x in range(1,10)]
 
-fileprefixes += ['ga5x5_' + str(5*x) + 'D' for x in range(2,6)]
+fileprefixes += ['gv5x5_' + str(5*x) + 'D' for x in range(2,6)]
 print(fileprefixes)
 
 scatcondprefix = '1x1pristine'
@@ -169,7 +169,7 @@ showA = False
 showB = False
 padCells = True
 paddingCells = 52
-vanity = False #Generates an un-annoted plot with no gridlines TODO: investigate Qhull options to make it prettier
+vanity = False #Generates an un-annofted plot with no gridlines TODO: investigate Qhull options to make it prettier
 channelFontSize = 0
 sigmaFontSize = 10
 n1n2OfInterest = []
@@ -677,7 +677,7 @@ for fileprefix in fileprefixes:
         #print("mean x, y = ")
         #print(meanX, meanY)
         
-        print("[][][][][][][][][][][][][][][][][][][][][][][][]")
+        #print("[][][][][][][][][][][][][][][][][][][][][][][][]")
         print(fileprefix)
         E = Es[index_s]
         theta = thetas[index_s]
@@ -731,7 +731,7 @@ for fileprefix in fileprefixes:
             crossSectionWholeUnc = 0.
         print("I/I_0 = " + "{:.7f}".format(RatiosAvgArr[index_s]) + " ± " + "{:.7f}".format(RatiosUncArr[index_s]))
         csstr = "$\S_{tiny} = $" + "{:.4f}".format(crossSectionWhole) + " ± " + "{:.4f}".format(crossSectionWholeUnc) + "Å$^2$"
-        print("Total S tiny = " + "{:.7f}".format(crossSectionWhole) + " ± " + "{:.7f}".format(crossSectionWholeUnc) + " Å^2")
+        #print("Total S tiny = " + "{:.7f}".format(crossSectionWhole) + " ± " + "{:.7f}".format(crossSectionWholeUnc) + " Å^2")
         #print(simgastr)
         if(Ninterest > 0):
             for index_i in range(Ninterest):

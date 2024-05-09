@@ -3,12 +3,12 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 50; Nsuper = 10;
+Nxy = 32; Nz = 50; Nsuper = 1;
 %Theta = 0.9;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 9;
-avoidNearestNeighbors = true;
+avoidNearestNeighbors = false;
 usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere

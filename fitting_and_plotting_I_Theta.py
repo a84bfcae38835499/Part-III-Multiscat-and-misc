@@ -9,7 +9,7 @@ invMaxTheta = 1
 fileprefix = '_5x5_05D'
 
 plt.rcParams["font.family"] = "PT Sans"
-
+strOfInterest = []
 def slugify(value, allow_unicode=False):
     """
     Taken from https://github.com/django/django/blob/master/django/utils/text.py
@@ -164,16 +164,26 @@ gaI00unc = np.array([1e-10,0.0176584,0.0371947,0.0399589,0.0459412,0.0309872,0.0
 
 """ v This data is the total data for the gaussians at 0 degrees """
 gaI_T = np.array([
-    1.,0.9625589,0.9264127,0.8953515,0.8593757,0.8377734,0.7931277,0.7697033,0.7398964,0.7224723,0.6815588,0.6187126,0.5258513,0.5605555
-])
+    1.,0.9625589])
 gaI_Tunc = np.array([
-    1e-10,0.0000473,0.0000770,0.0001449,0.0001461,0.0002042,0.0002520,0.0002935,0.0002922,0.0003071,0.0004033,0.0004915,0.0006300,0.0060960
+    1e-10,0.0000473
 ])
 
-gvI_T = np.array([1.,
+gvI_T = np.array([
+    1.,0.9670862,
 ])
-gvI_Tunc = np.array([1e-10,
-])
+gvI_Tunc = np.array([
+    1e-10,0.0000435])
+
+gaI_lo_T = np.array([
+    1.,0.9625589])
+gaI_lo_Tunc = np.array([
+    1e-10,0.0000473])
+
+gvI_lo_T = np.array([
+    1.,0.9670862])
+gvI_lo_Tunc = np.array([
+    1e-10,0.0000435])
 
 n1n2OfInterest = []
 n1n2Colours = [0., 0., 0.]
@@ -203,8 +213,9 @@ n1n2IArr = [gaI00]
 n1n2IUncArr = [gaI00unc]
 
 """
-
-
+strOfInterest = ["Gaussian Adatoms","Gaussian Vacancies"]
+IosOfInterstArr = [gaI_T_lo,gvI_lo_T]
+IosOfInterstArr = [gaI_lo_Tunc,gvI_lo_Tunc]
 Ninterest = len(n1n2OfInterest)
 
 def i_tb_L(Theta,S):
@@ -224,7 +235,8 @@ n_tb_S = 1
 
 def i_tb_T(Theta,S):
     eta = np.sqrt(S/cellArea)
-    return 1-2*Theta*eta**2
+    return (1-Theta*eta)**2
+    #return 1-2*Theta*eta**2
 n_tb_T = 1
 #===============================================
 Ninterest = 1
@@ -232,13 +244,13 @@ for i in range(Ninterest):
     #n1n2 = n1n2OfInterest[i]
     #I = n1n2IArr[i]
     #IUnc = n1n2IUncArr[i]
-    I = gaI_T
-    IUnc = gaI_Tunc
+    I = gvI_T
+    IUnc = gvI_Tunc
 
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
     #plt.title("Intensity against $\Theta$ for "+str(n1n2))
-    plt.title("Intensity against $\Theta$ for Gaussian Adatoms")
+    plt.title("Intensity against $\Theta$ for Gaussian Vacancies")
     #if(Ninterest > 0):
     #    ax1.set_ylabel("I"+str(n1n2)+"/$I_0$")
     #else:
@@ -266,7 +278,8 @@ for i in range(Ninterest):
 
     p_t, c_t, infodict_t, null, null = curve_fit(
         i_tb_T,Thetas,I,
-        sigma=IUnc,absolute_sigma=True,
+        #sigma=IUnc,absolute_sigma=True,
+        #p0 = 4.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
         p0 = 4.,check_finite = True,nan_policy='raise',bounds=[0,cellArea],full_output=True
         )
     S_tiny = p_t[0]
@@ -279,7 +292,8 @@ for i in range(Ninterest):
 
     p_s, c_s, infodict_s, null, null = curve_fit(
         i_tb_S,Thetas,I,
-        sigma=IUnc,absolute_sigma=True,
+        #sigma=IUnc,absolute_sigma=True,
+        #p0 = cellArea*1.1,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
         p0 = cellArea*1.1,check_finite = True,nan_policy='raise',bounds=[cellArea,cellArea*(9/4)],full_output=True
         )
     S_small = p_s[0]
@@ -291,7 +305,8 @@ for i in range(Ninterest):
 
     p_m, c_m, infodict_m, null, null = curve_fit(
         i_tb_M,Thetas,I,
-        sigma=IUnc,absolute_sigma=True,
+        #sigma=IUnc,absolute_sigma=True,
+        #p0 = 3*cellArea,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
         p0 = 3*cellArea,check_finite = True,nan_policy='raise',bounds=[(9/4)*cellArea,4*cellArea],full_output=True
         )
     S_medium = p_m[0]
@@ -303,8 +318,9 @@ for i in range(Ninterest):
 
     p_l, c_l, infodict_l, null, null = curve_fit(
         i_tb_L,Thetas,I,
-        sigma=IUnc,absolute_sigma=True,
-        p0 = cellArea*5,check_finite = True,nan_policy='raise',bounds=[4*cellArea,np.inf],full_output=True
+        #sigma=IUnc,absolute_sigma=True,
+        #p0 = cellArea*5,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
+        p0 = 5*cellArea,check_finite = True,nan_policy='raise',bounds=[4*cellArea,np.inf],full_output=True
         )
     S_large = p_l[0]
     SE = np.sqrt(np.diag(c_l))
@@ -313,20 +329,22 @@ for i in range(Ninterest):
     print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_l,N,n_tb_L)))
     print("* - - - - - -")
 
+    #===============================================
+    #clr = np.array([1, 0, .2])
+    #fD_L = i_tb_L(Thetas_continuum,S_large)
+    #fD_L_L = i_tb_L(Thetas_continuum,S_large-S_large_Unc)
+    #fD_L_U = i_tb_L(Thetas_continuum,S_large+S_large_Unc)
+    #ax1.plot(Thetas_continuum,fD_L,label="Large $S$\n"+
+    #         "S=" + "{:.5f}".format(S_large) + "$\pm$" + "{:.5f}".format(S_large_Unc),
+    #         color=clr)
+    #ax1.plot(Thetas_continuum,fD_L_L,color=clr/2)
+    #ax1.plot(Thetas_continuum,fD_L_U,color=clr/2)
+    #ax1.fill_between(Thetas_continuum, fD_L_L, fD_L_U, alpha=0.3, edgecolor=clr, facecolor=clr)
+
 
     #===============================================
-    clr = np.array([1, 0, .2])
-    fD_L = i_tb_L(Thetas_continuum,S_large)
-    fD_L_L = i_tb_L(Thetas_continuum,S_large-S_large_Unc)
-    fD_L_U = i_tb_L(Thetas_continuum,S_large+S_large_Unc)
-    ax1.plot(Thetas_continuum,fD_L,label="Large $S$\n"+
-             "S=" + "{:.5f}".format(S_large) + "$\pm$" + "{:.5f}".format(S_large_Unc),
-             color=clr)
-    ax1.plot(Thetas_continuum,fD_L_L,color=clr/2)
-    ax1.plot(Thetas_continuum,fD_L_U,color=clr/2)
-    ax1.fill_between(Thetas_continuum, fD_L_L, fD_L_U, alpha=0.3, edgecolor=clr, facecolor=clr)
-    
-    #===============================================
+
+
     clr = np.array([.3, .8, .0])
     fD_tb_medium = i_tb_M(Thetas_continuum,S_medium)
     fD_tb_medium_L = i_tb_M(Thetas_continuum,S_medium-S_medium_Unc)
@@ -339,40 +357,10 @@ for i in range(Ninterest):
     ax1.fill_between(Thetas_continuum, fD_tb_medium_L, fD_tb_medium_U, alpha=0.3, edgecolor=clr, facecolor=clr)
 
     #===============================================
-    """
-    clr = np.array([1.0, .5, .0])
-    fD_tb_medium_r = i_tb_M_R(Thetas_continuum,eta_tb_medium_r,xi_tb_medium_r,rho_def_tb_medium_r,delta_def_tb_medium_r)
-    fD_tb_medium_r_L = i_tb_M_R(Thetas_continuum,eta_tb_medium_r-eta_tb_medium_r_Unc,xi_tb_medium_r-xi_tb_medium_r_Unc,rho_def_tb_medium_r-rho_def_tb_medium_r_Unc,delta_def_tb_medium_r-delta_def_tb_medium_r_Unc)
-    fD_tb_medium_r_U = i_tb_M_R(Thetas_continuum,eta_tb_medium_r+eta_tb_medium_r_Unc,xi_tb_medium_r+xi_tb_medium_r_Unc,rho_def_tb_medium_r+rho_def_tb_medium_r_Unc,delta_def_tb_medium_r+delta_def_tb_medium_r_Unc)
-    ax1.plot(Thetas_continuum,fD_tb_medium_r,label="Medium $\Sigma$, reflecting\n"+
-             "S=" + "{:.5f}".format(S_tb_medium_r) + "$\pm$" + "{:.5f}".format(S_tb_medium_r_Unc)+"\n"
-             "$\\rho$ = " +"{:.5f}".format(rho_def_tb_medium_r) + "$\pm$" + "{:.5f}".format(rho_def_tb_medium_r_Unc)+ "\n" +
-             "$\delta$ = " +"{:.5f}".format(delta_def_tb_medium_r) + "$\pm$" + "{:.5f}".format(delta_def_tb_medium_r_Unc),
-             color=clr)
-    ax1.plot(Thetas_continuum,fD_tb_medium_r_L,color=clr/2)
-    ax1.plot(Thetas_continuum,fD_tb_medium_r_U,color=clr/2)
-    ax1.fill_between(Thetas_continuum, fD_tb_medium_r_L, fD_tb_medium_r_U, alpha=0.3, edgecolor=clr, facecolor=clr)
-    """
-    #===============================================
-    """
-    clr = np.array([1.0, .5, .0])
-    fD_tb_small_r = i_tb_M_R(Thetas_continuum,eta_tb_small_r,xi_tb_small_r,rho_def_tb_small_r,delta_def_tb_small_r)
-    fD_tb_small_r_L = i_tb_M_R(Thetas_continuum,eta_tb_small_r-eta_tb_small_r_Unc,xi_tb_small_r-xi_tb_small_r_Unc,rho_def_tb_small_r-rho_def_tb_small_r_Unc,delta_def_tb_small_r-delta_def_tb_small_r_Unc)
-    fD_tb_small_r_U = i_tb_M_R(Thetas_continuum,eta_tb_small_r+eta_tb_small_r_Unc,xi_tb_small_r+xi_tb_small_r_Unc,rho_def_tb_small_r+rho_def_tb_small_r_Unc,delta_def_tb_small_r+delta_def_tb_small_r_Unc)
-    ax1.plot(Thetas_continuum,fD_tb_small_r,label="Small $\Sigma$, reflecting\n"+
-            "S=" + "{:.5f}".format(S_tb_small_r) + "$\pm$" + "{:.5f}".format(S_tb_small_r_Unc)+"\n"
-            "$\\rho$ = " +"{:.5f}".format(rho_def_tb_small_r) + "$\pm$" + "{:.5f}".format(rho_def_tb_small_r_Unc)+ "\n" +
-            "$\delta$ = " +"{:.5f}".format(delta_def_tb_small_r) + "$\pm$" + "{:.5f}".format(delta_def_tb_small_r_Unc),
-            color=clr)
-    ax1.plot(Thetas_continuum,fD_tb_small_r_L,color=clr/2)
-    ax1.plot(Thetas_continuum,fD_tb_small_r_U,color=clr/2)
-    ax1.fill_between(Thetas_continuum, fD_tb_small_r_L, fD_tb_small_r_U, alpha=0.3, edgecolor=clr, facecolor=clr)
-    """
-    #===============================================
     clr = np.array([0, 0.4, 0.4])
-    fD_tb_small = i_tb_M(Thetas_continuum,S_small)
-    fD_tb_small_L = i_tb_M(Thetas_continuum,S_small-S_small_Unc)
-    fD_tb_small_U = i_tb_M(Thetas_continuum,S_small+S_small_Unc)
+    fD_tb_small = i_tb_S(Thetas_continuum,S_small)
+    fD_tb_small_L = i_tb_S(Thetas_continuum,S_small-S_small_Unc)
+    fD_tb_small_U = i_tb_S(Thetas_continuum,S_small+S_small_Unc)
     ax1.plot(Thetas_continuum,fD_tb_small,label="Small S\n"+
              "S=" + "{:.5f}".format(S_small) + "$\pm$" + "{:.5f}".format(S_small_Unc),
              color=clr)
@@ -382,10 +370,10 @@ for i in range(Ninterest):
 
     #===============================================
     clr = np.array([0, 0.7, 1.0])
-    fD_tb_tiny = i_tb_M(Thetas_continuum,S_tiny)
-    fD_tb_tiny_L = i_tb_M(Thetas_continuum,S_tiny-S_tiny_Unc)
-    fD_tb_tiny_U = i_tb_M(Thetas_continuum,S_tiny+S_tiny_Unc)
-    ax1.plot(Thetas_continuum,fD_tb_small,label="Tiny S\n"+
+    fD_tb_tiny = i_tb_T(Thetas_continuum,S_tiny)
+    fD_tb_tiny_L = i_tb_T(Thetas_continuum,S_tiny-S_tiny_Unc)
+    fD_tb_tiny_U = i_tb_T(Thetas_continuum,S_tiny+S_tiny_Unc)
+    ax1.plot(Thetas_continuum,fD_tb_tiny,label="Tiny S\n"+
              "S=" + "{:.5f}".format(S_tiny) + "$\pm$" + "{:.5f}".format(S_tiny_Unc),
              color=clr)
     ax1.plot(Thetas_continuum,fD_tb_tiny_L,color=clr/2)
@@ -395,6 +383,6 @@ for i in range(Ninterest):
     #===============================================
     plt.legend(loc='upper right')
     #plt.savefig(fname="Figures/Fitted Plots/"+slugify( execTime +"_fitted_" + str(n1n2)),dpi=300)
-    plt.savefig(fname="Figures/Fitted Plots/"+slugify( execTime +"_fitted_ga"),dpi=300)
+    plt.savefig(fname="Figures/Fitted Plots/"+slugify( execTime +"_fitted_gv"),dpi=300)
     plt.show()
     print("* Saved figure")
