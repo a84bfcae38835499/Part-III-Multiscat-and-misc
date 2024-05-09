@@ -207,50 +207,27 @@ n1n2IUncArr = [gaI00unc]
 
 Ninterest = len(n1n2OfInterest)
 
-def i_L(Theta,S):
+def i_tb_L(Theta,S):
     I_I0 = np.power((1 - Theta),2*S/cellArea)
     return I_I0
-n_L = 1
+n_tb_L = 1
 
-def i_S_D_NOO(Theta,S):
-    def F(Theta,R,D):
-        return (1-Theta)*((1-Theta)**6+(R-D/6)/(R)*Theta*(1-Theta)**3+(R-D/3)/(R)*(Theta**2)*(1-Theta)+(R-D/2)/(R)*(Theta**3))
-    I_I0 = F(Theta,cellArea,S-cellArea)**2
-    return I_I0
-n_S_D_NOO = 1
+def i_tb_M(Theta,S):
+    eta = np.sqrt(S/cellArea)
+    return (1-Theta*(eta**2)+(Theta**2)*(10-16*eta+7*eta**2)-(Theta**3)*(20-28*eta+10*eta**2)+(Theta**4)*(9-12*eta+4*eta**2))**2
+n_tb_M = 1
 
-def i_S_R_2_NOO(Theta,S,phase,rho):
-    def F(Theta,R,D):
-        return (1-Theta)*((1-Theta)**6+(R-D/6)/(R)*Theta*(1-Theta)**3+(R-D/3)/(R)*(Theta**2)*(1-Theta)+(R-D/2)/(R)*(Theta**3))
-    I_I0 = F(Theta,cellArea,S-cellArea)**2 + (rho*Theta)**2 + 2*rho*Theta*F(Theta,cellArea,S-cellArea)*np.cos(phase)
-    return I_I0
-n_S_R_2_NOO = 3
-
-def i_tb_S_D(Theta,eta):
+def i_tb_S(Theta,S):
+    eta = np.sqrt(S/cellArea)
     return (1-Theta*(eta**2)+(Theta**2)*(1-3*eta)*(1-eta)-2*(Theta**3)*((1-eta)**2))**2
-n_tb_S_D = 1
+n_tb_S = 1
 
-def i_tb_M_D(Theta,eta):
-    return (1-Theta*(eta**2)+(Theta**2)*(7*(eta**2)-16*eta+10)+(Theta**3)*(10*(eta**2)-28*eta+20)+(Theta**4)* (4*(eta**2)-12*eta+9))**2
-n_tb_M_D = 1
-
-def i_tb_S_S(Theta,xi):
-    return Theta*((xi-1)**2)-(Theta**2)*(xi-1)*(5-3*xi)+2*(Theta**3)*((1-xi)**2)
-n_tb_S_S = 1
-
-def i_tb_M_S(Theta,xi):
-    return Theta*((xi-2)**2)-(Theta**2)*((xi-2)**2)-2*(Theta**3)*(xi-2)*(3*xi-4)+(Theta**4)*((2*xi-3)**2)
-n_tb_M_S = 1
-
-def i_tb_S_R(Theta,eta,xi,rho,delta):
-    return np.abs(i_tb_S_D(Theta,eta)+rho*np.exp(1.j * delta)*i_tb_S_S(Theta,xi))**2
-n_tb_S_R = 4
-
-def i_tb_M_R(Theta,eta,xi,rho,delta):
-    return np.abs(i_tb_M_D(Theta,eta)+rho*np.exp(1.j * delta)*i_tb_M_S(Theta,xi))**2
-n_tb_M_R = 4
-Ninterest = 1
+def i_tb_T(Theta,S):
+    eta = np.sqrt(S/cellArea)
+    return 1-2*Theta*eta**2
+n_tb_T = 1
 #===============================================
+Ninterest = 1
 for i in range(Ninterest):
     #n1n2 = n1n2OfInterest[i]
     #I = n1n2IArr[i]
@@ -287,125 +264,63 @@ for i in range(Ninterest):
 
     print("* - - - - - -")
 
-    p_L, c_L, infodict_L, null, null = curve_fit(
-        i_L,Thetas,I,
+    p_t, c_t, infodict_t, null, null = curve_fit(
+        i_tb_T,Thetas,I,
         sigma=IUnc,absolute_sigma=True,
-        p0 = 1.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
+        p0 = 4.,check_finite = True,nan_policy='raise',bounds=[0,cellArea],full_output=True
         )
-    S_L = p_L[0]
-    SE = np.sqrt(np.diag(c_L))
-    S_L_Unc = SE[0]
-    #print(p_L)
-    #print(c_L)
-    print("S_L = "+ "{:.7f}".format(S_L) + "±" + "{:.7f}".format(S_L_Unc))
-    print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_L,N,n_L)))
-    print("* - - - - - -")
-
-    p_tb_small, c_tb_small, infodict_tb_small, null, null = curve_fit(
-        i_tb_S_D,Thetas,I,
-        sigma=IUnc,absolute_sigma=True,
-        p0 = 2.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
-        )
-    eta_tb_small = p_tb_small[0]
-    S_tb_small = cellArea * (eta_tb_small)**2
-    SE = np.sqrt(np.diag(c_tb_small))
-    eta_tb_small_Unc = SE[0]
-    S_tb_small_Unc = cellArea * eta_tb_small_Unc**2
-
-    #print(p_tb_small)
-    #print(c_tb_small)
-    print("eta_tb_small = "+ "{:.7f}".format(eta_tb_small) + "±" + "{:.7f}".format(eta_tb_small_Unc))
-    print("S_tb_small = "+ "{:.7f}".format(S_tb_small) + "±" + "{:.7f}".format(S_tb_small_Unc))
-    print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_tb_small,N,n_tb_S_D)))
+    S_tiny = p_t[0]
+    SE = np.sqrt(np.diag(c_t))
+    S_tiny_Unc = SE[0]
+    print("S_tiny = "+ "{:.7f}".format(S_tiny) + "±" + "{:.7f}".format(S_tiny_Unc))
+    print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_t,N,n_tb_S)))
 
     print("* - - - - - -")
 
-    p_tb_medium, c_tb_medium, infodict_tb_medium, null, null = curve_fit(
-        i_tb_M_D,Thetas,I,
+    p_s, c_s, infodict_s, null, null = curve_fit(
+        i_tb_S,Thetas,I,
         sigma=IUnc,absolute_sigma=True,
-        p0 = 2.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
+        p0 = cellArea*1.1,check_finite = True,nan_policy='raise',bounds=[cellArea,cellArea*(9/4)],full_output=True
         )
-    eta_tb_medium = p_tb_medium[0]
-    S_tb_medium = cellArea * (eta_tb_medium)**2
-    SE = np.sqrt(np.diag(c_tb_medium))
-    eta_tb_medium_Unc=SE[0]
-    S_tb_medium_Unc = cellArea * eta_tb_medium_Unc**2
+    S_small = p_s[0]
+    SE = np.sqrt(np.diag(c_s))
+    S_small_Unc = SE[0]
+    print("S_small = "+ "{:.7f}".format(S_small) + "±" + "{:.7f}".format(S_small_Unc))
+    print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_s,N,n_tb_S)))
+    print("* - - - - - -")
 
-    #print(p_tb_medium)
-    #print(c_tb_medium)
-    print("eta_tb_medium = "+ "{:.7f}".format(eta_tb_small) + "±" + "{:.7f}".format(eta_tb_medium_Unc))
-    print("S_tb_medium = "+ "{:.7f}".format(S_tb_medium) + "±" + "{:.7f}".format(S_tb_medium_Unc))
-    print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_tb_medium,N,n_tb_M_D)))
+    p_m, c_m, infodict_m, null, null = curve_fit(
+        i_tb_M,Thetas,I,
+        sigma=IUnc,absolute_sigma=True,
+        p0 = 3*cellArea,check_finite = True,nan_policy='raise',bounds=[(9/4)*cellArea,4*cellArea],full_output=True
+        )
+    S_medium = p_m[0]
+    SE = np.sqrt(np.diag(c_m))
+    S_medium_Unc=SE[0]
+    print("S_medium = "+ "{:.7f}".format(S_medium) + "±" + "{:.7f}".format(S_medium_Unc))
+    print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_m,N,n_tb_M)))
     print("* = = = = = =")
 
-    p_tb_small_r, c_tb_small_r, infodict_tb_small_r, null, null = curve_fit(
-        i_tb_S_R,Thetas,I,
+    p_l, c_l, infodict_l, null, null = curve_fit(
+        i_tb_L,Thetas,I,
         sigma=IUnc,absolute_sigma=True,
-        p0 = [1.5,1.5,0,np.pi],check_finite = True,nan_policy='raise',full_output=True,
-        bounds=[[1,1,0,0],[1.5,1.5,1,2*np.pi]]
+        p0 = cellArea*5,check_finite = True,nan_policy='raise',bounds=[4*cellArea,np.inf],full_output=True
         )
-    #print(p_tb_small_r)
-    #print(c_tb_small_r)
-
-    eta_tb_small_r = p_tb_small_r[0]
-    S_tb_small_r = cellArea * eta_tb_small_r**2 #eta
-    xi_tb_small_r = p_tb_small_r[1]
-    S_def_tb_small_r = cellArea * xi_tb_small_r**2 #xi
-    rho_def_tb_small_r = (p_tb_small_r[2]) #rho
-    delta_def_tb_small_r = (p_tb_small_r[3]) #delta
-    SE = np.sqrt(np.diag(c_tb_small_r))
-    eta_tb_small_r_Unc = SE[0]
-    S_tb_small_r_Unc = cellArea * eta_tb_small_r_Unc**2
-    xi_tb_small_r_Unc = SE[1]
-    S_def_tb_small_r_Unc = cellArea * xi_tb_small_r_Unc**2
-    rho_def_tb_small_r_Unc = SE[2]
-    delta_def_tb_small_r_Unc = SE[3]
-
-    print("S_tb_small_r = "+ "{:.7f}".format(S_tb_small_r) + "±" + "{:.7f}".format(S_tb_small_r_Unc))
-    print("S_def_tb_small_r = "+ "{:.7f}".format(S_def_tb_small_r) + "±" + "{:.7f}".format(S_def_tb_small_r_Unc))
-    print("rho_def_tb_small_r = "+ "{:.7f}".format(rho_def_tb_small_r) + "±" + "{:.7f}".format(rho_def_tb_small_r_Unc))
-    print("delta_def_tb_small_r = "+ "{:.7f}".format(delta_def_tb_small_r) + "±" + "{:.7f}".format(delta_def_tb_small_r_Unc))
-    print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_tb_small_r,N,n_tb_S_R)))
-    print("* = = = = = =")
-
-    p_tb_medium_r, c_tb_medium_r, infodict_tb_medium_r, null, null = curve_fit(
-        i_tb_M_R,Thetas,I,
-        sigma=IUnc,absolute_sigma=True,
-        p0 = [1.8,1.8,0.,np.pi],check_finite = True,nan_policy='raise',full_output=True,
-        bounds=[[1.5,1.5,0,0],[2,2,1,2*np.pi]]
-        )
-    #print(p_tb_medium_r)
-    #print(c_tb_medium_r)
-
-    eta_tb_medium_r = p_tb_medium_r[0]
-    S_tb_medium_r = cellArea * eta_tb_medium_r**2 #eta
-    xi_tb_medium_r = p_tb_medium_r[1]
-    S_def_tb_medium_r = cellArea * xi_tb_medium_r**2 #xi
-    rho_def_tb_medium_r = (p_tb_medium_r[2]) #rho
-    delta_def_tb_medium_r = (p_tb_medium_r[3]) #delta
-    SE = np.sqrt(np.diag(c_tb_medium_r))
-    eta_tb_medium_r_Unc = SE[0]
-    S_tb_medium_r_Unc = cellArea * eta_tb_medium_r_Unc**2
-    xi_tb_medium_r_Unc = SE[1]
-    S_def_tb_medium_r_Unc = cellArea * xi_tb_medium_r_Unc**2
-    rho_def_tb_medium_r_Unc = SE[2]
-    delta_def_tb_medium_r_Unc = SE[3]
-
-    print("S_tb_medium_r = "+ "{:.7f}".format(S_tb_medium_r) + "±" + "{:.7f}".format(S_tb_medium_r_Unc))
-    print("S_def_tb_medium_r = "+ "{:.7f}".format(S_def_tb_medium_r) + "±" + "{:.7f}".format(S_def_tb_medium_r_Unc))
-    print("rho_def_tb_medium_r = "+ "{:.7f}".format(rho_def_tb_medium_r) + "±" + "{:.7f}".format(rho_def_tb_medium_r_Unc))
-    print("delta_def_tb_medium_r = "+ "{:.7f}".format(delta_def_tb_medium_r) + "±" + "{:.7f}".format(delta_def_tb_medium_r_Unc))
-    print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_tb_medium_r,N,n_tb_M_R)))
-    print("* = = = = = =")
+    S_large = p_l[0]
+    SE = np.sqrt(np.diag(c_l))
+    S_large_Unc = SE[0]
+    print("S_large = "+ "{:.7f}".format(S_large) + "±" + "{:.7f}".format(S_large_Unc))
+    print("chi-squared = " + "{:.7f}".format(calculated_chi_squared(infodict_l,N,n_tb_L)))
+    print("* - - - - - -")
 
 
     #===============================================
     clr = np.array([1, 0, .2])
-    fD_L = i_L(Thetas_continuum,S_L)
-    fD_L_L = i_L(Thetas_continuum,S_L-S_L_Unc)
-    fD_L_U = i_L(Thetas_continuum,S_L+S_L_Unc)
-    ax1.plot(Thetas_continuum,fD_L,label="Large $\Sigma$\n"+
-             "S=" + "{:.5f}".format(S_L) + "$\pm$" + "{:.5f}".format(S_L_Unc),
+    fD_L = i_tb_L(Thetas_continuum,S_large)
+    fD_L_L = i_tb_L(Thetas_continuum,S_large-S_large_Unc)
+    fD_L_U = i_tb_L(Thetas_continuum,S_large+S_large_Unc)
+    ax1.plot(Thetas_continuum,fD_L,label="Large $S$\n"+
+             "S=" + "{:.5f}".format(S_large) + "$\pm$" + "{:.5f}".format(S_large_Unc),
              color=clr)
     ax1.plot(Thetas_continuum,fD_L_L,color=clr/2)
     ax1.plot(Thetas_continuum,fD_L_U,color=clr/2)
@@ -413,11 +328,11 @@ for i in range(Ninterest):
     
     #===============================================
     clr = np.array([.3, .8, .0])
-    fD_tb_medium = i_tb_M_D(Thetas_continuum,eta_tb_medium)
-    fD_tb_medium_L = i_tb_M_D(Thetas_continuum,eta_tb_medium-eta_tb_medium_Unc)
-    fD_tb_medium_U = i_tb_M_D(Thetas_continuum,eta_tb_medium+eta_tb_medium_Unc)
-    ax1.plot(Thetas_continuum,fD_tb_medium,label="Medium $\Sigma$\n"+
-             "S=" + "{:.5f}".format(S_tb_medium) + "$\pm$" + "{:.5f}".format(S_tb_medium_Unc),
+    fD_tb_medium = i_tb_M(Thetas_continuum,S_medium)
+    fD_tb_medium_L = i_tb_M(Thetas_continuum,S_medium-S_medium_Unc)
+    fD_tb_medium_U = i_tb_M(Thetas_continuum,S_medium+S_medium_Unc)
+    ax1.plot(Thetas_continuum,fD_tb_medium,label="Medium $S$\n"+
+             "S=" + "{:.5f}".format(S_medium) + "$\pm$" + "{:.5f}".format(S_medium_Unc),
              color=clr)
     ax1.plot(Thetas_continuum,fD_tb_medium_L,color=clr/2)
     ax1.plot(Thetas_continuum,fD_tb_medium_U,color=clr/2)
@@ -455,18 +370,30 @@ for i in range(Ninterest):
     """
     #===============================================
     clr = np.array([0, 0.4, 0.4])
-    fD_tb_small = i_tb_M_D(Thetas_continuum,eta_tb_small)
-    fD_tb_small_L = i_tb_M_D(Thetas_continuum,eta_tb_small-eta_tb_small_Unc)
-    fD_tb_small_U = i_tb_M_D(Thetas_continuum,eta_tb_small+eta_tb_small_Unc)
+    fD_tb_small = i_tb_M(Thetas_continuum,S_small)
+    fD_tb_small_L = i_tb_M(Thetas_continuum,S_small-S_small_Unc)
+    fD_tb_small_U = i_tb_M(Thetas_continuum,S_small+S_small_Unc)
     ax1.plot(Thetas_continuum,fD_tb_small,label="Small S\n"+
-             "S=" + "{:.5f}".format(S_tb_small) + "$\pm$" + "{:.5f}".format(S_tb_small_Unc),
+             "S=" + "{:.5f}".format(S_small) + "$\pm$" + "{:.5f}".format(S_small_Unc),
              color=clr)
     ax1.plot(Thetas_continuum,fD_tb_small_L,color=clr/2)
     ax1.plot(Thetas_continuum,fD_tb_small_U,color=clr/2)
     ax1.fill_between(Thetas_continuum, fD_tb_small_L, fD_tb_small_U, alpha=0.3, edgecolor=clr, facecolor=clr)
 
     #===============================================
-    plt.legend()
+    clr = np.array([0, 0.7, 1.0])
+    fD_tb_tiny = i_tb_M(Thetas_continuum,S_tiny)
+    fD_tb_tiny_L = i_tb_M(Thetas_continuum,S_tiny-S_tiny_Unc)
+    fD_tb_tiny_U = i_tb_M(Thetas_continuum,S_tiny+S_tiny_Unc)
+    ax1.plot(Thetas_continuum,fD_tb_small,label="Tiny S\n"+
+             "S=" + "{:.5f}".format(S_tiny) + "$\pm$" + "{:.5f}".format(S_tiny_Unc),
+             color=clr)
+    ax1.plot(Thetas_continuum,fD_tb_tiny_L,color=clr/2)
+    ax1.plot(Thetas_continuum,fD_tb_tiny_U,color=clr/2)
+    ax1.fill_between(Thetas_continuum, fD_tb_tiny_L, fD_tb_tiny_U, alpha=0.3, edgecolor=clr, facecolor=clr)
+
+    #===============================================
+    plt.legend(loc='upper right')
     #plt.savefig(fname="Figures/Fitted Plots/"+slugify( execTime +"_fitted_" + str(n1n2)),dpi=300)
     plt.savefig(fname="Figures/Fitted Plots/"+slugify( execTime +"_fitted_ga"),dpi=300)
     plt.show()
