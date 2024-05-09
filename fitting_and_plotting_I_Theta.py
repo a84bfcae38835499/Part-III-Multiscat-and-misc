@@ -117,8 +117,18 @@ while count < 10:
         count += 1
 
 Thetas = np.array([0,1/25,2/25,3/25,4/25,5/25,6/25])
+
+Thetas = [x/25 for x in range(0,10)]
+
+Thetas += [(5*x)/25 for x in range(2,6)]
+
+Thetas = np.array(Thetas)
+print(Thetas)
+
+#Thetas = np.array([0,1/25,2/25,3/25,4/25,5/25,6/25,7/25,8/25,9/25])
 N = Thetas.size
 Thetas_continuum = np.linspace(0.,1.,500)
+""" vv This data is for real mos2 """
 
 I10 = np.array([1.,0.8343576,0.6972710,0.5820808,0.4816842,0.3830502,0.3218771
 ])
@@ -145,6 +155,29 @@ I_30 = np.array([1.,0.8402811,0.6926791,0.5560454,0.4404330,0.3453218,0.2964200
 I_30unc = np.array([1e-10,0.0020416,0.0018611,0.0019598,0.0028706,0.0037053,0.0099891
 ])
 
+""" v This data is for the gaussianz """
+gaI00 = np.array([1.,0.9235979,0.8848201,0.8652465,0.7989249,0.7926799,0.7571613,0.7605055,0.6751379,0.6843397
+])
+gaI00unc = np.array([1e-10,0.0176584,0.0371947,0.0399589,0.0459412,0.0309872,0.0766873,0.0529496,0.0724498,0.0557927
+])
+
+
+""" v This data is the total data for the gaussians at 0 degrees """
+gaI_T = np.array([
+    1.,0.9625589,0.9264127,0.8953515,0.8593757,0.8377734,0.7931277,0.7697033,0.7398964,0.7224723,0.6815588,0.6187126,0.5258513,0.5605555
+])
+gaI_Tunc = np.array([
+    1e-10,0.0000473,0.0000770,0.0001449,0.0001461,0.0002042,0.0002520,0.0002935,0.0002922,0.0003071,0.0004033,0.0004915,0.0006300,0.0060960
+])
+
+gvI_T = np.array([1.,
+])
+gvI_Tunc = np.array([1e-10,
+])
+
+n1n2OfInterest = []
+n1n2Colours = [0., 0., 0.]
+"""
 n1n2OfInterest = [[1,0],
                   [0,0],
                   [-1,0],
@@ -158,11 +191,20 @@ n1n2Colours = [[1, 0.82, 0.149],
 n1n2IArr = [I10,I00,I_10,I_20,I_30]
 n1n2IUncArr = [I10unc,I00unc,I_10unc,I_20unc,I_30unc]
 """
+"""
 n1n2OfInterest = [[-1,0]]
 n1n2Colours = [[0.067, 0.769, 0.451]]
 n1n2IArr = [I_10]
 n1n2IUncArr = [I_10unc]
+
+n1n2OfInterest = [[0,0]]
+n1n2Colours = [[0., 0., 0.]]
+n1n2IArr = [gaI00]
+n1n2IUncArr = [gaI00unc]
+
 """
+
+
 Ninterest = len(n1n2OfInterest)
 
 def i_L(Theta,S):
@@ -207,30 +249,47 @@ n_tb_S_R = 4
 def i_tb_M_R(Theta,eta,xi,rho,delta):
     return np.abs(i_tb_M_D(Theta,eta)+rho*np.exp(1.j * delta)*i_tb_M_S(Theta,xi))**2
 n_tb_M_R = 4
+Ninterest = 1
 #===============================================
-
 for i in range(Ninterest):
-    n1n2 = n1n2OfInterest[i]
-    I = n1n2IArr[i]
-    IUnc = n1n2IUncArr[i]
+    #n1n2 = n1n2OfInterest[i]
+    #I = n1n2IArr[i]
+    #IUnc = n1n2IUncArr[i]
+    I = gaI_T
+    IUnc = gaI_Tunc
 
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
-    plt.title("Intensity against $\Theta$ for "+str(n1n2))
-    ax1.set_ylabel("I"+str(n1n2)+"/$I_0$")
+    #plt.title("Intensity against $\Theta$ for "+str(n1n2))
+    plt.title("Intensity against $\Theta$ for Gaussian Adatoms")
+    #if(Ninterest > 0):
+    #    ax1.set_ylabel("I"+str(n1n2)+"/$I_0$")
+    #else:
+    ax1.set_ylabel("$I/I_0$")
     ax1.set_xlabel("$\Theta$")
-    ax1.set_xlim(0,1/3)
+    ax1.set_xlim(0,1)
     ax1.set_ylim(0,1)
-    ax1.errorbar(x=Thetas,y=I,yerr=IUnc*20,label="I"+str(n1n2)+"\n(error bars $\\times$20)",
-                 color=n1n2Colours[i],linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
+    fillclr = [1.,0.3,0.5]
+    errscale = 20
+    #if(errscale == 1):
+    #    ax1.errorbar(x=Thetas,y=I,yerr=IUnc*errscale,label="I"+str(n1n2)+"\n(error bars $\\times$"+str(errscale)+")",
+    #                color=n1n2Colours[i],linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
+    #else:
+    #    ax1.errorbar(x=Thetas,y=I,yerr=IUnc,label="I"+str(n1n2),
+    #                color=n1n2Colours[i],linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
+    if(errscale == 1):
+        ax1.errorbar(x=Thetas,y=I,yerr=IUnc,label="$I/I_0$",
+                    color=fillclr,linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
+    else:
+        ax1.errorbar(x=Thetas,y=I,yerr=IUnc*errscale,label="$I/I_0$"+"\n(error bars $\\times$"+str(errscale)+")",
+                    color=fillclr,linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
 
-    fillclr = [0.3,1.0,0.0]
 
     print("* - - - - - -")
 
     p_L, c_L, infodict_L, null, null = curve_fit(
         i_L,Thetas,I,
-        #sigma=IUnc,absolute_sigma=True,
+        sigma=IUnc,absolute_sigma=True,
         p0 = 1.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
         )
     S_L = p_L[0]
@@ -244,7 +303,7 @@ for i in range(Ninterest):
 
     p_tb_small, c_tb_small, infodict_tb_small, null, null = curve_fit(
         i_tb_S_D,Thetas,I,
-        #sigma=IUnc,absolute_sigma=True,
+        sigma=IUnc,absolute_sigma=True,
         p0 = 2.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
         )
     eta_tb_small = p_tb_small[0]
@@ -263,7 +322,7 @@ for i in range(Ninterest):
 
     p_tb_medium, c_tb_medium, infodict_tb_medium, null, null = curve_fit(
         i_tb_M_D,Thetas,I,
-        #sigma=IUnc,absolute_sigma=True,
+        sigma=IUnc,absolute_sigma=True,
         p0 = 2.,check_finite = True,nan_policy='raise',bounds=[0,np.inf],full_output=True
         )
     eta_tb_medium = p_tb_medium[0]
@@ -281,7 +340,7 @@ for i in range(Ninterest):
 
     p_tb_small_r, c_tb_small_r, infodict_tb_small_r, null, null = curve_fit(
         i_tb_S_R,Thetas,I,
-        #sigma=IUnc,absolute_sigma=True,
+        sigma=IUnc,absolute_sigma=True,
         p0 = [1.5,1.5,0,np.pi],check_finite = True,nan_policy='raise',full_output=True,
         bounds=[[1,1,0,0],[1.5,1.5,1,2*np.pi]]
         )
@@ -311,7 +370,7 @@ for i in range(Ninterest):
 
     p_tb_medium_r, c_tb_medium_r, infodict_tb_medium_r, null, null = curve_fit(
         i_tb_M_R,Thetas,I,
-        #sigma=IUnc,absolute_sigma=True,
+        sigma=IUnc,absolute_sigma=True,
         p0 = [1.8,1.8,0.,np.pi],check_finite = True,nan_policy='raise',full_output=True,
         bounds=[[1.5,1.5,0,0],[2,2,1,2*np.pi]]
         )
@@ -399,7 +458,7 @@ for i in range(Ninterest):
     fD_tb_small = i_tb_M_D(Thetas_continuum,eta_tb_small)
     fD_tb_small_L = i_tb_M_D(Thetas_continuum,eta_tb_small-eta_tb_small_Unc)
     fD_tb_small_U = i_tb_M_D(Thetas_continuum,eta_tb_small+eta_tb_small_Unc)
-    ax1.plot(Thetas_continuum,fD_tb_small,label="Small $\Sigma$\n"+
+    ax1.plot(Thetas_continuum,fD_tb_small,label="Small S\n"+
              "S=" + "{:.5f}".format(S_tb_small) + "$\pm$" + "{:.5f}".format(S_tb_small_Unc),
              color=clr)
     ax1.plot(Thetas_continuum,fD_tb_small_L,color=clr/2)
@@ -408,6 +467,7 @@ for i in range(Ninterest):
 
     #===============================================
     plt.legend()
-    plt.savefig(fname="Figures/Fitted Plots/"+slugify( execTime +"_fitted_" + str(n1n2)),dpi=300)
+    #plt.savefig(fname="Figures/Fitted Plots/"+slugify( execTime +"_fitted_" + str(n1n2)),dpi=300)
+    plt.savefig(fname="Figures/Fitted Plots/"+slugify( execTime +"_fitted_ga"),dpi=300)
     plt.show()
     print("* Saved figure")

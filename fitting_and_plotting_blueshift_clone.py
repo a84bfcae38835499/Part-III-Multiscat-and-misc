@@ -136,39 +136,58 @@ Adatom_K_Unc = np.array([0,0.0262528,0.0497557,0.0474716,0.0893587,0.0878799,0.0
 Vacancy_H_diff = np.array([0.482082,0.518472,0.546852,0.571712,0.594904,0.621270,0.636488,0.653600,0.674068,0.687810
 ])
 Vacancy_H_diff_Unc = np.array([0,0.004146,0.002800,0.007577,0.004823,0.004684,0.005989,0.005131,0.004122,0.011551
-
 ])
+Adatom_K = 7.9031-Adatom_K
                                                                                         #   v extremely anomalous shit goin
 Vacancy_K = np.array([1.8196899,1.8337429,1.8547909,1.8771613,1.9104914,1.9690134,1.9689019,2.0050719,1.9985184,2.0403300
 ])
 Vacancy_K_Unc = np.array([0,0.0188508,0.0375486,0.0332651,0.0922589,0.0565959,0.0807228,0.0896489,0.0740899,0.0852711
 ])
-#how can I contrive to write this line of code:
-#   phi lo mean a Kunc
+Vacancy_K = 7.9031-Vacancy_K
 
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
-plt.title("Entropy and |K| against $\Theta$")
+plt.title("Entropy and |K| against $\Theta$ - Adatoms")
 ax1.set_ylabel("H$_{diff}$")
 ax2 = ax1.twinx()
-ax2.set_ylabel("|$K$|/$Å^{-1}$")
+ax2.set_ylabel("|$K$| / $Å^{-1}$")
 ax1.set_xlabel("$\Theta$")
 ax1.set_xlim(min(Thetas),max(Thetas))
 ax1.set_ylim(min(Adatom_H_diff),max(Adatom_H_diff))
+ax2.set_ylim(min(Adatom_K),max(Adatom_K))
 ax1.errorbar(x=Thetas,y=Adatom_H_diff,yerr=Adatom_H_diff_Unc,label="Adatom H$_{diff}$",
                  color=[0.,0.,1.],linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
 ax2.errorbar(x=Thetas,y=Adatom_K,yerr=Adatom_K_Unc,label="Adatom |$K$|",
                  color=[1,.5,0.],linestyle=(0,(4,10)),marker='+',markersize=10,capsize=2.)
 
-ax1.errorbar(x=Thetas,y=Vacancy_H_diff,yerr=Vacancy_H_diff_Unc,label="Vacancy H$_{diff}$",
-                 color=[1,0,0.5],linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
-ax2.errorbar(x=Thetas,y=Vacancy_K,yerr=Vacancy_K_Unc,label="Vacancy |$K$|",
-                 color=[0.,0.5,0.5],linestyle=(0,(4,10)),marker='+',markersize=10,capsize=2.)
+plt.legend()
 ax1.legend(loc=1)
-ax2.legend(loc=0)
+ax2.legend(loc=2)
+
+plt.savefig(fname="Figures/Blueshift/"+slugify( execTime ) + "_blueshift_adatom",dpi=300)
+print("* Saved figure")
+plt.show()
+
+fig2 = plt.figure()
+ax1 = fig2.add_subplot(111)
+plt.title("Entropy and |K| against $\Theta$ - Vacancies")
+ax1.set_ylabel("H$_{diff}$")
+ax2 = ax1.twinx()
+ax2.set_ylabel("|$K$| / $Å^{-1}$")
+ax1.set_xlabel("$\Theta$")
+ax1.set_xlim(min(Thetas),max(Thetas))
+ax1.set_ylim(min(Vacancy_H_diff),max(Vacancy_H_diff))
+ax2.set_ylim(min(Vacancy_K),max(Vacancy_K))
+ax1.errorbar(x=Thetas,y=Vacancy_H_diff,yerr=Vacancy_H_diff_Unc,label="H$_{diff}$",
+                 color=[1,0,0.5],linestyle=(0,(8,10)),marker='x',markersize=10,capsize=2.)
+ax2.errorbar(x=Thetas,y=Vacancy_K,yerr=Vacancy_K_Unc,label="|$K$|",
+                 color=[0.,0.5,0.5],linestyle=(0,(4,10)),marker='+',markersize=10,capsize=2.)
 
 plt.legend()
-plt.savefig(fname="Figures/Blueshift/"+slugify( execTime ) + "_blueshift",dpi=300)
-plt.show()
+ax1.legend(loc=1)
+ax2.legend(loc=2)
+
+plt.savefig(fname="Figures/Blueshift/"+slugify( execTime ) + "_blueshift_vacancy",dpi=300)
 print("* Saved figure")
+plt.show()
