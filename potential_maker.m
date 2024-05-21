@@ -3,20 +3,29 @@ rng default;
 rng("shuffle");
 %Number of grid points, number of Z points, and number of lattices
 %contained in the overall superlattice (or rather the square root of that)
+<<<<<<< Updated upstream
 Nxy = 32; Nz = 50; Nsuper = 1;
 %Theta = 0.9;
 Theta = (1/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 9;
 avoidNearestNeighbors = false;
+=======
+Nxy = 32; Nz = 100; Nsuper = 6;
+%Theta = 0.9;
+Theta = (1/(Nsuper*Nsuper));
+disp('Theta = ' + Theta)
+Nensemble_limit = 1;
+avoidNearestNeighbors = true;
+>>>>>>> Stashed changes
 usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
   defectH = 0.;
   defectR = 0.5;
   minDist = defectR;
-zMax = 6; zMin = 2;%units Å
-fileprefix = "10x10_MoS2_ibkt_4_mu_half"
+zMax = 6; zMin = -2;%units Å
+fileprefix = "6x6MoS2_ikbt_4_mu_half"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -28,6 +37,7 @@ onlyPrepConf = false;
 a1=[-const.c,0];
 a2=[const.c/2,const.c*sqrt(3)/2];
 a3=[0,0,const.c];
+%a3=[0,0,const.a];
 %A1 = a1;
 %A2 = a2;
 [b1,b2,b3] = Reciprocal([a1,0],[a2,0],a3);
@@ -190,7 +200,7 @@ end
 %actually check them lol
 %===
 %% Now interpolate the DFT data into a useful basis
-interpolateDFTdata = true;
+interpolateDFTdata = false;
 
 if(interpolateDFTdata)
   oldmethod = true;
@@ -998,7 +1008,7 @@ function [b1,b2,b3] = Reciprocal(a1,a2,a3)
     b3 = factor*cross(a1,a2);
 end
 
-function [VmatrixElement] = Vfunc_LiF(x,y,z)
+function [VmatrixElement] = Vfunc_LiF_Wolken(x,y,z)
     function [V0] = V0func(z)
         V0 = const.D * exp(2*const.alpha*(const.z0-z))...
             - 2*const.D*exp(const.alpha*(const.z0-z));
@@ -1145,6 +1155,7 @@ function [Vout] = AddSulphurDefect(doWeRepeat,Vin,m_in,n_in,a1,a2,Nsuper,Xsuper,
         mu = 0.5;
       end
       VmatrixElement = Vfunc_MoS2(x,y,z);
+      %VmatrixElement = Vfunc_LiF_Wolken(x,y,z);
     else
       error("This is impossible to fit, don't use this")
       if(hexDefect)
