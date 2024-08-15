@@ -1,6 +1,0 @@
-Files starting nxnMoS2 = initial tests of supercell timing, have 1 defect each, Nxy = 32, Nz = 50
-Files starting restest = tests of resolution and timing and convergence
-files ending _0ND = N defects
-Files starting x = Nxy = 10, Nz = 100 , with a low ensemble limt of 6 (I think)
-files starting _ = as above but with an ensemble limit of 10 or maybe 30
-Files starting - = Nxy = 16, Nz = 100
