@@ -10,8 +10,6 @@ import matplotlib.patheffects as pe
 import matplotlib.patches as patches
 import math
 
-<<<<<<< Updated upstream
-=======
 filenametxt=''
 scatcondprefix = ''
 pristineprefix = ''
@@ -100,7 +98,6 @@ Ninterest = sum(1 for _ in n1n2OfInterest)
 if(scatcondprefix == ''):
     scatcondprefix = fileprefix
 
->>>>>>> Stashed changes
 def slugify(value, allow_unicode=False):
     """
     Taken from https://github.com/django/django/blob/master/django/utils/text.py
