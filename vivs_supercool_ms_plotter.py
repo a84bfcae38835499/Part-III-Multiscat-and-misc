@@ -214,7 +214,6 @@ from scipy.spatial import Voronoi
 from scipy.spatial import voronoi_plot_2d
 import matplotlib.cm as cm
 
-<<<<<<< Updated upstream
 n1n2OfInterest = []
 n1n2Colours = []
 
@@ -229,7 +228,6 @@ fileprefix = 'ga5x5_03D'
 fileprefix = '5x5MoS2'
 fileprefix = 'ga5x5_04D'
 fileprefixes = ['gv5x5_0' + str(x) + 'D' for x in range(1,10)]
-=======
 Babs = np.sqrt(B1[0]**2+B1[1]**2)
 print("B1 = ") 
 print(B1)
@@ -242,7 +240,6 @@ b1 = B1 / Babs
 b2 = B2 / Babs
 print("Opening" + str(scatcondprefix) + ".in_scatcond")
 scatFile = open(scatcondprefix + '.in_scatcond', 'r')
->>>>>>> Stashed changes
 
 fileprefixes += ['gv5x5_' + str(5*x) + 'D' for x in range(2,6)]
 print(fileprefixes)
