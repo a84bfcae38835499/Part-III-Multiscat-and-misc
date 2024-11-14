@@ -1,23 +1,24 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import numpy as np
 import pandas as pd
+
 import datetime
 import unicodedata
 import re
-import matplotlib.patheffects as pe
-import matplotlib.patches as patches
 import math
+
+
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.cm as cm
+import matplotlib.patheffects as pe
+
+from scipy.spatial import Voronoi
+from scipy.spatial import voronoi_plot_2d
 
 filenametxt=''
 scatcondprefix = ''
 pristineprefix = ''
 
-#packages to import
-from scipy.spatial import Voronoi
-from scipy.spatial import voronoi_plot_2d
-import matplotlib.cm as cm
 
 n1n2OfInterest = []
 n1n2Colours = []
