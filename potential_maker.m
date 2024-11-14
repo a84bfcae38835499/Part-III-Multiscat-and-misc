@@ -1,11 +1,11 @@
 clear; close all; clc;
 rng default;
 rng("shuffle");
-%Number of grid points, number of Z points, and number of lattices
-%contained in the overall superlattice (or rather the square root of that)
-Nxy = 32; Nz = 50; Nsuper = 1;
-%Theta = 0.9;
-Theta = (1/(Nsuper*Nsuper));
+Nxy = 32; % Number of grid points
+Nz = 50;  % Number of Z points
+Nsuper = 1; % Number of lattices contained in the overall superlattice (or rather the square root of that)
+%Theta = 0.9; % Defect density, i.e. number of defects per unit cell
+Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
 Nensemble_limit = 9;
 avoidNearestNeighbors = false;
@@ -21,8 +21,8 @@ displacementMode = 1; % 0 = Gaussians
   defectH = 0.;
   defectR = 0.5;
   minDist = defectR;
-zMax = 6; zMin = -2;%units Å
-fileprefix = "6x6MoS2_ikbt_4_mu_half"
+zMax = 6; zMin = 1.5;%units Å
+fileprefix = "Multiscat_Input_Files/" + "McVey_Test"
 onlyWriteLatticeFile = false;
 plotPot = true;
 onlyPrepConf = false;
@@ -197,97 +197,17 @@ end
 %actually check them lol
 %===
 %% Now interpolate the DFT data into a useful basis
-interpolateDFTdata = false;
-
-if(interpolateDFTdata)
-  oldmethod = true;
-  if(oldmethod)
-    VDFTvect = zeros(DFTsuper*DFTsuper*12*12*19,1);
-    XDFTvect = VDFTvect;
-    YDFTvect = VDFTvect;
-    ZDFTvect = VDFTvect;
-    index = 0;
-    for k = 1:19
-      z = ZDFT(k);
-       for j = 1:12*DFTsuper
-        for i = 1:12*DFTsuper
-          if(index + 1 ~= 144*DFTsuper*DFTsuper*(k-1)+12*DFTsuper*(j-1)+i)
-            error("F")
-          end
-          index = 144*DFTsuper*DFTsuper*(k-1)+12*DFTsuper*(j-1)+i;
-          %disp("index = " + num2str(index))
-          XDFTvect(index) = XDFTsuper(i,j);
-          YDFTvect(index) = YDFTsuper(i,j);
-          ZDFTvect(index) = z;
-          VDFTvect(index) = VDFTsuper(i,j,k);
+Vinterp = interpolate_dft(Nxy,Nz,X,Y,Z,DFTsuper,XDFTsuper,YDFTsuper,ZDFT,VDFTsuper)
+Vinterpsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
+for z = 1:Nz
+    for nx = 1:Nxy:Nsuper*Nxy
+        for ny = 1:Nxy:Nsuper*Nxy
+            Vinterpsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = Vinterp(:,:,z);
         end
-      end
     end
-    InterpolatedFn = scatteredInterpolant(XDFTvect,YDFTvect,ZDFTvect,VDFTvect,'natural','none');
-    Xvect = squeeze(zeros(Nxy*Nxy*Nz,1));
-    Yvect = Xvect;
-    Zvect = Xvect;
-    for k = 1:Nz
-      z = Z(k);
-       for j = 1:Nxy
-        for i = 1:Nxy
-          index2 = Nxy*Nxy*(k-1)+Nxy*(j-1)+i;
-          %disp("index2 = " + num2str(index2))
-          Xvect(index2) = X(i,j);
-          Yvect(index2) = Y(i,j);
-          Zvect(index2) = z;
-        end
-      end
-    end
-    %Vvect = interp3(XDFTvect,YDFTvect,ZDFTvect,VDFTsuper,Xvect,Yvect,Zvect,'linear');
-    Vvect = InterpolatedFn(Xvect,Yvect,Zvect);%<- Beware! this step takes absolutely forever
-    if(anynan(Vvect))
-      error("Nan found!")
-    end  
-    for k = 1:Nz
-      for j = 1:Nxy
-        for i = 1:Nxy
-          Vinterp(i,j,k) = Vvect(Nxy*Nxy*(k-1)+Nxy*(j-1)+i);
-        end
-      end
-    end
-  else
-    %use new method
-
-    N1 = linspace(0,12,Nxy);
-    N2 = linspace(0,12,Nxy);
-    N1_a = [N1 13];
-    N2_a = [N2 13];
-
-    %N1 = linspace(0,const.c,Nxy);
-    %N2 = linspace(0,const.c,Nxy);
-    %N1_a = [N1 const.c*(Nxy+1/Nxy)];
-    %N2_a = [N2 const.c*(Nxy+1/Nxy)];
-    [x1, y1, z1] =  ndgrid(N1_a, N1_a, Z);
-    Vinterp_a = interp3(VDFT_a, x1, y1, z1, 'nearest');
-    Vinterp = Vinterp_a(1:Nxy, 1:Nxy, :);
-    figure
-    equipotential_plot('V', Vinterp, 'V0', 0, 'z', Z, 'X', N1, 'Y', N2)
-    shading interp
-  end
-  Vinterpsuper = zeros(Nsuper*Nxy,Nsuper*Nxy,Nz);
-  for z = 1:Nz
-      for nx = 1:Nxy:Nsuper*Nxy
-          for ny = 1:Nxy:Nsuper*Nxy
-              Vinterpsuper(nx:nx+Nxy-1,ny:ny+Nxy-1,z) = Vinterp(:,:,z);
-          end
-      end
-  end
 end
-
-%writematrix(Vsuper,"V.csv")
-
-%Vsuper = readmatrix("V_boyao.csv");
-%Vsuper = reshape(Vsuper,[Ncell,Ncell,Nz]);
-
-%===
 %% oh fuck
-copyInterp = false;
+copyInterp = true;
 if(copyInterp)
   Vsuper = Vinterpsuper;
 end
@@ -912,7 +832,7 @@ for Ne = 1:Nensemble
       hold off
 
     end
-  savestr = "Figures/" + fileprefix + "_" + string(Ne) + ".jpg";
+  savestr = fileprefix + "_" + string(Ne) + ".jpg";
   saveas(gcf,savestr,'jpg')
   end
   %===
@@ -986,6 +906,7 @@ end
 %% We supply the lattice to the mulitscat script so it can do its thing
 doingMSshit = true;
 if(doingMSshit)
+    disp("Now converting to Multiscat-acceptable format...")
     %potStructArray.V = Vsuper;
     confStruct=Multiscat.createConfigStruct(potStructArray);
     Multiscat.prepareConfigFile(confStruct);

@@ -11,7 +11,7 @@ function [] = WritePythonInfo(fileprefix,a1,a2,area,b1,b2,Nsuper,Theta,Nensemble
   denstr = [char(num2str(defectDensity))];
   entropstr = [char(num2str(inputEntropy,'%0.6f'))];
   defstr = [char(num2str(Ndefect))];
-  S = fileread('latticeVects.info_for_vivian_python_nice_plotting_hexagon_script');
+  S = fileread(fileprefix+'.info_for_vivian_python_nice_plotting_hexagon_script');
   realStr = ['Real space vectors:',newline,'a1 = ',a1str, newline, 'a2 = ',a2str,newline,'Unit cell area = ',areastr,newline,'Nsuper = ',nsupstr];
   recpStr = ['Reciprocal vectors:',newline,'b1 = ',b1str, newline, 'b2 = ', b2str];
   defectStr = ['Defect data:',newline,'Theta = ', thetastr,newline,'Ensemble size = ', ...
