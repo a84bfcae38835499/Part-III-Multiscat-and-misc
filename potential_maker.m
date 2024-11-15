@@ -900,7 +900,7 @@ end
 %% We supply the lattice to the mulitscat script so it can do its thing
 if(writeOutMS)
     disp("Now converting to Multiscat-acceptable format...")
-    %potStructArray.V = Vsuper;
+    potStructArray.V = Vsuper;
     confStruct=Multiscat.createConfigStruct(potStructArray);
     Multiscat.prepareConfigFile(confStruct);
     if(onlyPrepConf) 
