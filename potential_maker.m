@@ -18,12 +18,12 @@ displacementMode = 1; % 0 = Gaussians
   minDist = defectR;   %Minimum distance between adjacent defects to stop them overlapping
 zMax = 6; zMin = 1.5;%units Å
 
-fileprefix = "Multiscat_Input_Files/" + "McVey_Test"
+fileprefix = "McVey_Test"
 onlyWriteLatticeFile = false; % Do we stop once we've written the lattice file for the python script?
 onlyPrepConf = false; % Do we stop once we've written the config file?
   writeOutMS = true; % Do we actually write the data to multiscat-acceptable format?
 plotPot = true; % Do we plot the potential?
-comparePots = true; % Do we compare the DFT data to our analytical version
+comparePots = true; % Do we compare the DFT data to our analytical version?
 
 %a1=[const.a,0];
 %a2=[0,const.a];
