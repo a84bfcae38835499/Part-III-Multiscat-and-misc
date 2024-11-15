@@ -5,7 +5,7 @@ classdef const
     c = 3.16; %sulphur-sulphur distance
     d = 5.48; %length of Min's unit cell
 
-    D = 7.63; %Data for LiF
+    D = 7.63; %Wolken's parameters for LiF
     alpha = 1.1;
     z0 = 1.0;
     beta = 0.1;
@@ -14,6 +14,5 @@ classdef const
     zOffset = 1;
 
     rotatMat = [sqrt(3)/2 -1/2;1/2 sqrt(3)/2];
-    phong = 7;
   end
 end

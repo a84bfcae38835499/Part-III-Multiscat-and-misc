@@ -23,24 +23,6 @@ pristineprefix = ''
 n1n2OfInterest = []
 n1n2Colours = []
 
-fileprefix = '3x3ikbt_04'
-fileprefix = 'restest_16_50'
-fileprefix = '3x3highdefect_adatom'
-fileprefix = '2x2MoS2'
-fileprefix = 'restest_10_50'
-fileprefix = '7x7MoS2'
-fileprefix = '_1x1_01D'
-fileprefix = 'ga5x5_03D'
-fileprefix = 'gv5x5_10D'
-fileprefix = '1x1LiF_Wolken'
-fileprefix = '6x6MoS2_ikbt_4_mu_half'
-
-scatcondprefix = 'gaussian'
-scatcondprefix = '1x1pristine'
-
-pristineprefix = 'g-1x1_00D'
-pristineprefix = '1x1pristine'
-
 extractMicrostate = 0   #Set this to an int >0 to overcride ensemble averaging to plot only one microstate of an ensemble
 extractScatcond = 0   #Set this to an int >0 to skip all incident conditions apart from the this one
 nearestNeighborExclusion = True
@@ -63,37 +45,6 @@ channelFontSize = 6
 sigmaFontSize = 6
 n1n2OfInterest = [[0,0]]
 n1n2Colours = [[0.,0.,0.]]
-"""
-n1n2OfInterest = [[1,0],
-                  [0,0],
-                  [-1,0],
-                  [-2,0],
-                  [-3,0],
-                  [0,1],
-                  [1,-1],
-                  [1,-2],
-                  [-1,2]]
-n1n2Colours = [[1, 0.82, 0.149],
-                  [1, 1, 1],
-                  [0.067, 0.769, 0.451],
-                  [0.149, 0.792, 0.7],
-                  [0.296, 0.369, 1],
-                  [1, 0.463, 0.722],
-                  [0.518, 0.51, 0.941],
-                  [0.596, 0, 1],
-                  [1, 0.18, 0.408]]
-n1n2OfInterest = [[1,0],
-                  [0,0],
-                  [-1,0],
-                  [-2,0],
-                  [-3,0]]
-n1n2Colours = [[1, 0.82, 0.149],
-                  [1, 1, 1],
-                  [0.067, 0.769, 0.451],
-                  [0.149, 0.792, 0.7],
-                  [0.296, 0.369, 1],]
-"""
-
 Ninterest = sum(1 for _ in n1n2OfInterest)
 
 if(scatcondprefix == ''):
@@ -206,49 +157,13 @@ def tiny_S(I_I0, I_I0unc):
     Sunc = cellArea*I_I0unc/(2*Theta*(I_I0**0.5))
     return Seeesz, Sunc
 
-filenametxt=''
-scatcondprefix = ''
-pristineprefix = ''
-
-#packages to import
-from scipy.spatial import Voronoi
-from scipy.spatial import voronoi_plot_2d
-import matplotlib.cm as cm
-
 n1n2OfInterest = []
 n1n2Colours = []
 
 fileprefix = '3x3ikbt_04'
-fileprefix = 'restest_16_50'
-fileprefix = '3x3highdefect_adatom'
-fileprefix = '2x2MoS2'
-fileprefix = 'restest_10_50'
-fileprefix = '7x7MoS2'
-fileprefix = '_1x1_01D'
-fileprefix = 'ga5x5_03D'
-fileprefix = '5x5MoS2'
-fileprefix = 'ga5x5_04D'
-fileprefixes = ['gv5x5_0' + str(x) + 'D' for x in range(1,10)]
-Babs = np.sqrt(B1[0]**2+B1[1]**2)
-print("B1 = ") 
-print(B1)
-print("B2 = ") 
-print(B2)
-print("Babs = ") 
-print(Babs)
-latticeFile.close()
-b1 = B1 / Babs
-b2 = B2 / Babs
-print("Opening" + str(scatcondprefix) + ".in_scatcond")
-scatFile = open(scatcondprefix + '.in_scatcond', 'r')
-
-fileprefixes += ['gv5x5_' + str(5*x) + 'D' for x in range(2,6)]
-print(fileprefixes)
 
 scatcondprefix = '1x1pristine'
-scatcondprefix = 'gaussian'
 
-pristineprefix = '1x1pristine'
 pristineprefix = 'g-1x1_00D'
 
 extractMicrostate = 0   #Set this to an int >0 to overcride ensemble averaging to plot only one microstate of an ensemble

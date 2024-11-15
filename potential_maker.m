@@ -1,31 +1,29 @@
 clear; close all; clc;
 rng default;
 rng("shuffle");
-Nxy = 32; % Number of grid points
+Nxy = 32; % Number of grid points in the x and y axes
 Nz = 50;  % Number of Z points
 Nsuper = 1; % Number of lattices contained in the overall superlattice (or rather the square root of that)
 %Theta = 0.9; % Defect density, i.e. number of defects per unit cell
 Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
-Nensemble_limit = 9;
-avoidNearestNeighbors = false;
-Nxy = 32; Nz = 100; Nsuper = 6;
-%Theta = 0.9;
-Theta = (1/(Nsuper*Nsuper));
-disp('Theta = ' + Theta)
 Nensemble_limit = 1;
 avoidNearestNeighbors = true;
+
 usingDisplacementDefects = false;
 displacementMode = 1; % 0 = Gaussians
                       % 1 = Hemisphere
-  defectH = 0.;
-  defectR = 0.5;
-  minDist = defectR;
+  defectH = 0.; %Height of the defect
+  defectR = 0.5;  %Radius of the defect
+  minDist = defectR;   %Minimum distance between adjacent defects to stop them overlapping
 zMax = 6; zMin = 1.5;%units Å
+
 fileprefix = "Multiscat_Input_Files/" + "McVey_Test"
-onlyWriteLatticeFile = false;
-plotPot = true;
-onlyPrepConf = false;
+onlyWriteLatticeFile = false; % Do we stop once we've written the lattice file for the python script?
+onlyPrepConf = false; % Do we stop once we've written the config file?
+  writeOutMS = true; % Do we actually write the data to multiscat-acceptable format?
+plotPot = true; % Do we plot the potential?
+comparePots = true; % Do we compare the DFT data to our analytical version
 
 %a1=[const.a,0];
 %a2=[0,const.a];
@@ -249,7 +247,6 @@ if(Ndefect == 0 || usingDisplacementDefects)
   if(plotPot)
     Vplotted = Vsuper;
     %nPlot = 2/3;mPlot = 1/2;
-    comparePots = false;
     if(comparePots)
       [xS, yS] = ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol,Nxy);
       [xH, yH] = ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol,Nxy);
@@ -358,7 +355,7 @@ if(Ndefect == 0 || usingDisplacementDefects)
       hold off
 
     end
-  savestr = "Figures/" + fileprefix + ".jpg";
+  savestr = fileprefix + ".jpg";
   saveas(gcf,savestr,'jpg')
   end
   else
@@ -486,7 +483,6 @@ if(Ndefect == 0 || usingDisplacementDefects)
   if(plotPot)
     Vplotted = Vsuper;
     %nPlot = 2/3;mPlot = 1/2;
-    comparePots = false;
     if(comparePots)
       [xS, yS] = ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol,Nxy);
       [xH, yH] = ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol,Nxy);
@@ -723,7 +719,6 @@ for Ne = 1:Nensemble
   if(plotPot)
     Vplotted = Vout;
     %nPlot = 2/3;mPlot = 1/2;
-    comparePots = false;
     if(comparePots)
       [xS, yS] = ComparePotentials(Vplotted,dft.aboveSd,'Analytical potential','DFT - Vacancy',a1,a2,mPlotDef,nPlotDef,Z,dft.zAxis,0,aboveCol,Nxy);
       [xH, yH] = ComparePotentials(Vplotted,dft.aboveHollowd,'Analytical potential','DFT - Hollow site',a1,a2,mPlotHol,nPlotHol,Z,dft.zAxis,0,holCol,Nxy);
@@ -852,7 +847,6 @@ end
 %Vdefect = dft.aboveDefect;
 
 %nPlot = 2/3;mPlot = 1/2;
-comparePots = true;
 SpaghettiBolognaise = [a1(1) a2(1);a1(2) a2(2)]/(Nxy*Nsuper);
 zFitMin = 1.5;
 k = int64(interp1(Z,1:numel(Z),zFitMin));
@@ -904,8 +898,7 @@ end
 %colormap(plasma)
 %daspect([1 1 1])
 %% We supply the lattice to the mulitscat script so it can do its thing
-doingMSshit = true;
-if(doingMSshit)
+if(writeOutMS)
     disp("Now converting to Multiscat-acceptable format...")
     %potStructArray.V = Vsuper;
     confStruct=Multiscat.createConfigStruct(potStructArray);
