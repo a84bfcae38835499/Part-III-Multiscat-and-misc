@@ -15,41 +15,6 @@ import matplotlib.patheffects as pe
 from scipy.spatial import Voronoi
 from scipy.spatial import voronoi_plot_2d
 
-filenametxt=''
-scatcondprefix = ''
-pristineprefix = ''
-
-
-n1n2OfInterest = []
-n1n2Colours = []
-
-extractMicrostate = 0   #Set this to an int >0 to overcride ensemble averaging to plot only one microstate of an ensemble
-extractScatcond = 0   #Set this to an int >0 to skip all incident conditions apart from the this one
-nearestNeighborExclusion = True
-diffuseCompensationMode = 0
-                        #0 : Don't compensate
-                        #1 : subtract 1/N from both prsitine and nonpris intensities
-                        #2 : subtract the mean diffuse channel intensity from the unpristine intensity
-invMaxTheta = 3
-plotFigure = True
-useLog = True
-useBoth = False #Plots both log and nonlog graphs one after another
-writeCaption = True
-captionFontSize = 8
-showIndividualRatios = True
-showMeanK = True
-showA = False
-showB = True
-vanity = True #Generates an un-annoted plot with no gridlines TODO: investigate Qhull options to make it prettier
-channelFontSize = 6
-sigmaFontSize = 6
-n1n2OfInterest = [[0,0]]
-n1n2Colours = [[0.,0.,0.]]
-Ninterest = sum(1 for _ in n1n2OfInterest)
-
-if(scatcondprefix == ''):
-    scatcondprefix = fileprefix
-
 def slugify(value, allow_unicode=False):
     """
     Taken from https://github.com/django/django/blob/master/django/utils/text.py
@@ -160,11 +125,12 @@ def tiny_S(I_I0, I_I0unc):
 n1n2OfInterest = []
 n1n2Colours = []
 
-fileprefix = '3x3ikbt_04'
+fileprefix = 'McVey_Test'
+scatcondprefix = 'McVey_Test'
+pristineprefix = 'McVey_Test'
+filenametxt = ''
 
-scatcondprefix = '1x1pristine'
-
-pristineprefix = 'g-1x1_00D'
+fileprefixes = [fileprefix]
 
 extractMicrostate = 0   #Set this to an int >0 to overcride ensemble averaging to plot only one microstate of an ensemble
 extractScatcond = 1   #Set this to an int >0 to skip all incident conditions apart from the this one
@@ -174,19 +140,19 @@ diffuseCompensationMode = 0
                         #1 : subtract 1/N from both prsitine and nonpris intensities
                         #2 : subtract the mean diffuse channel intensity from the unpristine intensity
 invMaxTheta = 3
-plotFigure = False
-useLog = True
-useBoth = False #Plots both log and nonlog graphs one after another
+plotFigure = True
+useLog = False
+useBoth = True #Plots both log and nonlog graphs one after another
 writeCaption = True
 captionFontSize = 8
 showIndividualRatios = False
-showMeanK = True
-showA = False
-showB = False
+showMeanK = False
+showA = True
+showB = True
 padCells = True
 paddingCells = 52
 vanity = False #Generates an un-annofted plot with no gridlines TODO: investigate Qhull options to make it prettier
-channelFontSize = 0
+channelFontSize = 10
 sigmaFontSize = 10
 n1n2OfInterest = []
 n1n2Colours = []
@@ -730,12 +696,12 @@ for fileprefix in fileprefixes:
             kstr_txt = "$|K|$ = " + "{:.3f}".format(kAbsAvgArr[index_s]) + "$\pm$" +  "{:.3f}".format(kAbsAvgUncArr[index_s])+ "Å$^{-1}$"
         #    print("|K| = "+ "{:.7f}".format(kAbsAvgArr[index_s]) + " ± " + "{:.7f}".format(kAbsAvgUncArr[index_s]) +" Å^-1")
 
-        #print("<=>-<=>-<=>-<=>-<=>")
-    # print("Number of diffractive channels                  : " + str(nSpecCh))
-    # print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
-    # print("Diffractive intensity proportion : " + str(normSpecI))
-    # print("Diffuse intensity proportion  : " + str(normDiffI))
-    # intenstr = "Diffractive proportion = " + str(int(normSpecI*100))+ "%"
+        print("<=>-<=>-<=>-<=>-<=>")
+        print("Number of diffractive channels                  : " + str(nSpecCh))
+        print("Number of diffuse (non-diffractive) channels : " + str(nDiffCh))
+        print("Diffractive intensity proportion : " + str(normSpecI))
+        print("Diffuse intensity proportion  : " + str(normDiffI))
+        intenstr = "Diffractive proportion = " + str(int(normSpecI*100))+ "%"
         
         if(Nsuper != 1):
             #mean, unc = find_mean_stdv_with_stdvin(RatiosAvgArr[index_s],RatiosUncArr[index_s])
@@ -748,7 +714,7 @@ for fileprefix in fileprefixes:
         print("I/I_0 = " + "{:.7f}".format(RatiosAvgArr[index_s]) + " ± " + "{:.7f}".format(RatiosUncArr[index_s]))
         csstr = "$\S_{tiny} = $" + "{:.4f}".format(crossSectionWhole) + " ± " + "{:.4f}".format(crossSectionWholeUnc) + "Å$^2$"
         #print("Total S tiny = " + "{:.7f}".format(crossSectionWhole) + " ± " + "{:.7f}".format(crossSectionWholeUnc) + " Å^2")
-        #print(simgastr)
+        #print(sigmastr)
         if(Ninterest > 0):
             for index_i in range(Ninterest):
                 n1n2 = n1n2OfInterest[index_i]
@@ -955,7 +921,7 @@ for fileprefix in fileprefixes:
                 if(not vanity):
                     if(writeCaption):
                         plt.figtext(0.5, -0.035, defectstr+", "+entropytxt, wrap=True, horizontalalignment='center', fontsize=captionFontSize,transform=ax2.transAxes)
-                        plt.figtext(0.5, -0.07, intenstr + ", " + simgastr+", "+kstr_txt, wrap=True, horizontalalignment='center', fontsize=captionFontSize,transform=ax2.transAxes)
+                        #plt.figtext(0.5, -0.07, intenstr + ", " + sigmastr+", "+kstr_txt, wrap=True, horizontalalignment='center', fontsize=captionFontSize,transform=ax2.transAxes)
                 else:
                     filenametxt = "vanity"
                     plt.tight_layout(pad=0)
