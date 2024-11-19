@@ -3,7 +3,7 @@ rng default;
 rng("shuffle");
 Nxy = 64; % Number of grid points in the x and y axes
 Nz = 50;  % Number of Z points
-Nsuper = 3; % Number of lattices contained in the overall superlattice (or rather the square root of that)
+Nsuper = 2; % Number of lattices contained in the overall superlattice (or rather the square root of that)
 %Theta = 0.9; % Defect density, i.e. number of defects per unit cell
 Theta = (0/(Nsuper*Nsuper));
 disp('Theta = ' + Theta)
