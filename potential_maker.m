@@ -18,7 +18,7 @@ displacementMode = 1; % 0 = Gaussians
   minDist = defectR;   %Minimum distance between adjacent defects to stop them overlapping
 zMax = 6; zMin = 1.5;%units Å
 
-fileprefix = "McVey_Test"
+fileprefix = "Plotting_test"
 onlyWriteLatticeFile = false; % Do we stop once we've written the lattice file for the python script?
 onlyPrepConf = false; % Do we stop once we've written the config file?
   writeOutMS = true; % Do we actually write the data to multiscat-acceptable format?
