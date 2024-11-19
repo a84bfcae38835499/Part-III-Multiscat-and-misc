@@ -125,9 +125,9 @@ def tiny_S(I_I0, I_I0unc):
 n1n2OfInterest = []
 n1n2Colours = []
 
-fileprefix = 'McVey_Test'
-scatcondprefix = 'McVey_Test'
-pristineprefix = 'McVey_Test'
+fileprefix = 'Plotting_test'
+scatcondprefix = 'Plotting_test'
+pristineprefix = 'Plotting_test'
 filenametxt = ''
 
 fileprefixes = [fileprefix]
@@ -142,7 +142,7 @@ diffuseCompensationMode = 0
 invMaxTheta = 3
 plotFigure = True
 useLog = False
-useBoth = True #Plots both log and nonlog graphs one after another
+useBoth = False #Plots both log and nonlog graphs one after another
 writeCaption = True
 captionFontSize = 8
 showIndividualRatios = False
@@ -151,6 +151,8 @@ showA = True
 showB = True
 padCells = True
 paddingCells = 52
+smolVal = 1e-10
+vanityVal = 0
 vanity = False #Generates an un-annofted plot with no gridlines TODO: investigate Qhull options to make it prettier
 channelFontSize = 10
 sigmaFontSize = 10
@@ -387,9 +389,7 @@ for fileprefix in fileprefixes:
     RatiosUncArr = [0]*Nscat
 
     valminArr = [1.]*Nscat
-    valmaxArr = [0.]*Nscat
-    smolVal = 1e-100
-    vanityVal = 0
+    valmaxArr = [0]*Nscat
     skipNext = False
     for index_s in range(Nscat):
         if(extractScatcond != 0):
@@ -578,9 +578,9 @@ for fileprefix in fileprefixes:
             Is = iI[index_n]
             for ch in range(nOccChArr[index_s]):
                 I = Is[ch]
-                if(I == 0):
-                    print(f"Zero found, setting to {smolVal}")
-                    I = smolVal
+                if(I < smolVal):
+                    print(f"Small value found, setting to {smolVal}")
+                    Is[ch] = smolVal
         if(extractScatcond != 0):
             break
 
@@ -744,7 +744,9 @@ for fileprefix in fileprefixes:
                 print("b = " + str(b))
                 #sets the colour scale
                 if(b):
-                    mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]))
+                    if(valminArr[index_s] < smolVal):
+                        valminArr[index_s] = smolVal
+                    mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s]/2,valmaxArr[index_s]))
                 else:
                     mapper = cm.ScalarMappable(cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]))
 
@@ -843,10 +845,12 @@ for fileprefix in fileprefixes:
                 ax2.set_title(titelstr)
 
                 #creates a colourbar on the first subplot
-                #print("valminArr[index_s],valmaxArr[index_s = " + str(valminArr[index_s]) + "," + str(valmaxArr[index_s]))
+                print("valminArr[index_s], valmaxArr[index_s] = " + str(valminArr[index_s]) + "," + str(valmaxArr[index_s]))
                 if(not vanity):
                     if(b):
-                        cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
+                        if(valminArr[index_s] < smolVal):
+                            valminArr[index_s] = smolVal
+                        cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.LogNorm(valminArr[index_s]/2,valmaxArr[index_s]), orientation='vertical')
                     else:
                         cb1 = mpl.colorbar.ColorbarBase(ax, cmap='magma', norm=mpl.colors.Normalize(valminArr[index_s],valmaxArr[index_s]), orientation='vertical')
                     cb1.set_label('$Intensity$')
