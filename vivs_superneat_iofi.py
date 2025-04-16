@@ -54,7 +54,7 @@ Thetas = np.array([
 ])
 NIs = sum(1 for _ in n1n2OfInterest)
 
-Is = np.arrat([
+Is = np.array([
     
 ])
 
